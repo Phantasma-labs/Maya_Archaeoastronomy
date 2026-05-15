@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, Environment, useTexture } from '@react-three/drei';
+import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Pre-load the model
@@ -99,27 +99,32 @@ function SceneSetup({ sliderValue }: { sliderValue: number }) {
   const lightRef = useRef<THREE.DirectionalLight>(null);
   const ambientRef = useRef<THREE.AmbientLight>(null);
 
+  // Pre-allocate THREE objects to avoid GC spikes in useFrame
+  const tempPos = useRef(new THREE.Vector3());
+  const tempKeyColor = useRef(new THREE.Color());
+  const tempFillColor = useRef(new THREE.Color());
+
   // Smoothly interpolate light position and colors based on slider float value
-  useFrame((state, delta) => {
+  useFrame((_, delta) => {
     if (lightRef.current && ambientRef.current) {
-      let targetPos = new THREE.Vector3();
-      let targetKeyColor = new THREE.Color();
-      let targetFillColor = new THREE.Color();
+      const targetPos = tempPos.current;
+      const targetKeyColor = tempKeyColor.current;
+      const targetFillColor = tempFillColor.current;
       let targetFillIntensity = 0.5;
       let targetKeyIntensity = 2.5;
 
       if (sliderValue <= 2) {
         const t = sliderValue - 1;
         targetPos.lerpVectors(stepsData[0].lightPosition, stepsData[1].lightPosition, t);
-        targetKeyColor.lerpColors(stepsData[0].keyLightColor, stepsData[1].keyLightColor, t);
-        targetFillColor.lerpColors(stepsData[0].fillLightColor, stepsData[1].fillLightColor, t);
+        targetKeyColor.copy(stepsData[0].keyLightColor).lerp(stepsData[1].keyLightColor, t);
+        targetFillColor.copy(stepsData[0].fillLightColor).lerp(stepsData[1].fillLightColor, t);
         targetFillIntensity = THREE.MathUtils.lerp(stepsData[0].fillLightIntensity, stepsData[1].fillLightIntensity, t);
         targetKeyIntensity = THREE.MathUtils.lerp(stepsData[0].keyLightIntensity, stepsData[1].keyLightIntensity, t);
       } else {
         const t = sliderValue - 2;
         targetPos.lerpVectors(stepsData[1].lightPosition, stepsData[2].lightPosition, t);
-        targetKeyColor.lerpColors(stepsData[1].keyLightColor, stepsData[2].keyLightColor, t);
-        targetFillColor.lerpColors(stepsData[1].fillLightColor, stepsData[2].fillLightColor, t);
+        targetKeyColor.copy(stepsData[1].keyLightColor).lerp(stepsData[2].keyLightColor, t);
+        targetFillColor.copy(stepsData[1].fillLightColor).lerp(stepsData[2].fillLightColor, t);
         targetFillIntensity = THREE.MathUtils.lerp(stepsData[1].fillLightIntensity, stepsData[2].fillLightIntensity, t);
         targetKeyIntensity = THREE.MathUtils.lerp(stepsData[1].keyLightIntensity, stepsData[2].keyLightIntensity, t);
       }
@@ -169,7 +174,7 @@ export default function Lesson1() {
 
   // Load new audio when active step changes, and Auto-play if started (with 2 sec delay)
   useEffect(() => {
-    let timerId: number;
+    let timerId: ReturnType<typeof setTimeout> | undefined;
 
     if (audioRef.current) {
       audioRef.current.load();
@@ -350,9 +355,7 @@ export default function Lesson1() {
                 <div className="subtitle">{currentData.sublabel}</div>
               </div>
               <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.2)' }} />
-              <div className="tooltip-text" style={{ margin: 0, paddingTop: 0, borderTop: 'none', textAlign: 'left', maxWidth: '500px' }}>
-                {currentData.tooltip}
-              </div>
+              {/* Tooltip hidden */}
             </div>
             {/* Audio Controls */}
             <div style={{ position: 'absolute', right: 0, display: 'flex', gap: '0.25rem' }}>
@@ -398,8 +401,16 @@ export default function Lesson1() {
                 if (newStep === activeStep || (newStep === 3 && activeStep === 3)) {
                   setSliderValue(val);
                   if (audioRef.current && !isNaN(audioRef.current.duration)) {
-                    const progress = val - (activeStep === 3 ? 3 : activeStep);
-                    audioRef.current.currentTime = progress * audioRef.current.duration;
+                    let progress = val - (activeStep === 3 ? 3 : activeStep);
+                    
+                    // Sync with handleTimeUpdate's 30s delay for Step 2
+                    if (activeStep === 2) {
+                      const delay = 30.0;
+                      const duration = audioRef.current.duration;
+                      audioRef.current.currentTime = delay + (progress * (duration - delay));
+                    } else {
+                      audioRef.current.currentTime = progress * audioRef.current.duration;
+                    }
                   }
                   if (!hasStarted) setHasStarted(true);
                 } else {

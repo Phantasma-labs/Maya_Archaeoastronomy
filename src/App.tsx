@@ -1,4 +1,3 @@
-import React from 'react';
 import Lesson1 from './lessons/Lesson1';
 
 function App() {

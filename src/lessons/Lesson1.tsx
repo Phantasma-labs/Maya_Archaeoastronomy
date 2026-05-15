@@ -166,6 +166,26 @@ export default function Lesson1() {
   const [sliderValue, setSliderValue] = useState(1);
   const [activeStep, setActiveStep] = useState(1);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Track loading state
+  useEffect(() => {
+    const checkLoading = async () => {
+      try {
+        // We use the preloaded assets to ensure they are ready
+        await Promise.all([
+          useGLTF.preload('/assets/Pyramid_v003.glb'),
+          useGLTF.preload('/assets/Floor_v003.glb'),
+        ]);
+        // Small delay to ensure GPU upload and scene initialization
+        setTimeout(() => setIsLoading(false), 500);
+      } catch (error) {
+        console.error("Error loading assets:", error);
+        setIsLoading(false); // Avoid infinite loading
+      }
+    };
+    checkLoading();
+  }, []);
   const currentData = stepsData[activeStep - 1];
 
   // Audio state
@@ -295,28 +315,39 @@ export default function Lesson1() {
         <div
           style={{
             position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.6)', zIndex: 100,
+            background: isLoading ? 'black' : 'rgba(0,0,0,0.6)',
+            zIndex: 100,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', backdropFilter: 'blur(5px)'
+            cursor: isLoading ? 'default' : 'pointer',
+            backdropFilter: isLoading ? 'none' : 'blur(5px)',
+            transition: 'background 0.5s ease, backdrop-filter 0.5s ease'
           }}
-          onClick={() => setHasStarted(true)}
+          onClick={() => !isLoading && setHasStarted(true)}
         >
           <div style={{
-            padding: '1.5rem 4rem', background: 'rgba(255,255,255,0.1)',
-            border: '1px solid rgba(255,255,255,0.3)', borderRadius: '8px',
-            color: 'white', fontSize: '1.5rem', letterSpacing: '0.2em',
-            textTransform: 'uppercase', transition: 'all 0.3s ease'
+            padding: '1.5rem 4rem',
+            background: isLoading ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.1)',
+            border: isLoading ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.3)',
+            borderRadius: '8px',
+            color: isLoading ? 'rgba(255,255,255,0.3)' : 'white',
+            fontSize: '1.5rem', letterSpacing: '0.2em',
+            textTransform: 'uppercase', transition: 'all 0.3s ease',
+            pointerEvents: isLoading ? 'none' : 'auto'
           }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
-              e.currentTarget.style.transform = 'scale(1.05)';
+              if (!isLoading) {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.2)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-              e.currentTarget.style.transform = 'scale(1)';
+              if (!isLoading) {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }
             }}
           >
-            Start Experience
+            {isLoading ? 'Loading Assets...' : 'Start Experience'}
           </div>
         </div>
       )}

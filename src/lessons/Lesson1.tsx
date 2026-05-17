@@ -41,18 +41,56 @@ function Pyramid() {
   return <primitive object={scene} />;
 }
 
-function Floor() {
+function Floor({ lightT }: { lightT: number }) {
   const { scene } = useGLTF('/assets/Floor_v003.glb');
+  const materialsRef = useRef<THREE.MeshStandardMaterial[]>([]);
 
   useEffect(() => {
-    // Ensure all meshes receive shadows
+    // Ensure all meshes receive shadows and store materials
+    materialsRef.current = [];
     scene.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
-        child.receiveShadow = true;
-        child.castShadow = true;
+        const mesh = child as THREE.Mesh;
+        mesh.receiveShadow = true;
+        mesh.castShadow = true;
+        if (mesh.material) {
+          const mat = mesh.material as THREE.MeshStandardMaterial;
+          if (mat.color) {
+            if (!mat.userData.originalColor) {
+              mat.userData.originalColor = mat.color.clone();
+            }
+            materialsRef.current.push(mat);
+          }
+        }
       }
     });
   }, [scene]);
+
+  const tempMultiplier = useRef(new THREE.Color());
+  const tempTargetColor = useRef(new THREE.Color());
+  const step1Multiplier = useRef(new THREE.Color(2.6, 2, 1.1)); // 2x brighter for Step 1
+  const warmMultiplier = useRef(new THREE.Color(1.5, 1.5, 1.05)); // Step 2
+  const zenithMultiplier = useRef(new THREE.Color(2, 2, 2)); // Step 3
+
+  useFrame((_, delta) => {
+    const multiplier = tempMultiplier.current;
+
+    if (lightT <= 2) {
+      const t = lightT - 1;
+      multiplier.copy(step1Multiplier.current).lerp(warmMultiplier.current, t);
+    } else {
+      const t = lightT - 2;
+      multiplier.copy(warmMultiplier.current).lerp(zenithMultiplier.current, t);
+    }
+
+    materialsRef.current.forEach((mat) => {
+      if (mat.userData.originalColor) {
+        const original = mat.userData.originalColor as THREE.Color;
+        const targetColor = tempTargetColor.current.copy(original).multiply(multiplier);
+        mat.color.lerp(targetColor, delta * 10);
+      }
+    });
+  });
 
   return <primitive object={scene} />;
 }
@@ -64,7 +102,7 @@ const stepsDataEN = [
     sublabel: "Feb 12 · 52 days from winter solstice",
     tooltip: "The first shadow triangle pierces the staircase. The calendar has awakened.",
     caption: "It begins quietly. On the twelfth of February — fifty-two days after the winter solstice — the angle of the afternoon sun catches the edge of the first terrace. A single triangle of shadow appears on the north staircase. This is not an accident. The Maya architects of Chichén Itzá designed this building to do exactly this, on exactly this day. Fifty-two days. The same number of years it takes for the two Maya calendars to realign. The same number written into the very stone of this pyramid — fifty-two niches per side, on every face.",
-    lightPosition: new THREE.Vector3(-70, 22, -140),
+    lightPosition: new THREE.Vector3(-70, 20, -140),
     keyLightColor: new THREE.Color('#ffdcab'), // Matches Step 2
     keyLightIntensity: 4, // Editable sun intensity
     fillLightColor: new THREE.Color('#d4beb0'), // Matches Step 2
@@ -191,10 +229,11 @@ function SceneSetup({ lightT, lang }: { lightT: number, lang: 'EN' | 'ES' }) {
         shadow-camera-top={80}
         shadow-camera-bottom={-80}
         shadow-bias={-0.0001}
+        shadow-radius={8}
       />
       <Pyramid />
       {/* Imported Floor Geometry */}
-      <Floor />
+      <Floor lightT={lightT} />
     </>
   );
 }
@@ -403,7 +442,7 @@ export default function Lesson1() {
 
       <div className="canvas-wrapper">
         {/* Cinematic Background Crossfader */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '184.6%', zIndex: -1 }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '184.8%', zIndex: -1 }}>
           {[1, 2, 3].map((s) => (
             <div
               key={s}
@@ -461,6 +500,36 @@ export default function Lesson1() {
               </div>
               <div className="slider-container" style={{ flexGrow: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', height: '2px', background: 'rgba(255,255,255,0.8)', width: `${((lightT - 1) / 2) * 100}%`, pointerEvents: 'none', zIndex: 1 }} />
+                <div style={{ position: 'absolute', left: 0, right: 0, height: '100%', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
+                  {[1, 2, 3].map((step) => {
+                    const percent = ((step - 1) / 2) * 100;
+                    return (
+                      <div key={step}
+                        onClick={() => {
+                          if (isPlaying) {
+                            if (audioRef.current) audioRef.current.pause();
+                            setIsPlaying(false);
+                          }
+                          setManualLightT(step);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          left: `${percent}%`,
+                          transform: 'translateX(-50%) translateY(-50%)',
+                          top: '50%',
+                          width: '12px',
+                          height: '12px',
+                          borderRadius: '50%',
+                          background: 'white',
+                          pointerEvents: 'auto',
+                          cursor: 'pointer',
+                          zIndex: 3,
+                          boxShadow: '0 0 5px rgba(255, 255, 255, 0.5)'
+                        }}
+                      />
+                    );
+                  })}
+                </div>
                 <input
                   type="range"
                   className="lighting-slider"

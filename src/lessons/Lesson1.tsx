@@ -58,7 +58,7 @@ function Floor() {
 }
 
 
-const stepsData = [
+const stepsDataEN = [
   {
     title: "First contact",
     sublabel: "Feb 12 · 52 days from winter solstice",
@@ -94,8 +94,45 @@ const stepsData = [
   }
 ];
 
+const stepsDataES = [
+  {
+    title: "Primer contacto",
+    sublabel: "12 Feb · 52 días desde el solsticio de invierno",
+    tooltip: "El primer triángulo de sombra perfora la escalinata. El calendario ha despertado.",
+    caption: "Comienza en silencio. El doce de febrero — cincuenta y dos días después del solsticio de invierno — el ángulo del sol de la tarde atrapa el borde de la primera terraza. Un único triángulo de sombra aparece en la escalinata norte. Esto no es un accidente. Los arquitectos mayas de Chichén Itzá diseñaron este edificio para hacer exactamente esto, en exactamente este día. Cincuenta y dos días. El mismo número de años que tardan los dos calendarios mayas en realinearse. El mismo número escrito en la propia piedra de esta pirámide — cincuenta y dos nichos por lado, en cada cara.",
+    lightPosition: new THREE.Vector3(-70, 22, -140),
+    keyLightColor: new THREE.Color('#ffdcab'),
+    keyLightIntensity: 4,
+    fillLightColor: new THREE.Color('#d4beb0'),
+    fillLightIntensity: 0.75
+  },
+  {
+    title: "El descenso",
+    sublabel: "9 Abr / 2 Sep · 73 días desde el solsticio de verano",
+    tooltip: "Los 9 triángulos encajan. El cuerpo de Kukulcán está completo. 73 × 8 = 584 — el período de Venus.",
+    caption: "Nueve de abril. El sol alcanza su posición setenta y tres días antes del solsticio de verano. Y la escalinata cobra vida. Nueve triángulos de luz y sombra descienden por la balaustrada norte — uno por cada una de las nueve terrazas de esta pirámide. Juntos trazan el cuerpo de Kukulcán, la serpiente emplumada, cuya cabeza ya aguarda en la base. Pero hay un mensaje más profundo oculto aquí. Setenta y tres días. Multiplícalo por ocho — y obtienes quinientos ochenta y cuatro. La duración exacta del viaje de Venus por el cielo, visto desde la Tierra. Esta pirámide no solo marca el calendario maya. Marca la órbita de Venus.",
+    lightPosition: new THREE.Vector3(-60.80, 33.26, -133.03),
+    keyLightColor: new THREE.Color('#ffdcab'),
+    keyLightIntensity: 4,
+    fillLightColor: new THREE.Color('#d4beb0'),
+    fillLightIntensity: 1
+  },
+  {
+    title: "Puerta cenital",
+    sublabel: "24 May · El sol pasa directamente sobre nuestras cabezas",
+    tooltip: "Escalinata iluminada por completo. El sol está en el cenit. El portal se abre.",
+    caption: "Veinticuatro de mayo. El sol alcanza el cenit — directamente encima. En esta latitud, no hay sombra al mediodía. La escalinata resplandece. Para los mayas, este era el paso cenital — el momento en que el sol se situaba en el centro del cielo. Marcaba la llegada de las primeras lluvias. El inicio del ciclo de siembra. El cambio de año. La escalinata norte de la pirámide te ha guiado a través de cincuenta y dos días, setenta y tres días y el cenit. Cada posición un número. Cada número un engranaje en una máquina astronómica que los mayas construyeron en piedra — una máquina que sigue funcionando, cinco siglos después de que los últimos astrónomos caminaran por estos escalones.",
+    lightPosition: new THREE.Vector3(0, 150, 0),
+    keyLightColor: new THREE.Color('#fff4e6'),
+    keyLightIntensity: 1.5,
+    fillLightColor: new THREE.Color('#fff4e6'),
+    fillLightIntensity: 1.55
+  }
+];
 
-function SceneSetup({ sliderValue }: { sliderValue: number }) {
+
+function SceneSetup({ lightT, lang }: { lightT: number, lang: 'EN' | 'ES' }) {
+  const stepsData = lang === 'ES' ? stepsDataES : stepsDataEN;
   const lightRef = useRef<THREE.DirectionalLight>(null);
   const ambientRef = useRef<THREE.AmbientLight>(null);
 
@@ -104,7 +141,7 @@ function SceneSetup({ sliderValue }: { sliderValue: number }) {
   const tempKeyColor = useRef(new THREE.Color());
   const tempFillColor = useRef(new THREE.Color());
 
-  // Smoothly interpolate light position and colors based on slider float value
+  // Smoothly interpolate light position and colors based on lightT float value
   useFrame((_, delta) => {
     if (lightRef.current && ambientRef.current) {
       const targetPos = tempPos.current;
@@ -113,15 +150,15 @@ function SceneSetup({ sliderValue }: { sliderValue: number }) {
       let targetFillIntensity = 0.5;
       let targetKeyIntensity = 2.5;
 
-      if (sliderValue <= 2) {
-        const t = sliderValue - 1;
+      if (lightT <= 2) {
+        const t = lightT - 1;
         targetPos.lerpVectors(stepsData[0].lightPosition, stepsData[1].lightPosition, t);
         targetKeyColor.copy(stepsData[0].keyLightColor).lerp(stepsData[1].keyLightColor, t);
         targetFillColor.copy(stepsData[0].fillLightColor).lerp(stepsData[1].fillLightColor, t);
         targetFillIntensity = THREE.MathUtils.lerp(stepsData[0].fillLightIntensity, stepsData[1].fillLightIntensity, t);
         targetKeyIntensity = THREE.MathUtils.lerp(stepsData[0].keyLightIntensity, stepsData[1].keyLightIntensity, t);
       } else {
-        const t = sliderValue - 2;
+        const t = lightT - 2;
         targetPos.lerpVectors(stepsData[1].lightPosition, stepsData[2].lightPosition, t);
         targetKeyColor.copy(stepsData[1].keyLightColor).lerp(stepsData[2].keyLightColor, t);
         targetFillColor.copy(stepsData[1].fillLightColor).lerp(stepsData[2].fillLightColor, t);
@@ -186,37 +223,54 @@ export default function Lesson1() {
     };
     checkLoading();
   }, []);
-  const currentData = stepsData[activeStep - 1];
+  const [lang, setLang] = useState<'EN' | 'ES'>('EN');
+
+  useEffect(() => {
+    if (navigator.language && navigator.language.toLowerCase().startsWith('es')) {
+      setLang('ES');
+    }
+  }, []);
+
+  const stepsData = lang === 'ES' ? stepsDataES : stepsDataEN;
+
+
+  const baseLightT = sliderValue <= 2 ? sliderValue : (sliderValue <= 3 ? 2 : sliderValue - 1);
+  const [manualLightT, setManualLightT] = useState<number | null>(null);
+  const lightT = manualLightT !== null ? manualLightT : baseLightT;
 
   // Audio state
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  // Load new audio when active step changes, and Auto-play if started (with 2 sec delay)
+  // Load new audio when active step changes
   useEffect(() => {
     let timerId: ReturnType<typeof setTimeout> | undefined;
 
     if (audioRef.current) {
       audioRef.current.load();
-      if (hasStarted) {
+      // If we are currently playing, automatically continue to the next track
+      // Otherwise, wait for user input (removes forced autoplay)
+      if (isPlaying) {
         timerId = window.setTimeout(() => {
           if (audioRef.current) {
             audioRef.current.play()
-              .then(() => setIsPlaying(true))
-              .catch(e => console.log('Playback error:', e));
+              .catch(e => {
+                console.log('Playback error:', e);
+                setIsPlaying(false);
+              });
           }
-        }, 2000); // 2 second delay before playback
-      } else {
-        setIsPlaying(false);
+        }, 500);
       }
     }
 
     return () => {
       if (timerId) clearTimeout(timerId);
     };
-  }, [activeStep, hasStarted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeStep]);
 
   const togglePlay = () => {
+    setManualLightT(null);
     if (!hasStarted) {
       setHasStarted(true);
       return;
@@ -234,9 +288,20 @@ export default function Lesson1() {
   };
 
   const handleStepClick = (step: number) => {
-    setActiveStep(step);
-    setSliderValue(step);
+    setManualLightT(null);
     if (!hasStarted) setHasStarted(true);
+
+    if (step !== activeStep) {
+      setActiveStep(step);
+      setSliderValue(step);
+      setIsPlaying(true);
+    } else {
+      if (!isPlaying && audioRef.current) {
+        audioRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch(e => console.log('Playback error:', e));
+      }
+    }
   };
 
   // Keyboard navigation
@@ -264,33 +329,9 @@ export default function Lesson1() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [hasStarted, isPlaying]);
 
-  const rewindAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      if (!isPlaying && hasStarted) {
-        audioRef.current.play()
-          .then(() => setIsPlaying(true))
-          .catch(e => console.log('Playback error:', e));
-      }
-    }
-  };
-
   const handleTimeUpdate = () => {
-    if (audioRef.current && isPlaying && activeStep < 3) {
-      let progress = 0;
-
-      if (activeStep === 2) {
-        // 40 second delay before slider starts moving
-        const delay = 30.0;
-        if (audioRef.current.currentTime <= delay) {
-          progress = 0;
-        } else {
-          progress = (audioRef.current.currentTime - delay) / (audioRef.current.duration - delay);
-        }
-      } else {
-        progress = audioRef.current.currentTime / audioRef.current.duration;
-      }
-
+    if (audioRef.current && isPlaying) {
+      const progress = audioRef.current.currentTime / audioRef.current.duration;
       if (!isNaN(progress)) {
         setSliderValue(activeStep + progress);
       }
@@ -304,6 +345,7 @@ export default function Lesson1() {
       setSliderValue(nextStep);
     } else {
       setIsPlaying(false);
+      setSliderValue(4.0);
     }
   };
 
@@ -347,7 +389,7 @@ export default function Lesson1() {
               }
             }}
           >
-            {isLoading ? 'Loading Assets...' : 'Start Experience'}
+            {isLoading ? (lang === 'ES' ? 'Cargando Recursos...' : 'Loading Assets...') : (lang === 'ES' ? 'Iniciar Experiencia' : 'Start Experience')}
           </div>
         </div>
       )}
@@ -366,7 +408,7 @@ export default function Lesson1() {
                 backgroundPosition: 'center top', /* Anchors top so the height pushes down correctly */
                 backgroundRepeat: 'no-repeat',
                 transform: 'scaleX(-1)', /* Flips horizontally only */
-                opacity: Math.max(0, 1 - Math.abs(sliderValue - s)),
+                opacity: Math.max(0, 1 - Math.abs(lightT - s)),
               }}
             />
           ))}
@@ -374,44 +416,59 @@ export default function Lesson1() {
 
         <Canvas shadows gl={{ alpha: true, antialias: true }}>
           <GltfCamera />
-          <SceneSetup sliderValue={sliderValue} />
+          <SceneSetup lightT={lightT} lang={lang} />
         </Canvas>
 
         {/* OVERLAYS */}
         <div className="top-gradient-panel">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', position: 'relative', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-              <div style={{ textAlign: 'left' }}>
-                <h1>{currentData.title}</h1>
-                <div className="subtitle">{currentData.sublabel}</div>
-              </div>
-              <div style={{ width: '1px', height: '40px', background: 'rgba(255,255,255,0.2)' }} />
-              {/* Tooltip hidden */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4rem' }}>
+              {stepsData.map((step, index) => {
+                const stepNum = index + 1;
+                const isActive = activeStep === stepNum;
+                // Only the title that is currently playing is yellow
+                const isYellow = isActive && isPlaying && manualLightT === null;
+                return (
+                  <div
+                    key={stepNum}
+                    onClick={() => handleStepClick(stepNum)}
+                    style={{
+                      cursor: 'pointer',
+                      opacity: isActive ? 1 : 0.4,
+                      transition: 'all 0.3s ease',
+                      textAlign: 'center',
+                      transform: isActive ? 'scale(1.05)' : 'scale(1)'
+                    }}
+                  >
+                    <h1 style={{ fontSize: '1.2rem', margin: 0, letterSpacing: '0.1em', textTransform: 'uppercase', color: isYellow ? '#ffd54f' : 'white' }}>{step.title}</h1>
+                    <div className="subtitle" style={{ fontSize: '0.8rem', marginTop: '6px', opacity: 0.8, color: 'white' }}>{step.sublabel}</div>
+                  </div>
+                );
+              })}
             </div>
-            {/* Audio Controls */}
-            <div style={{ position: 'absolute', right: 0, display: 'flex', gap: '0.25rem' }}>
-              <button
-                onClick={rewindAudio}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)', border: 'none', color: 'white',
-                  width: '28px', height: '28px', borderRadius: '50%', display: 'flex',
-                  alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', padding: 0
-                }}
-                title="Rewind Voice Over"
-              >
-                ⏪
-              </button>
-              <button
-                onClick={togglePlay}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)', border: 'none', color: 'white',
-                  width: '28px', height: '28px', borderRadius: '50%', display: 'flex',
-                  alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', padding: 0
-                }}
-                title={isPlaying ? "Pause Voice Over" : "Play Voice Over"}
-              >
-                {isPlaying ? '⏸' : '▶'}
-              </button>
+            
+            {/* Manual Lighting Slider */}
+            <div style={{ marginTop: '2rem', width: '100%', maxWidth: '800px', display: 'flex', alignItems: 'center', gap: '1rem', opacity: 0.8 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'white' }}>{lang === 'ES' ? 'Línea de Tiempo' : 'Lighting Timeline'}</span>
+              </div>
+              <div className="slider-container" style={{ flexGrow: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', height: '2px', background: 'rgba(255,255,255,0.8)', width: `${((lightT - 1) / 2) * 100}%`, pointerEvents: 'none', zIndex: 1 }} />
+                <input 
+                  type="range"
+                  className="lighting-slider"
+                  min="1" max="3" step="0.01"
+                  value={lightT}
+                  onChange={(e) => {
+                    if (isPlaying) {
+                      if (audioRef.current) audioRef.current.pause();
+                      setIsPlaying(false);
+                    }
+                    setManualLightT(parseFloat(e.target.value));
+                  }}
+                  style={{ zIndex: 2, position: 'relative', width: '100%', background: 'rgba(255, 255, 255, 0.2)', height: '2px', appearance: 'none', outline: 'none' }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -419,49 +476,66 @@ export default function Lesson1() {
 
       <div className="bottom-bar">
         <div className="slider-controls">
-          <div className="slider-container">
-            <input
-              type="range"
-              min="1"
-              max="3"
-              step="0.01"
-              value={sliderValue}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value);
-                const newStep = Math.min(3, Math.floor(val));
-                if (newStep === activeStep || (newStep === 3 && activeStep === 3)) {
-                  setSliderValue(val);
-                  if (audioRef.current && !isNaN(audioRef.current.duration)) {
-                    let progress = val - (activeStep === 3 ? 3 : activeStep);
-                    
-                    // Sync with handleTimeUpdate's 30s delay for Step 2
-                    if (activeStep === 2) {
-                      const delay = 30.0;
-                      const duration = audioRef.current.duration;
-                      audioRef.current.currentTime = delay + (progress * (duration - delay));
-                    } else {
+          <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '800px', margin: '0 auto', gap: '1rem' }}>
+            <button
+              onClick={togglePlay}
+              style={{
+                background: 'transparent', border: 'none', color: 'white',
+                width: '40px', height: '40px', display: 'flex',
+                alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', padding: 0,
+                cursor: 'pointer', transition: 'all 0.3s ease', flexShrink: 0
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+              title={isPlaying ? "Pause Voice Over" : "Play Voice Over"}
+            >
+              {isPlaying ? '⏸' : '▶'}
+            </button>
+            <div className="slider-container" style={{ flexGrow: 1, marginBottom: 0, position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', height: '2px', background: 'rgba(255,255,255,0.8)', width: `${((sliderValue - 1) / 3) * 100}%`, pointerEvents: 'none', zIndex: 1 }} />
+              <div style={{ position: 'absolute', left: 0, right: 0, height: '100%', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
+                {[1, 2, 3].map((step) => {
+                  const percent = ((step - 1) / 3) * 100;
+                  return (
+                    <div key={step} style={{
+                      position: 'absolute',
+                      left: `${percent}%`,
+                      transform: 'translateX(-50%)',
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: '#ffd54f',
+                      zIndex: 2,
+                      boxShadow: '0 0 5px rgba(255, 213, 79, 0.5)'
+                    }} />
+                  );
+                })}
+              </div>
+              <input
+                type="range"
+                style={{ zIndex: 3, position: 'relative', width: '100%', background: 'rgba(255,255,255,0.2)' }}
+                min="1"
+                max="4"
+                step="0.01"
+                value={sliderValue}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  let newStep = Math.floor(val);
+                  if (newStep >= 4) newStep = 3;
+                  
+                  if (newStep === activeStep) {
+                    setSliderValue(val);
+                    if (audioRef.current && !isNaN(audioRef.current.duration)) {
+                      const progress = val - activeStep;
                       audioRef.current.currentTime = progress * audioRef.current.duration;
                     }
+                    if (!hasStarted) setHasStarted(true);
+                  } else {
+                    handleStepClick(newStep);
+                    setSliderValue(val);
                   }
-                  if (!hasStarted) setHasStarted(true);
-                } else {
-                  handleStepClick(newStep);
-                }
-              }}
-            />
-            <div className="step-labels">
-              <div className="step-label" onClick={() => handleStepClick(1)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <div>First contact</div>
-                <div style={{ fontSize: '0.65rem', fontWeight: 300, letterSpacing: '0.05em', opacity: 0.7, marginTop: '4px', textTransform: 'uppercase' }}>Feb 12</div>
-              </div>
-              <div className="step-label" onClick={() => handleStepClick(2)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <div>The descent</div>
-                <div style={{ fontSize: '0.65rem', fontWeight: 300, letterSpacing: '0.05em', opacity: 0.7, marginTop: '4px', textTransform: 'uppercase' }}>Apr 9</div>
-              </div>
-              <div className="step-label" onClick={() => handleStepClick(3)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                <div>Zenith gate</div>
-                <div style={{ fontSize: '0.65rem', fontWeight: 300, letterSpacing: '0.05em', opacity: 0.7, marginTop: '4px', textTransform: 'uppercase' }}>May 24</div>
-              </div>
+                }}
+              />
             </div>
           </div>
         </div>
@@ -470,7 +544,7 @@ export default function Lesson1() {
       {/* Hidden Audio Element - defaulting to EN tracks */}
       <audio
         ref={audioRef}
-        src={`/assets/audio/L01_VO_00${activeStep}_EN.mp3`}
+        src={`/assets/audio/L01_VO_00${activeStep}_${lang}.mp3`}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleAudioEnded}
       />

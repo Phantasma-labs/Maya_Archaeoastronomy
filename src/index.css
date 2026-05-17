@@ -145,6 +145,12 @@ input[type=range]::-webkit-slider-thumb:hover {
   transform: scale(1.2);
 }
 
+.lighting-slider::-webkit-slider-thumb {
+  width: 16px !important;
+  height: 16px !important;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.8) !important;
+}
+
 .step-labels {
   display: flex;
   justify-content: space-between;

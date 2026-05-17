@@ -226,7 +226,14 @@ export default function Lesson1() {
   const [lang, setLang] = useState<'EN' | 'ES'>('EN');
 
   useEffect(() => {
-    if (navigator.language && navigator.language.toLowerCase().startsWith('es')) {
+    const params = new URLSearchParams(window.location.search);
+    const urlLang = params.get('lang');
+
+    if (urlLang?.toLowerCase() === 'es') {
+      setLang('ES');
+    } else if (urlLang?.toLowerCase() === 'en') {
+      setLang('EN');
+    } else if (navigator.language && navigator.language.toLowerCase().startsWith('es')) {
       setLang('ES');
     }
   }, []);
@@ -396,7 +403,7 @@ export default function Lesson1() {
 
       <div className="canvas-wrapper">
         {/* Cinematic Background Crossfader */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '185%', zIndex: -1 }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '184.6%', zIndex: -1 }}>
           {[1, 2, 3].map((s) => (
             <div
               key={s}
@@ -446,7 +453,7 @@ export default function Lesson1() {
                 );
               })}
             </div>
-            
+
             {/* Manual Lighting Slider */}
             <div style={{ marginTop: '2rem', width: '100%', maxWidth: '800px', display: 'flex', alignItems: 'center', gap: '1rem', opacity: 0.8 }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', whiteSpace: 'nowrap' }}>
@@ -454,7 +461,7 @@ export default function Lesson1() {
               </div>
               <div className="slider-container" style={{ flexGrow: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', height: '2px', background: 'rgba(255,255,255,0.8)', width: `${((lightT - 1) / 2) * 100}%`, pointerEvents: 'none', zIndex: 1 }} />
-                <input 
+                <input
                   type="range"
                   className="lighting-slider"
                   min="1" max="3" step="0.01"
@@ -522,7 +529,7 @@ export default function Lesson1() {
                   const val = parseFloat(e.target.value);
                   let newStep = Math.floor(val);
                   if (newStep >= 4) newStep = 3;
-                  
+
                   if (newStep === activeStep) {
                     setSliderValue(val);
                     if (audioRef.current && !isNaN(audioRef.current.duration)) {

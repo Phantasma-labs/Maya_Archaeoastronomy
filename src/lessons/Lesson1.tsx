@@ -102,7 +102,7 @@ const stepsDataEN = [
     sublabel: "Feb 12 · 52 days from winter solstice",
     tooltip: "The first shadow triangle pierces the staircase. The calendar has awakened.",
     caption: "It begins quietly. On the twelfth of February — fifty-two days after the winter solstice — the angle of the afternoon sun catches the edge of the first terrace. A single triangle of shadow appears on the north staircase. This is not an accident. The Maya architects of Chichén Itzá designed this building to do exactly this, on exactly this day. Fifty-two days. The same number of years it takes for the two Maya calendars to realign. The same number written into the very stone of this pyramid — fifty-two niches per side, on every face.",
-    lightPosition: new THREE.Vector3(-70, 20, -140),
+    lightPosition: new THREE.Vector3(-80, 20, -140),
     keyLightColor: new THREE.Color('#ffdcab'), // Matches Step 2
     keyLightIntensity: 4, // Editable sun intensity
     fillLightColor: new THREE.Color('#d4beb0'), // Matches Step 2

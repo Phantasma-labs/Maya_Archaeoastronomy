@@ -14,9 +14,14 @@ function GltfCamera() {
 
   useEffect(() => {
     if (cameras && cameras.length > 0) {
-      const cam = cameras[0] as THREE.PerspectiveCamera;
-      cam.fov = 32;
+      // Clone so we don't permanently mutate the cached GLTF camera
+      const cam = cameras[0].clone() as THREE.PerspectiveCamera;
+      const isPortrait = size.width < size.height;
+
+      // Use a moderate FOV for portrait to avoid the "zoomed out" look
+      cam.fov = isPortrait ? 45 : 32;
       cam.aspect = size.width / size.height;
+
       cam.updateProjectionMatrix();
       set({ camera: cam });
     }
@@ -173,6 +178,7 @@ function SceneSetup({ lightT, lang }: { lightT: number, lang: 'EN' | 'ES' }) {
   const stepsData = lang === 'ES' ? stepsDataES : stepsDataEN;
   const lightRef = useRef<THREE.DirectionalLight>(null);
   const ambientRef = useRef<THREE.AmbientLight>(null);
+  const { size } = useThree();
 
   // Pre-allocate THREE objects to avoid GC spikes in useFrame
   const tempPos = useRef(new THREE.Vector3());
@@ -228,12 +234,14 @@ function SceneSetup({ lightT, lang }: { lightT: number, lang: 'EN' | 'ES' }) {
         shadow-camera-right={80}
         shadow-camera-top={80}
         shadow-camera-bottom={-80}
-        shadow-bias={-0.0001}
         shadow-radius={8}
       />
-      <Pyramid />
-      {/* Imported Floor Geometry */}
-      <Floor lightT={lightT} />
+      {/* Safely shift the models in world-space for portrait framing */}
+      <group position={size.width < size.height ? [-18, -3, 0] : [0, 0, 0]}>
+        <Pyramid />
+        {/* Imported Floor Geometry */}
+        <Floor lightT={lightT} />
+      </group>
     </>
   );
 }
@@ -243,6 +251,7 @@ export default function Lesson1() {
   const [activeStep, setActiveStep] = useState(1);
   const [hasStarted, setHasStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
 
   // Track loading state
   useEffect(() => {
@@ -326,6 +335,7 @@ export default function Lesson1() {
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
+        setHasPlayedOnce(true);
         audioRef.current.play()
           .then(() => setIsPlaying(true))
           .catch(e => console.log('Playback error:', e));
@@ -336,6 +346,7 @@ export default function Lesson1() {
   const handleStepClick = (step: number) => {
     setManualLightT(null);
     if (!hasStarted) setHasStarted(true);
+    setHasPlayedOnce(true);
 
     if (step !== activeStep) {
       setActiveStep(step);
@@ -412,8 +423,7 @@ export default function Lesson1() {
           }}
           onClick={() => !isLoading && setHasStarted(true)}
         >
-          <div style={{
-            padding: '1.5rem 4rem',
+          <div className="start-button" style={{
             background: isLoading ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0.1)',
             border: isLoading ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.3)',
             borderRadius: '8px',
@@ -468,7 +478,7 @@ export default function Lesson1() {
         {/* OVERLAYS */}
         <div className="top-gradient-panel">
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4rem' }}>
+            <div className="steps-container">
               {stepsData.map((step, index) => {
                 const stepNum = index + 1;
                 const isActive = activeStep === stepNum;
@@ -477,6 +487,7 @@ export default function Lesson1() {
                 return (
                   <div
                     key={stepNum}
+                    className={isActive ? 'step-active' : 'step-inactive'}
                     onClick={() => handleStepClick(stepNum)}
                     style={{
                       cursor: 'pointer',
@@ -553,20 +564,45 @@ export default function Lesson1() {
       <div className="bottom-bar">
         <div className="slider-controls">
           <div style={{ display: 'flex', alignItems: 'center', width: '100%', maxWidth: '800px', margin: '0 auto', gap: '1rem' }}>
-            <button
-              onClick={togglePlay}
-              style={{
-                background: 'transparent', border: 'none', color: 'white',
-                width: '40px', height: '40px', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', padding: 0,
-                cursor: 'pointer', transition: 'all 0.3s ease', flexShrink: 0
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-              title={isPlaying ? "Pause Voice Over" : "Play Voice Over"}
-            >
-              {isPlaying ? '⏸' : '▶'}
-            </button>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              {!hasPlayedOnce && (
+                <span
+                  className="pulse-text"
+                  onClick={togglePlay}
+                  style={{
+                    position: 'absolute',
+                    right: '100%',
+                    marginRight: '1rem',
+                    whiteSpace: 'nowrap',
+                    color: '#ffd54f',
+                    fontSize: '0.8rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.1em',
+                    pointerEvents: 'auto',
+                    cursor: 'pointer',
+                    transition: 'opacity 0.3s ease, transform 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                >
+                  {lang === 'ES' ? 'Inicia' : 'Start here'}
+                </span>
+              )}
+              <button
+                onClick={togglePlay}
+                style={{
+                  background: 'transparent', border: 'none', color: 'white',
+                  width: '40px', height: '40px', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', padding: 0,
+                  cursor: 'pointer', transition: 'all 0.3s ease', flexShrink: 0
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                title={isPlaying ? "Pause Voice Over" : "Play Voice Over"}
+              >
+                {isPlaying ? '⏸' : '▶'}
+              </button>
+            </div>
             <div className="slider-container" style={{ flexGrow: 1, marginBottom: 0, position: 'relative', display: 'flex', alignItems: 'center' }}>
               <div style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', height: '2px', background: 'rgba(255,255,255,0.8)', width: `${((sliderValue - 1) / 3) * 100}%`, pointerEvents: 'none', zIndex: 1 }} />
               <div style={{ position: 'absolute', left: 0, right: 0, height: '100%', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
@@ -623,6 +659,9 @@ export default function Lesson1() {
         src={`/assets/audio/L01_VO_00${activeStep}_${lang}.mp3`}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleAudioEnded}
+        onLoadedData={(e) => {
+          e.currentTarget.playbackRate = 1.20;
+        }}
       />
     </div>
   );

@@ -204,3 +204,54 @@ button:disabled {
   color: #cbd5e1;
   margin-right: 0.5rem;
 }
+
+@keyframes pulseOpacity {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+.pulse-text {
+  animation: pulseOpacity 2s ease-in-out infinite;
+}
+
+.steps-container {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+
+.start-button {
+  padding: 1.5rem 4rem;
+}
+
+@media (max-width: 1024px) {
+  .steps-container {
+    gap: 0.5rem;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .start-button {
+    padding: 1rem 2rem !important;
+    font-size: 1rem !important;
+  }
+  
+  .top-gradient-panel {
+    padding: 1rem 1rem;
+  }
+
+  .bottom-bar {
+    padding: 0.5rem 1rem;
+  }
+  
+  h1 {
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  /* Hide inactive subtitles on mobile to save space */
+  .step-inactive .subtitle {
+    display: none !important;
+  }
+}

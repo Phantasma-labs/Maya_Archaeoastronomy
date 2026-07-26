@@ -107,7 +107,7 @@ const stepsDataEN = [
     sublabel: "Feb 12 · 52 days from winter solstice",
     tooltip: "The first shadow triangle pierces the staircase. The calendar has awakened.",
     caption: "It begins quietly. On the twelfth of February — fifty-two days after the winter solstice — the angle of the afternoon sun catches the edge of the first terrace. A single triangle of shadow appears on the north staircase. This is not an accident. The Maya architects of Chichén Itzá designed this building to do exactly this, on exactly this day. Fifty-two days. The same number of years it takes for the two Maya calendars to realign. The same number written into the very stone of this pyramid — fifty-two niches per side, on every face.",
-    lightPosition: new THREE.Vector3(-80, 20, -140),
+    lightPosition: new THREE.Vector3(-50, 0, -140),
     keyLightColor: new THREE.Color('#ffdcab'), // Matches Step 2
     keyLightIntensity: 4, // Editable sun intensity
     fillLightColor: new THREE.Color('#d4beb0'), // Matches Step 2
@@ -118,7 +118,7 @@ const stepsDataEN = [
     sublabel: "Apr 9 / Sep 2 · 73 days from summer solstice",
     tooltip: "All 9 triangles lock in. Kukulcán's body is complete. 73 × 8 = 584 — the Venus period.",
     caption: "April ninth. The sun reaches its position seventy-three days before the summer solstice. And the staircase comes alive. Nine triangles of light and shadow descend the north balustrade — one for each of the nine terraces of this pyramid. Together they trace the body of Kukulcán, the feathered serpent, his head already waiting at the base. But there is a deeper message hidden here. Seventy-three days. Multiply by eight — and you get five hundred and eighty-four. The exact length of Venus's journey around the sky, as seen from Earth. This pyramid doesn't just mark the Maya calendar. It marks the orbit of Venus.",
-    lightPosition: new THREE.Vector3(-60.80, 33.26, -133.03),
+    lightPosition: new THREE.Vector3(-50, 20, -140),
     keyLightColor: new THREE.Color('#ffdcab'), // Warmer Step 2
     keyLightIntensity: 4, // Editable sun intensity
     fillLightColor: new THREE.Color('#d4beb0'), // Warmer Step 2 fill

@@ -17,6 +17,56 @@ export interface LightingConfig {
 }
 
 /**
+ * Pedagogical content attached to an Atmosphere Timeline keyframe.
+ * All fields are optional so legacy sky-only keyframes still type-check;
+ * a keyframe without a callout falls back to its `SkyKeyframe.name` for
+ * the slider label and shows no extra panel content.
+ *
+ * `lines` is the on-screen text callout body (rendered as a stacked
+ * multi-line block). `prompt` is the "drag to next step" line shown
+ * below the callout. `hotspot` is the optional tap-to-open card
+ * (e.g. Step 2's Kukulcán serpent-head popup). `completion` is the
+ * optional end-of-lesson reveal panel.
+ */
+export interface StepCallout {
+  /** Big headline (e.g. "First contact"). Falls back to keyframe.name. */
+  label?: string;
+  /** Smaller secondary line under the label (e.g. "Feb 12 · 52 days…"). */
+  sublabel?: string;
+  /** Hover/title tooltip (e.g. "The first shadow triangle pierces…"). */
+  tooltip?: string;
+  /** Multi-line on-screen text block, one entry per rendered line. */
+  lines?: string[];
+  /** Interaction prompt shown beneath the callout (e.g. "→ Drag to Step 2…"). */
+  prompt?: string;
+  /** Optional tap-to-open hotspot card (Step 2's Kukulcán popup). */
+  hotspot?: {
+    label: string;
+    /** Body text shown inside the popup card. */
+    text: string;
+    /** Optional anchor direction toward the in-scene feature. */
+    anchor?: 'serpent-head' | 'temple-summit' | 'staircase-base';
+  };
+  /** Per-keyframe astronomical data (sun azimuth/altitude/declination/time). */
+  astro?: {
+    /** Solar azimuth, e.g. "≈ 240°". */
+    azimuth: string;
+    /** Solar altitude above the horizon, e.g. "≈ 29–30°". */
+    altitude: string;
+    /** Solar declination, e.g. "≈ −13.5°". */
+    declination: string;
+    /** Local clock time of the event, e.g. "~15:32". */
+    time: string;
+  };
+  /** Optional completion reveal (Step 3's "Decoded" panel). */
+  completion?: {
+    heading: string;
+    /** Rendered as preformatted lines to preserve alignment. */
+    body: string[];
+  };
+}
+
+/**
  * A single authored sky/light state on the Atmosphere Timeline (ADR-001).
  * Keyframes are COMPLETE states — no partial-axis overrides, no fallback
  * chains. Every keyframe defines all of its values so any adjacent pair
@@ -32,6 +82,8 @@ export interface SkyKeyframe {
   lightRotation: [number, number, number];
   /** IBL contribution (scene.environmentIntensity) at this keyframe. */
   iblIntensity: number;
+  /** Optional pedagogical content shown when this keyframe is active. */
+  callout?: StepCallout;
 }
 
 /**
@@ -103,6 +155,14 @@ export interface LearningTopic {
   summary: string;
   details: string[];
   keyFact?: string;
+  /**
+   * Optional focused-view skyTimeline. When present, this topic owns its
+   * own Atmosphere Timeline (overrides the lesson's default) and the
+   * overlay renders the focused UI (slider, callout, sun blueprint).
+   * Used by Snake Descent to scope the timeline to the two
+   * serpent-shadow keyframes (1st contact → The descent).
+   */
+  skyTimeline?: SkyKeyframe[];
 }
 
 export interface LessonContent {

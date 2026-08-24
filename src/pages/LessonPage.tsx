@@ -20,6 +20,9 @@ export const LessonPage: React.FC = () => {
    * Timeline position (continuous, 1..N). Everything else — sky crossfade,
    * sun rotation, IBL intensity — is DERIVED from it via sampleAtmosphere.
    * There is deliberately no env/light React state to get out of sync.
+   *
+   * Default is 1 (the snake-descent 1st-contact keyframe) so the lesson
+   * opens on the focused serpent-shadow view. Other topics reset to step 3.
    */
   const [sliderPosition, setSliderPosition] = useState<number>(1);
 
@@ -29,13 +32,51 @@ export const LessonPage: React.FC = () => {
   // tween must NOT be scheduled from inside a setState updater).
   const positionRef = useRef(sliderPosition);
 
+  /**
+   * The selected topic id is lifted here so the page can swap the active
+   * skyTimeline and reset the slider position when the user navigates
+   * between topics. Defaults to the Snake Descent topic (step 1) so the
+   * lesson opens on the focused serpent-shadow view.
+   */
+  const [selectedTopicId, setSelectedTopicId] = useState<string>(() => {
+    if (!lessonEntry) return '';
+    const snake = lessonEntry.config.content.topics.find((t) => t.id === 'snake-descent');
+    return snake ? snake.id : lessonEntry.config.content.topics[0]?.id ?? '';
+  });
+
+  // The active skyTimeline is the selected topic's own (if it owns one)
+  // or the lesson's default 3-step timeline. Snake Descent owns a 2-step
+  // focused timeline; every other topic falls back to the lesson default.
+  const activeSkyTimeline = useMemo(() => {
+    if (!lessonEntry) return [];
+    const topic = lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId)
+      ?? lessonEntry.config.content.topics[0];
+    return topic?.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline;
+  }, [lessonEntry, selectedTopicId]);
+
+  // Whether to render the focused UI (slider, callout, sun blueprint):
+  // true only for topics that own their own skyTimeline (Snake Descent).
+  const showFocusedUI = useMemo(() => {
+    if (!lessonEntry) return false;
+    const topic = lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId);
+    return !!topic?.skyTimeline;
+  }, [lessonEntry, selectedTopicId]);
+
+  // Reset the slider position when the selected topic changes. Topics that
+  // own a skyTimeline start at step 1; topics using the lesson default
+  // default to step 3 (the zenith keyframe). The lesson default's
+  // skyTimeline always has N=3, so step 3 is always a valid position.
+  useEffect(() => {
+    if (!lessonEntry) return;
+    const topic = lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId)
+      ?? lessonEntry.config.content.topics[0];
+    setSliderPosition(topic?.skyTimeline ? 1 : 3);
+  }, [selectedTopicId, lessonEntry]);
+
   const atmosphere = useMemo(() => {
-    if (!lessonEntry) return null;
-    return sampleAtmosphere(
-      lessonEntry.config.assets.environment.skyTimeline,
-      sliderPosition
-    );
-  }, [lessonEntry, sliderPosition]);
+    if (!lessonEntry || activeSkyTimeline.length === 0) return null;
+    return sampleAtmosphere(activeSkyTimeline, sliderPosition);
+  }, [activeSkyTimeline, sliderPosition, lessonEntry]);
 
   // Eased sweep tween toward a clicked step marker (~0.6 s). The sweep visibly
   // passes through the in-between states — that transition IS the feature.
@@ -76,8 +117,12 @@ export const LessonPage: React.FC = () => {
     [cancelSweep]
   );
 
+  const handleSelectTopic = useCallback((id: string) => {
+    setSelectedTopicId(id);
+  }, []);
+
   // Cancel an in-flight sweep on unmount.
-  useEffect(() => cancelSweep, [cancelSweep]);
+  useEffect(() => () => cancelSweep(), [cancelSweep]);
 
   if (!lessonEntry || !atmosphere) {
     return (
@@ -128,21 +173,37 @@ export const LessonPage: React.FC = () => {
   const { config, SceneComponent, OverlayComponent } = lessonEntry;
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-[#090b10] relative select-none">
-      {/* 3D Scene Viewport — fills entire viewport */}
-      <SceneCanvas cameraConfig={config.camera}>
-        <SceneComponent config={config} atmosphere={atmosphere} />
-      </SceneCanvas>
+    <div className="w-screen h-screen overflow-hidden bg-[#090b10] relative select-none flex items-center justify-center">
+      {/* Cinematic 16:9 frame — on horizontal/widescreen viewports the scene
+          and overlay are letterboxed to a 16:9 frame (centered) instead of
+          stretching across the full width. On narrow/tall viewports the
+          frame fills the width and its height follows from the ratio. */}
+      <div
+        className="relative"
+        style={{
+          width: 'min(100%, calc(100vh * 16 / 9))',
+          aspectRatio: '16 / 9'
+        }}
+      >
+        {/* 3D Scene Viewport — fills the 16:9 frame */}
+        <SceneCanvas cameraConfig={config.camera}>
+          <SceneComponent config={config} atmosphere={atmosphere} />
+        </SceneCanvas>
 
-      {/* Educational UI Overlay — sits above the canvas */}
-      {OverlayComponent && (
-        <OverlayComponent
-          config={config}
-          sliderPosition={sliderPosition}
-          onSliderPositionChange={handleLiveChange}
-          onStepSelect={handleStepSelect}
-        />
-      )}
+        {/* Educational UI Overlay — sits above the canvas, over the frame */}
+        {OverlayComponent && (
+          <OverlayComponent
+            config={config}
+            sliderPosition={sliderPosition}
+            onSliderPositionChange={handleLiveChange}
+            onStepSelect={handleStepSelect}
+            selectedTopicId={selectedTopicId}
+            onSelectTopic={handleSelectTopic}
+            skyTimeline={activeSkyTimeline}
+            showFocusedUI={showFocusedUI}
+          />
+        )}
+      </div>
     </div>
   );
 };

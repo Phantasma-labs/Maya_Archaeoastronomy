@@ -2,7 +2,12 @@ import React, { useRef } from 'react';
 
 interface AtmosphereTimelineProps {
   /** Ordered timeline keyframes (step i+1 ↔ keyframes[i]). */
-  keyframes: { id: string; name: string }[];
+  keyframes: {
+    id: string;
+    name: string;
+    /** Optional pedagogical label — preferred over `name` when present. */
+    callout?: { label?: string; sublabel?: string; tooltip?: string };
+  }[];
   /** Continuous position in [1, N]. Integer = exactly on a keyframe. */
   value: number;
   /** Live scrubbing (drag / track click). */
@@ -10,6 +15,10 @@ interface AtmosphereTimelineProps {
   /** Step-marker / keyboard step navigation — parent runs the eased sweep. */
   onStepSelect: (step: number) => void;
 }
+
+/** Display label prefers the callout label, falls back to the keyframe name. */
+const displayLabel = (kf: AtmosphereTimelineProps['keyframes'][number]) =>
+  kf.callout?.label ?? kf.name;
 
 /**
  * AtmosphereTimeline — the lesson's single environment control (ADR-001).
@@ -56,6 +65,15 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
     onLiveChange(positionFromClientX(e.clientX));
   };
 
+  // Thumb press — the draggable knob. Unlike the track, grabbing the thumb
+  // never skips on step markers, so it stays grabbable even when it sits
+  // exactly on top of a marker at the track extremes (Step 1 / Step N).
+  const handleThumbPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    draggingRef.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    onLiveChange(positionFromClientX(e.clientX));
+  };
+
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!draggingRef.current) return;
     onLiveChange(positionFromClientX(e.clientX));
@@ -89,25 +107,21 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
   };
 
   // Display state: nearest keyframe is "active"; mid-segment shows the blend.
-  const lowerIndex = Math.min(Math.floor(value) - 1, N - 1);
-  const upperIndex = Math.min(lowerIndex + 1, N - 1);
   const mix = Math.min(Math.max(value - Math.floor(value), 0), 1);
-  const blending = mix > 0.001 && lowerIndex !== upperIndex;
+  const blending = mix > 0.001;
   const activeIndex = Math.min(Math.max(Math.round(value) - 1, 0), N - 1);
-  const thumbPercent = ((value - 1) / (N - 1)) * 100;
+  // Edge-inset position (0..1) for the thumb/fill — keeps the thumb (16px,
+  // half 8px) fully inside the track at both extremes. For N=2 this fixes
+  // the overflow where the percentage-based centering pushed the step-2
+  // marker and the thumb past the track boundary.
+  const trackInsetRatio = N > 1 ? (value - 1) / (N - 1) : 0;
+  const thumbInsetRem = 0.5; // 8px — matches the thumb's half-width
+  const trackInsetStyle = (axis: 'left' | 'width') => ({
+    [axis]: `calc(${thumbInsetRem}rem + (100% - ${thumbInsetRem * 2}rem) * ${trackInsetRatio})`
+  });
 
   return (
     <div className="pointer-events-auto w-full bg-[#12151e]/85 backdrop-blur-md border border-[#d4af37]/25 rounded-2xl px-4 pt-2.5 pb-3 shadow-lg">
-      {/* Readout: current atmosphere state */}
-      <div className="flex items-center justify-between text-[10px] font-mono mb-2">
-        <span className="uppercase tracking-wider text-[#8e897e]">Atmosphere</span>
-        <span className="text-[#d4af37] truncate">
-          {blending
-            ? `${keyframes[lowerIndex].name} ↔ ${keyframes[upperIndex].name} ${Math.round(mix * 100)}%`
-            : keyframes[activeIndex].name}
-        </span>
-      </div>
-
       {/* Slider track */}
       <div
         ref={trackRef}
@@ -118,7 +132,7 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
         aria-valuenow={Math.round(value * 100) / 100}
         aria-valuetext={keyframes[activeIndex].name}
         tabIndex={0}
-        className="relative h-8 flex items-center cursor-pointer touch-none select-none outline-none focus-visible:ring-1 focus-visible:ring-[#d4af37]/60 rounded"
+        className="relative h-8 cursor-pointer touch-none select-none outline-none focus-visible:ring-1 focus-visible:ring-[#d4af37]/60 rounded"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={endDrag}
@@ -126,46 +140,62 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
         onKeyDown={handleKeyDown}
       >
         {/* Rail */}
-        <div className="absolute left-0 right-0 h-1 rounded-full bg-[#1c202a] border border-[#d4af37]/20" />
-        {/* Fill up to the thumb */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#1c202a] border border-[#d4af37]/20" />
+        {/* Fill up to the thumb — inset so it ends at the thumb's center. */}
         <div
-          className="absolute left-0 h-1 rounded-full bg-gradient-to-r from-[#8b6b23] via-[#d4af37] to-[#f3e5ab]"
-          style={{ width: `${thumbPercent}%` }}
+          className="absolute top-1/2 -translate-y-1/2 h-1 rounded-full bg-gradient-to-r from-[#8b6b23] via-[#d4af37] to-[#f3e5ab]"
+          style={trackInsetStyle('width')}
         />
-        {/* Step markers (click → eased sweep via parent) */}
-        {keyframes.map((keyframe, i) => {
-          const step = i + 1;
-          const left = ((step - 1) / (N - 1)) * 100;
-          const isActive = i === activeIndex && !blending;
-          return (
-            <button
-              key={keyframe.id}
-              data-step-marker
-              type="button"
-              title={`${step}. ${keyframe.name}`}
-              aria-label={`Sweep to ${keyframe.name}`}
-              onClick={() => onStepSelect(step)}
-              className={`absolute w-3 h-3 -translate-x-1/2 rotate-45 border transition-all cursor-pointer ${
-                isActive
-                  ? 'bg-[#d4af37] border-[#f3e5ab] scale-110'
-                  : 'bg-[#12151e] border-[#d4af37]/50 hover:border-[#d4af37] hover:bg-[#8b6b23]/50'
-              }`}
-              style={{ left: `${left}%` }}
-            />
-          );
-        })}
-        {/* Thumb (visual only — the track handles all input) */}
+        {/* Step markers — flex justify-between so the first/last markers sit
+            at the track edges fully inside, regardless of N. The previous
+            percentage-based centering caused both markers to clip the track
+            boundary on a 2-step timeline (the "Step 2 button doesn't respond"
+            bug). `pointer-events-none` on the wrapper lets the track own
+            pointer events; each marker re-enables them. */}
+        <div className="absolute inset-0 flex items-center justify-between pointer-events-none">
+          {keyframes.map((keyframe, i) => {
+            const step = i + 1;
+            const isActive = i === activeIndex && !blending;
+            const titleText = keyframe.callout?.tooltip
+              ? `${step}. ${displayLabel(keyframe)} — ${keyframe.callout.tooltip}`
+              : `${step}. ${displayLabel(keyframe)}`;
+            return (
+              <button
+                key={keyframe.id}
+                data-step-marker
+                type="button"
+                title={titleText}
+                aria-label={`Sweep to ${displayLabel(keyframe)}`}
+                onClick={() => onStepSelect(step)}
+                className={`pointer-events-auto w-3 h-3 rotate-45 border transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-[#d4af37] border-[#f3e5ab] scale-110'
+                    : 'bg-[#12151e] border-[#d4af37]/50 hover:border-[#d4af37] hover:bg-[#8b6b23]/50'
+                }`}
+              />
+            );
+          })}
+        </div>
+        {/* Thumb (draggable handle — captures its own pointer so it stays
+            grabbable even when it overlaps a step marker at the extremes) */}
         <div
-          className="absolute w-4 h-4 -translate-x-1/2 rounded-full bg-[#f3e5ab] border-2 border-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.45)] pointer-events-none"
-          style={{ left: `${thumbPercent}%` }}
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-[#f3e5ab] border-2 border-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.45)] pointer-events-auto cursor-grab active:cursor-grabbing touch-none"
+          style={trackInsetStyle('left')}
+          onPointerDown={handleThumbPointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
         />
       </div>
 
-      {/* Step labels */}
-      <div className="relative h-4 mt-1 text-[9px] font-mono uppercase tracking-wider">
+      {/* Step labels — flex justify-between with edge-aligned text so labels
+          stay inside the track at any N (no left/right half overflow on N=2). */}
+      <div className="flex justify-between items-center h-4 mt-1 text-[9px] font-mono uppercase tracking-wider gap-2">
         {keyframes.map((keyframe, i) => {
           const step = i + 1;
-          const left = ((step - 1) / (N - 1)) * 100;
+          const isFirst = i === 0;
+          const isLast = i === N - 1;
+          const align = isFirst ? 'text-left' : isLast ? 'text-right' : 'text-center';
           const isActive = i === activeIndex && !blending;
           return (
             <button
@@ -173,12 +203,12 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
               data-step-marker
               type="button"
               onClick={() => onStepSelect(step)}
-              className={`absolute -translate-x-1/2 truncate max-w-[33%] transition-colors cursor-pointer ${
+              title={keyframe.callout?.sublabel ?? keyframe.callout?.tooltip ?? displayLabel(keyframe)}
+              className={`truncate max-w-[34%] transition-colors cursor-pointer ${align} ${
                 isActive ? 'text-[#f3e5ab]' : 'text-[#8e897e] hover:text-[#d4af37]'
               }`}
-              style={{ left: `${left}%` }}
             >
-              {keyframe.name}
+              {displayLabel(keyframe)}
             </button>
           );
         })}

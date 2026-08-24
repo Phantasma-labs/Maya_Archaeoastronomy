@@ -46,30 +46,78 @@ export const lesson01Config: LessonConfig = {
       // ADR-001 — hardcoded Atmosphere Timeline keyframes (complete states;
       // interpolation happens between them). K2's light X/Y were carried
       // over from the lesson default so every keyframe is fully specified.
+      //
+      // The three keyframes are the lesson's narrative spine:
+      //   1. First contact   — Feb 12, 52 days past winter solstice
+      //   2. The descent     — Apr 9 / Sep 2, 73 days from summer solstice
+      //   3. Zenith gate     — May 24, sun directly overhead
+      // Pedagogical copy lives in each keyframe's `callout` so it stays
+      // config-driven (no special-casing in Lesson01Overlay).
       skyTimeline: [
         {
           id: 'sky-01',
-          name: 'Atmospheric Daylight',
+          name: 'Step 1 · 1st contact',
           url: '/assets/lesson_01/01.webp',
-          description: 'Clear tropical sky over the Yucatán peninsula.',
+          description: 'Warm amber pre-sunset light over the Yucatán peninsula.',
           lightRotation: [1.6564, 0, 1.5],
-          iblIntensity: 0.5
+          iblIntensity: 0.5,
+          callout: {
+            label: '1st contact',
+            sublabel: 'Feb 12  ·  52 days from winter solstice',
+            tooltip: 'The first shadow triangle pierces the staircase. The calendar has awakened.',
+            lines: [
+              '52 days after winter solstice.',
+              '52: The Calendar Round in years.',
+              'The count has begun.'
+            ],
+            prompt: '→ Drag to Step 2 to advance the sun'
+          }
         },
         {
           id: 'sky-02',
-          name: 'Equinoctial Horizon',
+          name: 'Step 2 · The descent',
           url: '/assets/lesson_01/02.webp',
-          description: 'Sunlight conditions highlighting solar azimuths.',
+          description: 'Equinoctial light locking in the nine shadow triangles along the north alfarda.',
           lightRotation: [1.6564, 0, 1.66],
-          iblIntensity: 0.82
+          iblIntensity: 0.82,
+          callout: {
+            label: 'The descent',
+            sublabel: 'Apr 9 / Sep 2  ·  73 days from summer solstice',
+            tooltip:
+              'All 9 triangles lock in. Kukulcán’s body is complete. 73 × 8 = 584 — the Venus period.',
+            lines: [
+              '9 triangles = 9 terraces.',
+              '73 days × 8 = 584 days.',
+              '584 days = 1 Venus year.',
+              'The serpent descends. Venus is encoded.'
+            ],
+            prompt: '→ Drag to Step 3 to open the zenith gate',
+            hotspot: {
+              label: 'Kukulcán',
+              text: 'The feathered serpent deity — associated with Venus, agriculture, and kingship across Mesoamerica.',
+              anchor: 'serpent-head'
+            }
+          }
         },
         {
           id: 'sky-03',
-          name: 'Dusk Celestial View',
+          name: 'Step 3 · Zenith gate',
           url: '/assets/lesson_01/03.webp',
-          description: 'Evening atmosphere suitable for observing Venus and planetary transitions.',
+          description: 'Sun near vertical over Chichén Itzá (20.68° N) — the zenith passage.',
           lightRotation: [-0.2, 0, 0],
-          iblIntensity: 0.66
+          iblIntensity: 0.66,
+          callout: {
+            label: 'Zenith gate',
+            sublabel: 'May 24  ·  Sun passes directly overhead',
+            tooltip:
+              'Full staircase ablaze. The sun stands at the zenith. The portal opens.',
+            lines: [
+              'Zenith passage: the sun stands at 90°.',
+              'No shadow at noon.',
+              'First rains approaching.',
+              'The agricultural year begins.'
+            ]
+          }
         }
       ],
       // Shared skydome framing — authored values (these were previously the
@@ -112,6 +160,75 @@ export const lesson01Config: LessonConfig = {
       'The Temple of Kukulkán at Chichén Itzá is a monumental stepped pyramid strongly associated with calendrical, astronomical, and agricultural symbolism. Rising 30 meters above the northern plaza, the structure harmonizes solar mechanics, geometrical orientation, and sacred number sequences into stone.',
     topics: [
       {
+        id: 'snake-descent',
+        title: 'Snake Descent',
+        icon: 'Sun',
+        summary:
+          'Around the equinoxes, the setting sun projects undulating triangular shadows along the northern balustrade that merge with the Kukulkán serpent head at the staircase base.',
+        details: [
+          'As the sun descends in the late afternoon around the equinoxes, the edges of the nine stepped terraces cast a series of 7 isosceles triangles of light onto the northwest balustrade.',
+          'These illuminated triangles visually merge with the colossal stone-carved serpent head of Kukulkán (the Feathered Serpent) at the base of the staircase.',
+          'Scholars emphasize this as a sophisticated architectural and astronomical alignment, though debate continues on whether every detail was intentionally engineered for specific modern dates.'
+        ],
+        // Focused-view skyTimeline: scopes the Atmosphere Timeline to the
+        // two serpent-shadow keyframes (1st contact → The descent). When this
+        // topic is active the overlay shows the slider, the contextual
+        // callout, and the right-side sun blueprint info box.
+        skyTimeline: [
+          {
+            id: 'sd-01',
+            name: 'Step 1 · 1st contact',
+            url: '/assets/lesson_01/01.webp',
+            lightRotation: [1.6564, 0, 1.5],
+            iblIntensity: 0.5,
+            callout: {
+              label: '1st contact',
+              sublabel: 'Feb 12  ·  52 days from winter solstice',
+              tooltip: 'The first shadow triangle pierces the staircase. ',
+              lines: ['The first shadow triangle pierces the staircase. '],
+              astro: {
+                azimuth: '≈ 240°',
+                altitude: '≈ 29–30°',
+                declination: '≈ −13.5°',
+                time: '~15:32'
+              }
+            }
+          },
+          {
+            id: 'sd-02',
+            name: 'Step 2 · The descent',
+            url: '/assets/lesson_01/02.webp',
+            lightRotation: [1.6564, 0, 1.66],
+            iblIntensity: 0.82,
+            callout: {
+              label: 'The descent',
+              sublabel: 'Apr 9 / Sep 2  ·  73 days from summer solstice',
+              tooltip: 'All 9 triangles lock in. The serpent body is complete.',
+              lines: ['All 9 triangles lock in. The serpent body is complete.'],
+              astro: {
+                azimuth: '≈ 276°',
+                altitude: '≈ 7°',
+                declination: '≈ +8°',
+                time: '~18:37'
+              }
+            }
+          }
+        ]
+      },
+      {
+        id: 'solar-zenith',
+        title: 'Zenith',
+        icon: 'Compass',
+        summary:
+          'At the tropical latitude of Chichén Itzá (~20.68° N), the Sun passes directly overhead at local noon twice annually.',
+        details: [
+          'During subsolar zenith passage (occurring in late May and mid-July at Chichén Itzá), vertical objects cast zero shadow at local solar noon.',
+          'These zenith events served as sacred solar markers closely correlated with agricultural planting and rain ceremonies (Chak rituals).',
+          'Academic consensus treats these as significant cultural markers while maintaining careful separation between astronomical calculations and archaeological interpretations.'
+        ],
+        keyFact: 'At 20.68° N latitude, the Sun passes through the absolute zenith point at local solar noon twice per year.'
+      },
+      {
         id: 'solar-calendar',
         title: '365-Day Solar Calendar Architecture',
         icon: 'Calendar',
@@ -126,19 +243,6 @@ export const lesson01Config: LessonConfig = {
         keyFact: '4 stairways × 91 steps + 1 upper platform = 365 steps (Haab solar year).'
       },
       {
-        id: 'equinox-shadow',
-        title: 'Kukulkán Serpent Shadow Phenomenon',
-        icon: 'Sun',
-        summary:
-          'Around the spring and autumn equinoxes, the setting sun projects undulating triangular shadows along the northern balustrade.',
-        details: [
-          'As the sun descends in the late afternoon around the equinoxes, the edges of the nine stepped terraces cast a series of 7 isosceles triangles of light onto the northwest balustrade.',
-          'These illuminated triangles visually merge with the colossal stone-carved serpent head of Kukulkán (the Feathered Serpent) at the base of the staircase.',
-          'Scholars emphasize this as a sophisticated architectural and astronomical alignment, though debate continues on whether every detail was intentionally engineered for specific modern dates.'
-        ],
-        keyFact: '7 triangular diamonds of light connect the terrace stepped edges to the Kukulkán serpent head at the staircase base.'
-      },
-      {
         id: 'calendar-round',
         title: 'The 52-Year Calendar Round (Tzolk\'in & Haab)',
         icon: 'Clock',
@@ -150,32 +254,6 @@ export const lesson01Config: LessonConfig = {
           'This 52-year epoch was celebrated as a momentous rejuvenation cycle across Mesoamerica.'
         ],
         keyFact: '52 panels reflect the 52-year Calendar Round cycle (18,980 days = 73 Tzolk\'in cycles = 52 Haab years).'
-      },
-      {
-        id: 'venus-cycle',
-        title: 'Venus Synodic Observations (584 Days)',
-        icon: 'Orbit',
-        summary:
-          'The Maya meticulously tracked Venus as Chak Ek\' (the Great Morning Star), observing its 584-day synodic period.',
-        details: [
-          'The Maya recorded the complex visible movements of Venus, calculating its apparent synodic period as ~584 days (the time between successive inferior or superior conjunctions).',
-          'The mathematical harmonic 5 Venus synodic cycles = 8 Haab solar years (5 × 584 = 8 × 365 = 2,920 days) was fundamental to Maya astronomical tables (such as the Dresden Codex).',
-          'Note: 584 days is the apparent synodic period observed from Earth, distinct from Venus\'s 224.7-day orbital period around the Sun.'
-        ],
-        keyFact: '5 Venus synodic cycles (584 days) match exactly 8 Solar Haab years (365 days) = 2,920 days.'
-      },
-      {
-        id: 'solar-zenith',
-        title: 'Solar Zenith Passages (Zero Shadow)',
-        icon: 'Compass',
-        summary:
-          'At the tropical latitude of Chichén Itzá (~20.68° N), the Sun passes directly overhead at local noon twice annually.',
-        details: [
-          'During subsolar zenith passage (occurring in late May and mid-July at Chichén Itzá), vertical objects cast zero shadow at local solar noon.',
-          'These zenith events served as sacred solar markers closely correlated with agricultural planting and rain ceremonies (Chak rituals).',
-          'Academic consensus treats these as significant cultural markers while maintaining careful separation between astronomical calculations and archaeological interpretations.'
-        ],
-        keyFact: 'At 20.68° N latitude, the Sun passes through the absolute zenith point at local solar noon twice per year.'
       }
     ],
     archaeologicalNotes:

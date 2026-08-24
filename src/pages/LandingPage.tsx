@@ -7,7 +7,6 @@ import {
   Sun,
   Calendar,
   Clock,
-  Orbit,
   Lock,
   Layers,
   Globe
@@ -80,7 +79,7 @@ export const LandingPage: React.FC = () => {
             </span>
             <span>•</span>
             <span className="flex items-center gap-1.5">
-              <Orbit className="w-4 h-4 text-[#d4af37]" /> Venus 584-Day Period
+              <Sun className="w-4 h-4 text-[#d4af37]" /> Serpent Shadow Phenomenon
             </span>
           </div>
         </div>

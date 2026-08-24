@@ -1,5 +1,5 @@
 import React from 'react';
-import { AtmosphereSample, LessonConfig } from '../core/types/lesson.types';
+import { AtmosphereSample, LessonConfig, SkyKeyframe } from '../core/types/lesson.types';
 import { lesson01Config } from './lesson01/config';
 import { Lesson01Scene } from './lesson01/Lesson01Scene';
 import { Lesson01Overlay } from './lesson01/Lesson01Overlay';
@@ -20,6 +20,14 @@ export interface LessonEntry {
     onSliderPositionChange: (position: number) => void;
     /** Step-marker clicks — the overlay animates the ~0.6 s sweep. */
     onStepSelect: (step: number) => void;
+    /** Controlled selected topic id (lifted to LessonPage for slider reset). */
+    selectedTopicId: string;
+    /** Topic selection callback — parent resets the timeline position. */
+    onSelectTopic: (id: string) => void;
+    /** Active skyTimeline: the selected topic's own, or the lesson default. */
+    skyTimeline: SkyKeyframe[];
+    /** Show the focused UI (slider, callout, sun blueprint). */
+    showFocusedUI: boolean;
   }>;
 }
 

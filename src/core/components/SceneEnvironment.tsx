@@ -19,6 +19,15 @@ interface SceneEnvironmentProps {
  *   keyframe only one dome draws).
  * Crossfading is plain alpha blending — no custom shaders.
  *
+ * CRITICAL: dome B is the only TRANSPARENT object in the scene, so
+ * three.js bucketing draws it in the transparent pass AFTER all opaque
+ * geometry — renderOrder -999 only sorts within the transparent list.
+ * It must therefore keep depth testing enabled: the models write depth,
+ * dome A does not, so dome B blends over the sky region but is occluded
+ * by floor/layout/trees. depthTest=false made it alpha-blend across the
+ * whole viewport instead — the "geometry dissolves toward the next sky
+ * during sweeps" regression.
+ *
  * IBL: a scene can bind only one envmap, so scene.environment follows the
  * DOMINANT keyframe (A below mix 0.5, B at/above) while
  * scene.environmentIntensity follows the continuously interpolated
@@ -142,7 +151,6 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
           color={tint}
           side={THREE.BackSide}
           depthWrite={false}
-          depthTest={false}
           toneMapped={false}
           fog={false}
           transparent

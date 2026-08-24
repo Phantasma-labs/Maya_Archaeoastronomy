@@ -48,6 +48,10 @@ driven by a derived `AtmosphereSample` (`sampleAtmosphere()` in `core/utils`):
 - **Dome A** (renderOrder −1000, opaque) shows `skyTimeline[sample.indexA]`.
 - **Dome B** (renderOrder −999, `transparent`, `opacity = sample.mix`, hidden at mix ≈ 0)
   shows `skyTimeline[sample.indexB]`. Crossfade = plain alpha blending; no custom shaders.
+  Dome B keeps depth testing ON: as the only transparent object it renders in three.js's
+  transparent pass *after* all opaque geometry regardless of renderOrder, so the models'
+  depth must occlude it — `depthTest=false` blended it over the whole viewport, making the
+  geometry dissolve toward the incoming sky during sweeps (fixed regression).
 - Both domes share the lesson's framing (`scale`/`panY` via `texture.matrix` with
   `matrixAutoUpdate=false`; shared `rotation`) and brightness tint (`intensity`).
 - **IBL**: `scene.environment` can't blend two envmaps, so it follows the *dominant*

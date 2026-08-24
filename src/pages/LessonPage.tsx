@@ -1,102 +1,85 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getLessonEntry } from '../lessons/registry';
 import { SceneCanvas } from '../core/components/SceneCanvas';
-import { DevPanel, IBL_DEFAULTS } from '../dev/DevPanel';
-import { SceneRuntimeState } from '../core/types/lesson.types';
-import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { sampleAtmosphere } from '../core/utils/atmosphere';
+import { ArrowLeft, AlertCircle, Clock } from 'lucide-react';
+
+/** Eased sweep duration for step-marker clicks (ADR-001), in ms. */
+const SWEEP_MS = 600;
+
+const easeInOutCubic = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
 export const LessonPage: React.FC = () => {
   const { lessonId = '01' } = useParams<{ lessonId: string }>();
   const lessonEntry = useMemo(() => getLessonEntry(lessonId), [lessonId]);
 
-  const [isDevPanelVisible, setIsDevPanelVisible] = useState<boolean>(false);
+  /**
+   * ADR-001 — single runtime writer for the whole scene: the Atmosphere
+   * Timeline position (continuous, 1..N). Everything else — sky crossfade,
+   * sun rotation, IBL intensity — is DERIVED from it via sampleAtmosphere.
+   * There is deliberately no env/light React state to get out of sync.
+   */
+  const [sliderPosition, setSliderPosition] = useState<number>(1);
 
-  // Initialize runtime state from lesson config defaults
-  const [runtimeState, setRuntimeState] = useState<SceneRuntimeState | null>(() => {
+  // Mirror of the latest position for the sweep driver — lets the rAF
+  // callback read the current value without stale closures, and keeps
+  // updater functions pure (StrictMode double-invokes updaters, so the
+  // tween must NOT be scheduled from inside a setState updater).
+  const positionRef = useRef(sliderPosition);
+
+  const atmosphere = useMemo(() => {
     if (!lessonEntry) return null;
-    const envConfig = lessonEntry.config.assets.environment;
-    return {
-      directionalLight: { ...lessonEntry.config.lighting.directional },
-      // Spread the lesson's environment config (url, intensity,
-      // backgroundEnabled, presets), then layer IBL_DEFAULTS on top
-      // for everything else. Lesson configs no longer override the
-      // baked IBL/scale/panY/rotation values, so the skydome boots
-      // at the user's intended framing on the very first frame —
-      // no flash while we wait for the DevPanel's first onChange.
-      environment: {
-        ...envConfig,
-        iblIntensity: envConfig.iblIntensity ?? IBL_DEFAULTS.iblIntensity,
-        scale: envConfig.scale ?? IBL_DEFAULTS.scale,
-        panY: envConfig.panY ?? IBL_DEFAULTS.panY,
-        rotation: envConfig.rotation ?? IBL_DEFAULTS.rotation,
-        backgroundEnabled: envConfig.backgroundEnabled !== false
-      }
-    };
-  });
+    return sampleAtmosphere(
+      lessonEntry.config.assets.environment.skyTimeline,
+      sliderPosition
+    );
+  }, [lessonEntry, sliderPosition]);
 
-  // Stable callback — DevPanel calls this on every slider change
-  const handleRuntimeStateChange = useCallback((newState: SceneRuntimeState) => {
-    setRuntimeState(newState);
+  // Eased sweep tween toward a clicked step marker (~0.6 s). The sweep visibly
+  // passes through the in-between states — that transition IS the feature.
+  const sweepRef = useRef<{ frame: number } | null>(null);
+
+  const cancelSweep = useCallback(() => {
+    if (sweepRef.current) {
+      cancelAnimationFrame(sweepRef.current.frame);
+      sweepRef.current = null;
+    }
   }, []);
 
-  const handleToggleDevPanel = useCallback(() => {
-    setIsDevPanelVisible((prev) => !prev);
-  }, []);
-
-  const handleEnvironmentPresetSelect = useCallback((url: string) => {
-    setRuntimeState((prev) => {
-      if (!prev) return prev;
-
-      // Look up the matching preset in the lesson config to see if it
-      // carries optional directional-light X/Y/Z rotations and/or a
-      // per-preset IBL intensity. Each axis is applied independently —
-      // a preset that only defines Z (e.g. sky-02 / sky-03) leaves X and Y
-      // untouched, so existing manual overrides persist.
-      const presets = lessonEntry?.config.assets.environment.presets;
-      const matchedPreset = presets?.find((p) => p.url === url);
-      const newX = matchedPreset?.directionalLightRotationX;
-      const newY = matchedPreset?.directionalLightRotationY;
-      const newZ = matchedPreset?.directionalLightRotationZ;
-      const newIbl = matchedPreset?.iblIntensity;
-
-      const nextEnvironment: typeof prev.environment = {
-        ...prev.environment,
-        url,
-        // Per-preset IBL override — when defined on the preset, drives
-        // scene.environmentIntensity. When omitted, leave the current
-        // IBL value untouched so existing manual overrides persist.
-        ...(typeof newIbl === 'number' ? { iblIntensity: newIbl } : {})
+  const handleStepSelect = useCallback(
+    (step: number) => {
+      cancelSweep();
+      const from = positionRef.current;
+      if (Math.abs(step - from) < 0.0001) return;
+      const start = performance.now();
+      const tick = (now: number) => {
+        const t = Math.min((now - start) / SWEEP_MS, 1);
+        const next = t >= 1 ? step : from + (step - from) * easeInOutCubic(t);
+        positionRef.current = next;
+        setSliderPosition(next);
+        sweepRef.current = t >= 1 ? null : { frame: requestAnimationFrame(tick) };
       };
+      sweepRef.current = { frame: requestAnimationFrame(tick) };
+    },
+    [cancelSweep]
+  );
 
-      // Apply any rotation axes the preset declares. Each axis is
-      // independent: only axes explicitly set on the preset are
-      // overridden; the others keep their current value.
-      const hasAnyRotation =
-        typeof newX === 'number' ||
-        typeof newY === 'number' ||
-        typeof newZ === 'number';
+  // Dragging cancels any running sweep — live input always wins.
+  const handleLiveChange = useCallback(
+    (position: number) => {
+      cancelSweep();
+      positionRef.current = position;
+      setSliderPosition(position);
+    },
+    [cancelSweep]
+  );
 
-      const nextDirectionalLight = hasAnyRotation
-        ? {
-            ...prev.directionalLight,
-            rotation: [
-              typeof newX === 'number' ? newX : prev.directionalLight.rotation[0],
-              typeof newY === 'number' ? newY : prev.directionalLight.rotation[1],
-              typeof newZ === 'number' ? newZ : prev.directionalLight.rotation[2]
-            ] as [number, number, number]
-          }
-        : prev.directionalLight;
+  // Cancel an in-flight sweep on unmount.
+  useEffect(() => cancelSweep, [cancelSweep]);
 
-      return {
-        ...prev,
-        environment: nextEnvironment,
-        directionalLight: nextDirectionalLight
-      };
-    });
-  }, [lessonEntry]);
-
-  if (!lessonEntry || !runtimeState) {
+  if (!lessonEntry || !atmosphere) {
     return (
       <div className="min-h-screen bg-[#090b10] text-[#e6dfd3] flex flex-col items-center justify-center p-6 text-center">
         <div className="w-16 h-16 rounded-full bg-amber-950/40 border border-[#d4af37]/30 flex items-center justify-center mb-6 text-[#d4af37]">
@@ -117,33 +100,49 @@ export const LessonPage: React.FC = () => {
     );
   }
 
+  // Coming-soon lessons never reach the placeholder scene — Lesson01Scene
+  // assumes its own model ids and would crash on an empty models array.
+  if (lessonEntry.config.status === 'coming-soon') {
+    return (
+      <div className="min-h-screen bg-[#090b10] text-[#e6dfd3] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-amber-950/40 border border-[#d4af37]/30 flex items-center justify-center mb-6 text-[#d4af37]">
+          <Clock className="w-8 h-8" />
+        </div>
+        <h1 className="font-serif text-2xl font-bold text-[#f5ecd7] mb-2">
+          {lessonEntry.config.title}
+        </h1>
+        <p className="text-sm text-[#a39e93] max-w-md mb-6">
+          This module is still in production — assets and curriculum are being authored.
+        </p>
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#d4af37] text-black font-semibold text-xs tracking-wider uppercase hover:brightness-110 transition-all shadow-lg"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Return to Lesson Catalog
+        </Link>
+      </div>
+    );
+  }
+
   const { config, SceneComponent, OverlayComponent } = lessonEntry;
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-[#090b10] relative select-none">
       {/* 3D Scene Viewport — fills entire viewport */}
       <SceneCanvas cameraConfig={config.camera}>
-        <SceneComponent config={config} runtimeState={runtimeState} />
+        <SceneComponent config={config} atmosphere={atmosphere} />
       </SceneCanvas>
 
       {/* Educational UI Overlay — sits above the canvas */}
       {OverlayComponent && (
         <OverlayComponent
           config={config}
-          isDevPanelVisible={isDevPanelVisible}
-          onToggleDevPanel={handleToggleDevPanel}
-          onSelectEnvironmentPreset={handleEnvironmentPresetSelect}
-          currentEnvUrl={runtimeState.environment.url}
+          sliderPosition={sliderPosition}
+          onSliderPositionChange={handleLiveChange}
+          onStepSelect={handleStepSelect}
         />
       )}
-
-      {/* Leva Developer Panel — toggle with button or Alt+D */}
-      <DevPanel
-        lessonConfig={config}
-        isVisible={isDevPanelVisible}
-        onToggleVisibility={handleToggleDevPanel}
-        onChange={handleRuntimeStateChange}
-      />
     </div>
   );
 };

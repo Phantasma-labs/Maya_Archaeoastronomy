@@ -22,7 +22,6 @@ with no assets and a placeholder scene.
 | UI | React | 18.3.1 |
 | Routing | react-router-dom (2 routes + catch-all) | 6.29 |
 | 3D | three + @react-three/fiber + @react-three/drei | 0.174.0 / 8.18.0 / 9.122.0 |
-| Dev panel | leva *(removal scheduled — ADR-001)* | 0.9.36 |
 | Styling | Tailwind CSS 3.4 + PostCSS + autoprefixer | — |
 | Icons | lucide-react | 0.475 |
 | Package manager | npm (package-lock.json) | — |
@@ -34,9 +33,10 @@ Scripts: `dev` (vite, port 3000), `build` (`tsc && vite build` — tsc type-chec
 
 - Landing page with lesson catalog (`/`) and lesson experience page (`/lesson/:lessonId`).
 - Fixed cinematic camera baked from the GLB authoring camera (no user orbit/zoom — deliberate).
-- Sky preset system: 3 equirectangular panoramas with per-preset IBL intensity and
-  directional-light axis overrides, selectable from the learner overlay.
-- Leva developer panel (Alt+D) with directional-light and IBL controls + lighting presets.
+- **Atmosphere Timeline** (ADR-001): a continuous slider over hardcoded sky keyframes —
+  in-between positions crossfade the two adjacent sky panoramas and interpolate sun
+  rotation + IBL intensity; step-marker clicks run an eased sweep through the blend.
+- The former Leva developer panel was removed by design (ADR-001) — no debug tooling ships.
 - Loading screen (drei `useProgress`) and a React error boundary with retry UI.
 
 ## Important constraints

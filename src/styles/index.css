@@ -67,9 +67,3 @@ html, body, #root {
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out forwards;
 }
-
-/* Leva Panel Custom Positioning and Theme Overrides */
-div[class*="leva-root"] {
-  z-index: 1000 !important;
-  font-family: 'JetBrains Mono', monospace !important;
-}

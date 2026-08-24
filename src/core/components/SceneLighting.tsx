@@ -1,47 +1,50 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
-import { LightingConfig } from '../types/lesson.types';
 
 interface SceneLightingProps {
-  config: LightingConfig;
+  /**
+   * Sun Euler rotation [X, Y, Z] radians — interpolated from the
+   * Atmosphere Timeline keyframes (ADR-001).
+   */
+  rotation: [number, number, number];
+  intensity: number;
+  color: string;
+  castShadow?: boolean;
 }
 
 /**
  * SceneLighting Component
  *
- * Renders a single directional sun light.
- * The directional light direction is computed from Euler angles so that
- * sliders in the Dev Panel produce intuitive angular rotation of the sun.
+ * Renders a single directional sun light (fill comes exclusively from the
+ * IBL environment — see SceneEnvironment; no ambient by design).
+ *
+ * Its rotation arrives already interpolated from the Atmosphere Timeline
+ * keyframes, so dragging the slider visibly swings the sun. Direction is
+ * derived from Euler angles: a directional light positioned at P points
+ * toward the origin, so placing it on a rotated unit sphere gives full
+ * 3-axis angular control.
  *
  * Shadow camera bounds are generous (±120 units) to cover the full
  * Chichén Itzá plaza footprint visible in the Lesson 01 scene.
- *
- * Note: ambient fill is intentionally omitted — scene fill light comes
- * exclusively from the IBL environment (see SceneEnvironment).
  */
-export const SceneLighting: React.FC<SceneLightingProps> = ({ config }) => {
-  const { directional } = config;
-
-  // Translate Euler rotation into a world-space position for the directional light.
-  // A directional light at position P points toward the origin, so placing it
-  // on a rotated unit sphere gives full 3-axis angular control.
+export const SceneLighting: React.FC<SceneLightingProps> = ({
+  rotation,
+  intensity,
+  color,
+  castShadow = true
+}) => {
   const lightPosition = useMemo<[number, number, number]>(() => {
-    const euler = new THREE.Euler(
-      directional.rotation[0],
-      directional.rotation[1],
-      directional.rotation[2],
-      'YXZ'
-    );
+    const euler = new THREE.Euler(rotation[0], rotation[1], rotation[2], 'YXZ');
     const vec = new THREE.Vector3(0, 1, 0).applyEuler(euler).multiplyScalar(120);
     return [vec.x, vec.y, vec.z];
-  }, [directional.rotation]);
+  }, [rotation]);
 
   return (
     <directionalLight
       position={lightPosition}
-      intensity={directional.intensity}
-      color={directional.color}
-      castShadow={directional.castShadow !== false}
+      intensity={intensity}
+      color={color}
+      castShadow={castShadow}
       shadow-mapSize-width={2048}
       shadow-mapSize-height={2048}
       shadow-camera-near={0.5}

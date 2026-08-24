@@ -3,11 +3,12 @@ import { ModelLoader, preloadLessonModels } from '../../core/components/ModelLoa
 import { FixedGlbCamera } from '../../core/components/FixedGlbCamera';
 import { SceneEnvironment } from '../../core/components/SceneEnvironment';
 import { SceneLighting } from '../../core/components/SceneLighting';
-import { LessonConfig, SceneRuntimeState } from '../../core/types/lesson.types';
+import { AtmosphereSample, LessonConfig } from '../../core/types/lesson.types';
 
 interface Lesson01SceneProps {
   config: LessonConfig;
-  runtimeState: SceneRuntimeState;
+  /** Derived sample of the Atmosphere Timeline (ADR-001). */
+  atmosphere: AtmosphereSample;
 }
 
 // Preload all 3 GLBs in parallel at module init time.
@@ -27,7 +28,7 @@ preloadLessonModels([
  *   - SceneLighting   — directional sun (ambient fill removed; IBL provides fill)
  *   - ModelLoader × 3 — Floor, Layout (pyramid), Trees (independently cached)
  */
-export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({ config, runtimeState }) => {
+export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({ config, atmosphere }) => {
   const floorAsset = config.assets.models.find((m) => m.id === 'floor')!;
   const layoutAsset = config.assets.models.find((m) => m.id === 'layout')!;
   const treesAsset = config.assets.models.find((m) => m.id === 'trees')!;
@@ -37,14 +38,15 @@ export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({ config, runtimeSta
       {/* Fixed Cinematic Camera — position/quaternion baked from GLB authoring data */}
       <FixedGlbCamera config={config.camera} />
 
-      {/* Equirectangular Sky Dome + IBL Environment */}
-      <SceneEnvironment config={runtimeState.environment} />
+      {/* Sky crossfade + IBL, driven by the Atmosphere Timeline sample */}
+      <SceneEnvironment config={config.assets.environment} sample={atmosphere} />
 
-      {/* Directional Sun Light (IBL provides scene fill) */}
+      {/* Directional Sun Light — rotation interpolates between timeline keyframes */}
       <SceneLighting
-        config={{
-          directional: runtimeState.directionalLight
-        }}
+        rotation={atmosphere.lightRotation}
+        intensity={config.lighting.directional.intensity}
+        color={config.lighting.directional.color}
+        castShadow={config.lighting.directional.castShadow}
       />
 
       {/* 3D Scene Geometry — each GLB loaded independently */}

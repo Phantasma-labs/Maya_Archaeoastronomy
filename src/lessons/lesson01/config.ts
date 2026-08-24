@@ -43,45 +43,43 @@ export const lesson01Config: LessonConfig = {
       }
     ],
     environment: {
-      url: '/assets/lesson_01/01.webp',
-      // IBL/scale/panY/rotation/iblIntensity intentionally omitted so
-      // the Dev Panel's IBL_DEFAULTS are used on first paint. Only the
-      // per-preset IBL overrides (and the sky URL, brightness, and
-      // background-on flag) live here.
-      // Sky-dome visual brightness — independent from IBL contribution.
-      intensity: 1.0,
-      // Sky-dome on (default).
-      backgroundEnabled: true,
-      presets: [
+      // ADR-001 — hardcoded Atmosphere Timeline keyframes (complete states;
+      // interpolation happens between them). K2's light X/Y were carried
+      // over from the lesson default so every keyframe is fully specified.
+      skyTimeline: [
         {
           id: 'sky-01',
           name: 'Atmospheric Daylight',
           url: '/assets/lesson_01/01.webp',
           description: 'Clear tropical sky over the Yucatán peninsula.',
-          directionalLightRotationX: 1.6564,
-          directionalLightRotationY: 0,
-          directionalLightRotationZ: 1.5,
-          iblIntensity: .5
+          lightRotation: [1.6564, 0, 1.5],
+          iblIntensity: 0.5
         },
         {
           id: 'sky-02',
           name: 'Equinoctial Horizon',
           url: '/assets/lesson_01/02.webp',
           description: 'Sunlight conditions highlighting solar azimuths.',
-          directionalLightRotationZ: 1.66,
-          iblIntensity: .82
+          lightRotation: [1.6564, 0, 1.66],
+          iblIntensity: 0.82
         },
         {
           id: 'sky-03',
           name: 'Dusk Celestial View',
           url: '/assets/lesson_01/03.webp',
           description: 'Evening atmosphere suitable for observing Venus and planetary transitions.',
-          directionalLightRotationX: -0.2,
-          directionalLightRotationY: 0,
-          directionalLightRotationZ: 0,
-          iblIntensity: .66
+          lightRotation: [-0.2, 0, 0],
+          iblIntensity: 0.66
         }
-      ]
+      ],
+      // Shared skydome framing — authored values (these were previously the
+      // Dev Panel's IBL_DEFAULTS; ADR-001 bakes them into the lesson config).
+      scale: 0.52,
+      panY: -0.029,
+      rotation: [0.09, -1.7, 0.05],
+      // Sky-dome visual brightness — independent from IBL contribution.
+      intensity: 1.0,
+      backgroundEnabled: true
     }
   },
 
@@ -97,12 +95,9 @@ export const lesson01Config: LessonConfig = {
 
   lighting: {
     directional: {
+      // Intensity/color are lesson-level constants; rotation lives on the
+      // Atmosphere Timeline keyframes and interpolates between them.
       intensity: 3.6,
-      // Rotation matches the sky-01 preset framing so the scene boots
-      // already in that orientation. Selecting sky-01 in the overlay
-      // is then a no-op on the directional light, while sky-02 / sky-03
-      // still rotate to their authored azimuths.
-      rotation: [1.6564, 0, 1.5],
       color: '#fff6ea',
       castShadow: true
     }

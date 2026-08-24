@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
-  Sliders,
   BookOpen,
   Sun,
   Calendar,
@@ -17,13 +16,16 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { LessonConfig } from '../../core/types/lesson.types';
+import { AtmosphereTimeline } from '../../core/components/AtmosphereTimeline';
 
 interface Lesson01OverlayProps {
   config: LessonConfig;
-  isDevPanelVisible: boolean;
-  onToggleDevPanel: () => void;
-  onSelectEnvironmentPreset?: (url: string) => void;
-  currentEnvUrl?: string;
+  /** Continuous Atmosphere Timeline position in [1, N] (ADR-001). */
+  sliderPosition: number;
+  /** Live scrubbing updates from dragging the timeline. */
+  onSliderPositionChange: (position: number) => void;
+  /** Step-marker clicks — LessonPage runs the eased sweep. */
+  onStepSelect: (step: number) => void;
 }
 
 const topicIcons: Record<string, React.ReactNode> = {
@@ -36,16 +38,19 @@ const topicIcons: Record<string, React.ReactNode> = {
 
 export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   config,
-  isDevPanelVisible,
-  onToggleDevPanel,
-  onSelectEnvironmentPreset,
-  currentEnvUrl
+  sliderPosition,
+  onSliderPositionChange,
+  onStepSelect
 }) => {
   const [selectedTopicId, setSelectedTopicId] = useState<string>(config.content.topics[0].id);
   const [isStudyPanelOpen, setIsStudyPanelOpen] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'topics' | 'monument' | 'environment'>('topics');
 
   const selectedTopic = config.content.topics.find((t) => t.id === selectedTopicId) || config.content.topics[0];
+
+  // Nearest timeline keyframe — drives the "Active" badge in the Atmosphere tab.
+  const skyTimeline = config.assets.environment.skyTimeline;
+  const activeIndex = Math.min(Math.max(Math.round(sliderPosition) - 1, 0), skyTimeline.length - 1);
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-4 md:p-6 select-none z-20">
@@ -73,7 +78,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           </div>
         </div>
 
-        {/* View status & Developer / Study toggles */}
+        {/* View status & Study toggle */}
         <div className="flex items-center gap-2">
           {/* Fixed Camera Badge */}
           <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#12151e]/70 backdrop-blur-md border border-white/10 text-[11px] text-[#a39e93] font-mono">
@@ -92,23 +97,6 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           >
             <BookOpen className="w-4 h-4 text-[#d4af37]" />
             <span className="hidden sm:inline">Curriculum</span>
-          </button>
-
-          {/* Dev Panel Toggle */}
-          <button
-            onClick={onToggleDevPanel}
-            title="Toggle Developer Controls (Alt+D)"
-            className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
-              isDevPanelVisible
-                ? 'bg-[#8b6b23]/30 border-[#d4af37] text-[#d4af37]'
-                : 'bg-[#12151e]/85 border-white/10 text-[#a39e93] hover:text-[#e6dfd3] hover:border-[#d4af37]/40'
-            }`}
-          >
-            <Sliders className="w-4 h-4 text-[#d4af37]" />
-            <span className="hidden sm:inline">Dev Controls</span>
-            <span className="hidden md:inline px-1 py-0.2 rounded bg-black/40 text-[9px] font-mono text-[#a39e93]">
-              Alt+D
-            </span>
           </button>
         </div>
       </header>
@@ -253,19 +241,24 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
             </div>
           )}
 
-          {/* Tab 3: Environment Sky Presets */}
+          {/* Tab 3: Atmosphere Timeline keyframes (ADR-001) */}
           {activeTab === 'environment' && (
             <div className="flex-1 overflow-y-auto pr-1 space-y-3 custom-scrollbar">
               <span className="text-[10px] font-mono uppercase tracking-wider text-[#d4af37] block">
-                Atmosphere & Panorama Presets
+                Atmosphere Timeline Keyframes
               </span>
+              <p className="text-[11px] text-[#8e897e] leading-relaxed">
+                Drag the Atmosphere slider below to blend continuously between these authored
+                sky states — the sun and reflections follow the in-between values.
+              </p>
               <div className="space-y-2">
-                {config.assets.environment.presets?.map((preset) => {
-                  const isActive = currentEnvUrl === preset.url;
+                {skyTimeline.map((keyframe, i) => {
+                  const step = i + 1;
+                  const isActive = i === activeIndex;
                   return (
                     <button
-                      key={preset.id}
-                      onClick={() => onSelectEnvironmentPreset && onSelectEnvironmentPreset(preset.url)}
+                      key={keyframe.id}
+                      onClick={() => onStepSelect(step)}
                       className={`w-full flex items-center justify-between p-3 rounded-xl border text-left text-xs transition-all cursor-pointer ${
                         isActive
                           ? 'bg-[#d4af37]/20 border-[#d4af37] text-[#f5ecd7]'
@@ -274,15 +267,16 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                     >
                       <div>
                         <div className="font-semibold text-xs flex items-center gap-2">
-                          <span>{preset.name}</span>
+                          <span className="font-mono text-[#d4af37]/70">{step}.</span>
+                          <span>{keyframe.name}</span>
                           {isActive && (
                             <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-[#d4af37] text-black font-bold">
                               Active
                             </span>
                           )}
                         </div>
-                        {preset.description && (
-                          <div className="text-[11px] text-[#8e897e] mt-0.5">{preset.description}</div>
+                        {keyframe.description && (
+                          <div className="text-[11px] text-[#8e897e] mt-0.5">{keyframe.description}</div>
                         )}
                       </div>
                       <ChevronRight className="w-4 h-4 text-[#d4af37]" />
@@ -295,8 +289,18 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         </aside>
       )}
 
+      {/* Atmosphere Timeline — the lesson's single environment control (ADR-001) */}
+      <div className="pointer-events-auto w-full max-w-xl mx-auto mt-auto mb-2">
+        <AtmosphereTimeline
+          keyframes={skyTimeline}
+          value={sliderPosition}
+          onLiveChange={onSliderPositionChange}
+          onStepSelect={onStepSelect}
+        />
+      </div>
+
       {/* Bottom Footer Info Bar */}
-      <footer className="flex items-center justify-between gap-4 pointer-events-auto text-[11px] text-[#8e897e] font-mono bg-[#12151e]/80 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2.5 mt-auto">
+      <footer className="flex items-center justify-between gap-4 pointer-events-auto text-[11px] text-[#8e897e] font-mono bg-[#12151e]/80 backdrop-blur-md border border-white/10 rounded-xl px-4 py-2.5">
         <div className="flex items-center gap-4">
           <span>Maya Archaeoastronomy v1.0</span>
           <span className="hidden sm:inline">•</span>
@@ -304,7 +308,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         </div>
         <div className="flex items-center gap-3 text-[#a39e93]">
           <span className="hidden md:inline">3D Assets: Floor, Layout, Trees GLB</span>
-          <span className="text-[#d4af37]">Equirectangular HDR/PBR Sky</span>
+          <span className="text-[#d4af37]">Equirectangular Panorama Sky + IBL</span>
         </div>
       </footer>
     </div>

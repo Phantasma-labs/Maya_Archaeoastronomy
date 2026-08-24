@@ -2,10 +2,12 @@ import { ReactNode } from 'react';
 
 /**
  * Lighting Configuration for a 3D Lesson Scene
+ *
+ * ADR-001: rotation is NOT here — it lives on the Atmosphere Timeline
+ * keyframes (SkyKeyframe.lightRotation) and is interpolated at runtime.
  */
 export interface DirectionalLightConfig {
   intensity: number;
-  rotation: [number, number, number]; // [Euler X, Euler Y, Euler Z] in radians or degrees
   color: string;
   castShadow?: boolean;
 }
@@ -15,101 +17,53 @@ export interface LightingConfig {
 }
 
 /**
- * Environment Texture Configuration
+ * A single authored sky/light state on the Atmosphere Timeline (ADR-001).
+ * Keyframes are COMPLETE states — no partial-axis overrides, no fallback
+ * chains. Every keyframe defines all of its values so any adjacent pair
+ * can be linearly interpolated.
  */
-export interface EnvironmentPreset {
+export interface SkyKeyframe {
   id: string;
   name: string;
-  url: string;
   description?: string;
-  /**
-   * Optional directional light X-rotation (radians) to apply when this
-   * preset is selected. When omitted, the directional light's X
-   * rotation is left untouched.
-   */
-  directionalLightRotationX?: number;
-  /**
-   * Optional directional light Y-rotation (radians) to apply when this
-   * preset is selected. When omitted, the directional light's Y
-   * rotation is left untouched.
-   */
-  directionalLightRotationY?: number;
-  /**
-   * Optional directional light Z-rotation (radians) to apply when this
-   * preset is selected. When omitted, the directional light's Z
-   * rotation is left untouched.
-   */
-  directionalLightRotationZ?: number;
-  /**
-   * Optional IBL contribution (0–1+) to apply when this preset is
-   * selected. Drives scene.environmentIntensity in SceneEnvironment.
-   * When omitted, the lesson's default `environment.iblIntensity` is
-   * left untouched, allowing per-sky IBL tuning without touching the
-   * directional light.
-   */
-  iblIntensity?: number;
+  /** Equirectangular sky texture URL (2048×1024 LDR WebP today). */
+  url: string;
+  /** Directional-light Euler rotation [X, Y, Z] radians at this keyframe. */
+  lightRotation: [number, number, number];
+  /** IBL contribution (scene.environmentIntensity) at this keyframe. */
+  iblIntensity: number;
 }
 
+/**
+ * Environment Configuration
+ *
+ * `skyTimeline` is the ordered list of hardcoded keyframes; the slider
+ * position 1..N maps onto it. `scale`/`panY`/`rotation` frame the skydome
+ * (shared by all keyframes); `intensity` is the skydome brightness tint,
+ * independent from IBL.
+ */
 export interface EnvironmentConfig {
-  url: string;
+  skyTimeline: SkyKeyframe[];
   /**
-   * [X, Y, Z] Euler angles in radians, shared between the IBL
-   * environment and the skydome mesh. Optional — when omitted,
-   * SceneEnvironment treats the rotation as [0, 0, 0]. The Dev
-   * Panel's IBL_DEFAULTS supply a value when both the lesson and
-   * the user have not set one.
+   * UV-space zoom for the equirect panorama on the skydome, applied via
+   * texture.matrix: 1 = fills the dome once; <1 zooms in; >1 zooms out.
+   * Clamp-wrapped — never tiles.
    */
-  rotation?: [number, number, number];
+  scale: number;
+  /** Vertical UV pan in fractions of panorama height (positive = pan up). */
+  panY: number;
   /**
-   * UV-space zoom factor for the equirectangular panorama on the
-   * skydome. 1.0 = panorama fills the dome once (no transform);
-   * values <1 zoom in (tighter view of a smaller portion of the
-   * panorama); values >1 zoom out (more of the panorama compressed
-   * into view). The texture never tiles — wrap modes are clamped.
-   * Applied via `texture.matrix` in SceneEnvironment.
-   *
-   * Optional — when omitted, SceneEnvironment falls back to 1.0
-   * (panorama fills the dome once, no transform).
+   * [X, Y, Z] Euler radians, shared between the skydome mesh rotation and
+   * scene.environmentRotation (IBL reflections).
    */
-  scale?: number;
-  /**
-   * Vertical UV offset (pan) for the sky-dome panorama, in fractions
-   * of the panorama height. Positive = shift the panorama upward
-   * (so the visible dome shows lower-V content, i.e. the horizon
-   * moves down); negative = shift it downward. Combined with `scale`
-   * via `texture.matrix` so zooming and panning coexist without
-   * tiling. Optional for backward compatibility — when undefined,
-   * SceneEnvironment treats it as 0.
-   */
-  panY?: number;
-  /**
-   * Sky-dome visual brightness multiplier.
-   * 0 = pure black sky, 1 = original HDR pixel values, >1 = boosted.
-   * Drives the skydome mesh's material.color tint (the visible sky is
-   * rendered as an inverted sphere in SceneEnvironment, not as
-   * scene.background — see SceneEnvironment.tsx for the rationale).
-   * Independent from IBL so the visible sky can be darkened without
-   * killing PBR reflections on the models.
-   */
+  rotation: [number, number, number];
+  /** Skydome visual brightness multiplier (0 = black, 1 = original pixels). */
   intensity: number;
   /**
-   * IBL (image-based lighting) contribution to PBR materials.
-   * Drives scene.environmentIntensity. 0 = no IBL contribution.
-   * Independent from `intensity` so reflections can be tuned without
-   * changing the visible sky.
-   *
-   * Optional for backward compatibility with existing lesson configs —
-   * when undefined, SceneEnvironment falls back to `intensity` so the
-   * historical one-knob behaviour is preserved.
-   */
-  iblIntensity?: number;
-  /**
-   * Toggle the visible sky-dome background on/off without unloading the
-   * environment texture (IBL can still sample the same texture). Drives
-   * scene.background = null when false.
+   * Hide the visible skydome while keeping IBL bound to the same textures.
+   * Default: visible.
    */
   backgroundEnabled?: boolean;
-  presets?: EnvironmentPreset[];
 }
 
 /**
@@ -149,11 +103,6 @@ export interface LearningTopic {
   summary: string;
   details: string[];
   keyFact?: string;
-  recommendedLightPreset?: {
-    intensity?: number;
-    rotation?: [number, number, number];
-    color?: string;
-  };
 }
 
 export interface LessonContent {
@@ -194,9 +143,21 @@ export interface LessonConfig {
 }
 
 /**
- * Realtime Scene Runtime State (controlled by Dev Panel or presets)
+ * Sampled atmosphere state for a continuous Atmosphere Timeline position
+ * (1..N), derived from EnvironmentConfig.skyTimeline by
+ * sampleAtmosphere(). Pure derivation — never React state (ADR-001).
  */
-export interface SceneRuntimeState {
-  directionalLight: DirectionalLightConfig;
-  environment: EnvironmentConfig;
+export interface AtmosphereSample {
+  /** Lower keyframe index (0-based). */
+  indexA: number;
+  /** Upper keyframe index (equals indexA on an exact step). */
+  indexB: number;
+  /** Blend factor 0..<1 from keyframe A to B. */
+  mix: number;
+  /** Interpolated directional-light Euler rotation [X, Y, Z] radians. */
+  lightRotation: [number, number, number];
+  /** Interpolated IBL contribution → scene.environmentIntensity. */
+  iblIntensity: number;
+  /** Nearest keyframe index (0-based) for UI "active" badges. */
+  activeIndex: number;
 }

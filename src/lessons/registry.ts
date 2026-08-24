@@ -1,5 +1,5 @@
 import React from 'react';
-import { LessonConfig } from '../core/types/lesson.types';
+import { AtmosphereSample, LessonConfig } from '../core/types/lesson.types';
 import { lesson01Config } from './lesson01/config';
 import { Lesson01Scene } from './lesson01/Lesson01Scene';
 import { Lesson01Overlay } from './lesson01/Lesson01Overlay';
@@ -9,14 +9,17 @@ export interface LessonEntry {
   config: LessonConfig;
   SceneComponent: React.ComponentType<{
     config: LessonConfig;
-    runtimeState: any;
+    /** Derived sample of the Atmosphere Timeline at the current slider position. */
+    atmosphere: AtmosphereSample;
   }>;
   OverlayComponent?: React.ComponentType<{
     config: LessonConfig;
-    isDevPanelVisible: boolean;
-    onToggleDevPanel: () => void;
-    onSelectEnvironmentPreset?: (url: string) => void;
-    currentEnvUrl?: string;
+    /** Continuous slider position in [1, N] over environment.skyTimeline. */
+    sliderPosition: number;
+    /** Live scrubbing updates (drag / keyboard nudges). */
+    onSliderPositionChange: (position: number) => void;
+    /** Step-marker clicks — the overlay animates the ~0.6 s sweep. */
+    onStepSelect: (step: number) => void;
   }>;
 }
 

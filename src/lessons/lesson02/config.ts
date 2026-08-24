@@ -14,13 +14,24 @@ export const lesson02Config: LessonConfig = {
   assets: {
     models: [],
     environment: {
-      url: '/assets/lesson_01/02.webp',
-      // IBL/scale/panY/rotation/iblIntensity intentionally omitted so
-      // the Dev Panel's IBL_DEFAULTS are used on first paint. Only the
-      // sky URL, brightness, and background-on flag live here.
+      // Single-keyframe timeline (placeholder until Lesson 02 assets land) —
+      // a 1-step timeline renders a fixed sky and the slider is hidden.
+      skyTimeline: [
+        {
+          id: 'sky-02',
+          name: 'Equinoctial Horizon',
+          url: '/assets/lesson_01/02.webp',
+          description: 'Shared Chichén Itzá horizon sky pending dedicated observatory captures.',
+          lightRotation: [0.8, 1.5, 0],
+          iblIntensity: 0.33
+        }
+      ],
+      // Shared skydome framing — authored defaults (ex-DevPanel IBL_DEFAULTS).
+      scale: 0.52,
+      panY: -0.029,
+      rotation: [0.09, -1.7, 0.05],
       // Sky-dome visual brightness.
       intensity: 1.0,
-      // Sky-dome on (default).
       backgroundEnabled: true
     }
   },
@@ -37,7 +48,6 @@ export const lesson02Config: LessonConfig = {
   lighting: {
     directional: {
       intensity: 3.0,
-      rotation: [0.8, 1.5, 0],
       color: '#fff0dd',
       castShadow: true
     }

@@ -14,11 +14,11 @@ Ranked: **Critical** (risk of breakage/data loss), **High** (user- or growth-fac
 
 | # | Item | Evidence |
 |---|---|---|
-| H1 | **Dual runtime-state ownership.** → **Resolved by design (ADR-001: DevPanel removal + single-writer slider; implementation pending, ROADMAP Batch 0).** Leva keeps its own store; `LessonPage.runtimeState` is the other. Overlay preset clicks update `runtimeState` but not the Leva sliders; the next slider touch pushes *all* Leva values and silently stomps the preset's directional-light/IBL overrides. | `LessonPage.handleEnvironmentPresetSelect` vs `DevPanel` `onChange` effect |
-| H2 | **`/lesson/02` crashes on direct navigation.** Registry maps `'02'` to `Lesson01Scene`, which does `models.find(m => m.id === 'floor')!` — lesson02 has `models: []` → `useGLTF(undefined.url)` throws. Only masked by the landing page disabling the link. | `registry.ts:35`, `Lesson01Scene.tsx:31-33` |
-| H3 | **Landing page eagerly loads the whole 3D stack.** Registry statically imports scenes; `Lesson01Scene` preloads 3 GLBs (~3.4 MB) + Draco decoder (~1 MB) at module scope. Landing JS is a single 1.31 MB chunk (378 KB gzip) incl. three/drei/leva for a page with no 3D. | `Lesson01Scene.tsx:15-19`, registry static imports, build output |
-| H4 | **Dev panel is load-bearing for production boot.** → **Resolved by design (ADR-001, ROADMAP Batch 0).** `LessonPage` imports `IBL_DEFAULTS` from `dev/DevPanel.tsx` to seed runtime state — contradicting DevPanel's own "can be tree-shaken in production" comment. Removing/altering the dev tool silently changes scene boot defaults. | `LessonPage.tsx:5,29-32` |
-| H5 | **Mount-once state seeding.** `runtimeState` (useState initializer) and Leva initial values (`useControls` factory) are computed only at mount. In-app lesson switching will serve lesson A's state to lesson B. | `LessonPage.tsx:16`, `DevPanel.tsx:70` |
+| H1 | **Dual runtime-state ownership.** → **RESOLVED (Batch 0, ADR-001):** DevPanel/Leva deleted; the Atmosphere Timeline slider at `LessonPage` is now the single writer (`sliderPosition`), everything else derives via `sampleAtmosphere()`. *(Historical detail: Leva kept its own store alongside `runtimeState`; overlay preset clicks desynced the two.)*
+| H2 | **`/lesson/02` crashes on direct navigation.** → **RESOLVED (Batch 0):** `LessonPage` checks `config.status === 'coming-soon'` and renders a holding page before any scene component mounts. *(Remaining sub-issue: registry still points `'02'` at `Lesson01Scene` with its `find()!` assertions — see M9.)*
+| H3 | **Landing page eagerly loads the whole 3D stack.** Registry statically imports scenes; `Lesson01Scene` preloads 3 GLBs (~3.4 MB) + Draco decoder (~1 MB) at module scope. Landing JS is a single 1.12 MB chunk (312 KB gzip; was 1.31 MB / 378 KB before leva removal) incl. three/drei for a page with no 3D. | `Lesson01Scene.tsx:15-19`, registry static imports, build output |
+| H4 | **Dev panel was load-bearing for production boot.** → **RESOLVED (Batch 0, ADR-001):** `src/dev/` deleted; framing values (`scale`/`panY`/`rotation`) are authored in each lesson config; `IBL_DEFAULTS` is gone. No dev tooling ships. *(Historical detail: `LessonPage` imported `IBL_DEFAULTS` from `dev/DevPanel.tsx` to seed runtime state.)*
+| H5 | **Mount-once state seeding.** → **RESOLVED (Batch 0, ADR-001):** the only runtime state is `sliderPosition`; the atmosphere sample derives per render via `sampleAtmosphere()` — nothing to seed, nothing to go stale on lesson switch. |
 
 ## Medium
 
@@ -30,9 +30,9 @@ Ranked: **Critical** (risk of breakage/data loss), **High** (user- or growth-fac
 | M4 | `clsx` dependency has zero imports. | grep |
 | M5 | No ESLint/Prettier, yet code contains `eslint-disable-line react-hooks/exhaustive-deps` for a config that doesn't exist; `noUnusedLocals` is the only unused-code guard. | `FixedGlbCamera.tsx:53`, `DevPanel.tsx:173` |
 | M6 | Dead API surface: `ModelLoader.onLoaded` (never passed), `LessonConfig.customSceneRenderer`, `CameraConfig.source`, `LearningTopic.icon` (overlay maps icons by `topic.id` instead). | grep |
-| M7 | LDR WebP passed off as HDR: IBL from 8-bit 2048×1024 panoramas while the UI footer claims "Equirectangular HDR/PBR Sky". | `Lesson01Overlay.tsx:307` |
-| M8 | `scene.background` cleanup effect in `SceneEnvironment` resets state this component never sets — self-admitted migration residue. | `SceneEnvironment.tsx:146-153` |
-| M9 | Registry `SceneComponent` prop typed `runtimeState: any`; three non-null assertions in `Lesson01Scene`. | `registry.ts:12` |
+| M7 | LDR WebP skies: IBL samples 8-bit 2048×1024 panoramas (fidelity ceiling; HDR pipeline is ROADMAP 4.2). The misleading UI label was fixed in Batch 0 ("Equirectangular Panorama Sky + IBL"). | `lesson01/config.ts` skyTimeline |
+| M8 | → **RESOLVED (Batch 0):** `SceneEnvironment` rewrite dropped the stray `scene.background` cleanup; it now manages only `scene.environment*`, with a correct cleanup. | |
+| M9 | Registry `SceneComponent` now typed (`atmosphere: AtmosphereSample`) — resolved in Batch 0. Remaining: three non-null assertions in `Lesson01Scene` (`models.find(...)!`). | `Lesson01Scene.tsx:31-33` |
 
 ## Low
 

@@ -40,25 +40,31 @@ attribute default) — the "everything went black" regression documented in the 
 Caveat: `clone(true)` shares materials with the drei cache, so this fix mutates the cached
 originals (safe today at one loader per URL, hazardous if a URL is ever double-mounted).
 
-## Environment / sky
+## Environment / sky (ADR-001 — Atmosphere Timeline)
 
-`SceneEnvironment` renders **both** IBL and the visible sky from one 2048×1024 **LDR WebP**
-equirect (8.4 MB decoded each; clamped wrap, no mipmaps, `matrixAutoUpdate=false`):
+`SceneEnvironment` renders the visible sky as **two stacked inverted-sphere skydomes**
+driven by a derived `AtmosphereSample` (`sampleAtmosphere()` in `core/utils`):
 
-1. `scene.environment = texture` + `environmentIntensity` (= `iblIntensity`) +
-   `environmentRotation` for PBR reflections. PMREM generation happens once per unique URL.
-2. An inverted sphere skydome (r=500, 64×32, BackSide, `MeshBasicMaterial`, depthTest/
-   depthWrite off, `renderOrder=-1000`, not frustum-culled) for the visible sky.
-   `intensity` tints `material.color`; `scale`/`panY` write a custom UV `texture.matrix`.
-   It deliberately does not use `scene.background` (needs UV zoom control).
+- **Dome A** (renderOrder −1000, opaque) shows `skyTimeline[sample.indexA]`.
+- **Dome B** (renderOrder −999, `transparent`, `opacity = sample.mix`, hidden at mix ≈ 0)
+  shows `skyTimeline[sample.indexB]`. Crossfade = plain alpha blending; no custom shaders.
+- Both domes share the lesson's framing (`scale`/`panY` via `texture.matrix` with
+  `matrixAutoUpdate=false`; shared `rotation`) and brightness tint (`intensity`).
+- **IBL**: `scene.environment` can't blend two envmaps, so it follows the *dominant*
+  keyframe (A below mix 0.5, B at/above) while `scene.environmentIntensity` lerps
+  continuously. The directional sun dominates, making the midpoint envmap swap
+  imperceptible. `environmentRotation` tracks the shared rotation.
+- All (currently three) 2048×1024 **LDR WebP** textures load up front via
+  `useTexture([...urls])` under Suspense — the loading screen covers them, so scrubbing
+  never hits the network. Resident GPU cost ≈ 25 MB decoded + PMREM outputs.
 
-Not HDR: IBL from 8-bit data has no dynamic range — the UI footer label "HDR/PBR Sky"
-overstates it. Textures are never evicted; visiting all presets keeps all decoded textures
-plus PMREM results resident (~25 MB+ GPU for the three skies).
+It deliberately does not use `scene.background` (needs UV zoom control).
 
 ## Lighting & shadows
 
-One directional light; Euler rotation → position at radius 120 via `useMemo`.
+One directional light; Euler rotation → position at radius 120 via `useMemo`. The rotation
+arrives **already interpolated** from the timeline keyframes (ADR-001) — the sun visibly
+swings as the user scrubs the slider. Intensity and color are lesson-level constants.
 Shadow map 2048², ortho ±120 units, near 0.5, far 400, bias −0.0005 / normalBias 0.02.
 Effective density ≈ 0.12 world units per texel — tuned for this plaza; re-evaluate for
 larger scenes. No ambient/hemisphere light: fill is IBL-only (deliberate). Trees do not

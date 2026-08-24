@@ -50,12 +50,11 @@ Known, ranked issues live in `docs/TECH_DEBT.md`; sequencing in `docs/ROADMAP.md
   hemisphere lights; fill comes from the IBL environment by design.
 
 ### State management
-- **ADR-001 (locked):** this product ships **no developer panel**. Light/environment values
-  are hardcoded keyframes in lesson configs; the Atmosphere Timeline slider is the single
-  runtime writer (`sliderPosition`), everything else is derived — never stored. Do not
-  reintroduce leva-style debug stores as state owners.
-- Until the ADR-001 batch lands, the old Leva/other-writer conflict (TECH_DEBT H1) still
-  exists: do not add a third writer and do not hand-sync preset values into Leva.
+- **ADR-001 (implemented):** this product ships **no developer panel**. Light/environment
+  values are hardcoded keyframes in lesson configs (`skyTimeline`); the Atmosphere
+  Timeline slider is the single runtime writer (`sliderPosition` in `LessonPage`), and
+  everything else derives via `sampleAtmosphere()` — never stored. Do not reintroduce
+  leva-style debug stores as state owners.
 
 ### Assets
 - GLBs go to `public/assets/lesson_XX/`, Draco-compressed, versioned filenames

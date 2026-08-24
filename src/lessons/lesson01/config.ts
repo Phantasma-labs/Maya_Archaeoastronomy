@@ -225,35 +225,22 @@ export const lesson01Config: LessonConfig = {
           'During subsolar zenith passage (occurring in late May and mid-July at Chichén Itzá), vertical objects cast zero shadow at local solar noon.',
           'These zenith events served as sacred solar markers closely correlated with agricultural planting and rain ceremonies (Chak rituals).',
           'Academic consensus treats these as significant cultural markers while maintaining careful separation between astronomical calculations and archaeological interpretations.'
-        ],
-        keyFact: 'At 20.68° N latitude, the Sun passes through the absolute zenith point at local solar noon twice per year.'
+        ]
       },
       {
         id: 'solar-calendar',
-        title: '365-Day Solar Calendar Architecture',
+        title: 'Calendar',
         icon: 'Calendar',
         summary:
-          'The pyramid embodies the 365-day Haab solar year through its four staircases and summit platform.',
+          'The pyramid embodies the 365-day Haab solar year through its four staircases and summit platform, while its 52 panels mirror the 52-year Calendar Round that synchronizes the sacred and solar calendars.',
         details: [
           'The architecture consists of 9 stepped terraces divided by staircases on four faces.',
           'Each of the 4 stairways contains 91 steps, producing 364 steps in total.',
           'Counting the upper platform as the final step yields exactly 365 steps—corresponding to the days of the Haab solar year.',
-          'This provides an architectural tally of the annual solar cycle.'
-        ],
-        keyFact: '4 stairways × 91 steps + 1 upper platform = 365 steps (Haab solar year).'
-      },
-      {
-        id: 'calendar-round',
-        title: 'The 52-Year Calendar Round (Tzolk\'in & Haab)',
-        icon: 'Clock',
-        summary:
-          'The 52 panels on each side of the structure mirror the 52-year synchronization cycle of the sacred and solar calendars.',
-        details: [
           'Each facade of the pyramid contains 52 sculptured panels across the nine terrace tiers.',
           'In Maya chronology, the 260-day sacred Tzolk\'in calendar and the 365-day civil Haab calendar realign to the exact same starting date every 18,980 days (52 Haab years).',
           'This 52-year epoch was celebrated as a momentous rejuvenation cycle across Mesoamerica.'
-        ],
-        keyFact: '52 panels reflect the 52-year Calendar Round cycle (18,980 days = 73 Tzolk\'in cycles = 52 Haab years).'
+        ]
       }
     ],
     archaeologicalNotes:

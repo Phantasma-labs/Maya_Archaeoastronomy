@@ -5,7 +5,6 @@ import {
   BookOpen,
   Sun,
   Calendar,
-  Clock,
   Compass,
   Info,
   ChevronRight,
@@ -40,7 +39,6 @@ interface Lesson01OverlayProps {
 const topicIcons: Record<string, React.ReactNode> = {
   'solar-calendar': <Calendar className="w-4 h-4" />,
   'snake-descent': <Sun className="w-4 h-4" />,
-  'calendar-round': <Clock className="w-4 h-4" />,
   'solar-zenith': <Compass className="w-4 h-4" />
 };
 
@@ -182,7 +180,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                       <span className={`${isSelected ? 'text-[#d4af37]' : 'text-[#8e897e]'}`}>
                         {topicIcons[topic.id] || <Sparkles className="w-4 h-4" />}
                       </span>
-                      <span className="truncate text-[11px]">{topic.title.split(' ')[0]}...</span>
+                      <span className="truncate text-[11px]">{topic.title}</span>
                     </button>
                   );
                 })}

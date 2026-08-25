@@ -121,7 +121,7 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
   });
 
   return (
-    <div className="pointer-events-auto w-full bg-[#12151e]/85 backdrop-blur-md border border-[#d4af37]/25 rounded-2xl px-4 pt-2.5 pb-3 shadow-lg">
+    <div className="pointer-events-auto w-full bg-maya-surface/85 backdrop-blur-md border border-maya-gold/25 rounded-2xl px-4 pt-2.5 pb-3 shadow-lg">
       {/* Slider track */}
       <div
         ref={trackRef}
@@ -132,7 +132,7 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
         aria-valuenow={Math.round(value * 100) / 100}
         aria-valuetext={keyframes[activeIndex].name}
         tabIndex={0}
-        className="relative h-8 cursor-pointer touch-none select-none outline-none focus-visible:ring-1 focus-visible:ring-[#d4af37]/60 rounded"
+        className="relative h-8 cursor-pointer touch-none select-none outline-none focus-visible:ring-1 focus-visible:ring-maya-gold/60 rounded"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={endDrag}
@@ -140,10 +140,10 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
         onKeyDown={handleKeyDown}
       >
         {/* Rail */}
-        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-[#1c202a] border border-[#d4af37]/20" />
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1 rounded-full bg-maya-surfaceHover border border-maya-gold/20" />
         {/* Fill up to the thumb — inset so it ends at the thumb's center. */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 h-1 rounded-full bg-gradient-to-r from-[#8b6b23] via-[#d4af37] to-[#f3e5ab]"
+          className="absolute top-1/2 -translate-y-1/2 h-1 rounded-full bg-gradient-to-r from-maya-goldDark via-maya-gold to-maya-goldLight"
           style={trackInsetStyle('width')}
         />
         {/* Step markers — flex justify-between so the first/last markers sit
@@ -169,8 +169,8 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
                 onClick={() => onStepSelect(step)}
                 className={`pointer-events-auto w-3 h-3 rotate-45 border transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#d4af37] border-[#f3e5ab] scale-110'
-                    : 'bg-[#12151e] border-[#d4af37]/50 hover:border-[#d4af37] hover:bg-[#8b6b23]/50'
+                    ? 'bg-maya-gold border-maya-goldLight scale-110'
+                    : 'bg-maya-surface border-maya-gold/50 hover:border-maya-gold hover:bg-maya-goldDark/50'
                 }`}
               />
             );
@@ -179,7 +179,7 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
         {/* Thumb (draggable handle — captures its own pointer so it stays
             grabbable even when it overlaps a step marker at the extremes) */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-[#f3e5ab] border-2 border-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.45)] pointer-events-auto cursor-grab active:cursor-grabbing touch-none"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-maya-goldLight border-2 border-maya-gold shadow-[0_0_10px_rgba(212,175,55,0.45)] pointer-events-auto cursor-grab active:cursor-grabbing touch-none"
           style={trackInsetStyle('left')}
           onPointerDown={handleThumbPointerDown}
           onPointerMove={handlePointerMove}
@@ -203,9 +203,11 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
               data-step-marker
               type="button"
               onClick={() => onStepSelect(step)}
-              title={keyframe.callout?.sublabel ?? keyframe.callout?.tooltip ?? displayLabel(keyframe)}
+              title={
+                keyframe.callout?.sublabel ?? keyframe.callout?.tooltip ?? displayLabel(keyframe)
+              }
               className={`truncate max-w-[34%] transition-colors cursor-pointer ${align} ${
-                isActive ? 'text-[#f3e5ab]' : 'text-[#8e897e] hover:text-[#d4af37]'
+                isActive ? 'text-maya-goldLight' : 'text-maya-textDim hover:text-maya-gold'
               }`}
             >
               {displayLabel(keyframe)}

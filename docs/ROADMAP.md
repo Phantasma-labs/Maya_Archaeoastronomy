@@ -26,8 +26,13 @@ component, eased step sweep in `LessonPage`, coming-soon route guard.
 
 ## 2. Should fix (unblock growth)
 
-1. **Tooling minimum.** Add ESLint (react-hooks) + Prettier + `lint`/`typecheck` npm
-   scripts; run the existing eslint-disable comments against a real config.
+1. ✅ **Tooling minimum.** ESLint 9 flat config (`eslint.config.js`) with
+   `typescript-eslint`, `eslint-plugin-react-hooks`, `eslint-plugin-react-refresh`;
+   Prettier 3 (`.prettierrc.json`); `lint`, `lint:fix`, `format`, `format:check`,
+   `typecheck` npm scripts. The lone stale `eslint-disable-line` in
+   `FixedGlbCamera.tsx` was retired by capturing the config into a mount-time
+   `useRef` and reading from that ref inside the layout effect — exhaustive-deps
+   is satisfied without a disable.
 2. ✅ **Remove dead code** (TECH_DEBT M3, M4, M6, M8): vite middleware alias, `clsx`,
    `ModelLoader.onLoaded`, `customSceneRenderer`, `CameraConfig.source`,
    `LearningTopic.icon`, stray `scene.background` cleanup — each verified by grep.
@@ -37,18 +42,35 @@ component, eased step sweep in `LessonPage`, coming-soon route guard.
 1. ✅ **Route-level code splitting** — `App` lazy-loads `LessonPage`; the registry
    lazy-loads the lesson scene/overlay. Landing main chunk dropped to ~190 KB (62 KB gzip);
    the 3D stack + GLB preload load only on the lesson route.
-2. **Consolidate the design tokens** into the Tailwind `maya.*` palette; delete the CSS
-   vars and hardcoded hex drift. Decide the canonical surface color (`#12151e` vs `#121622`).
-3. **Typed registry**: `runtimeState: any` → the slider-position type; replace
-   `Lesson01Scene`'s `find(...)` with lookups that fail visibly and early. *(The `find(...)!`
-   assertions were replaced with a throwing `requireModel(id)` helper — see TECH_DEBT M9.)*
+2. ✅ **Consolidate the design tokens** into the Tailwind `maya.*` palette; delete
+   the CSS vars and hardcoded hex drift. Canonical surface color decided: **`#121622`**
+   (`maya-surface`). Every JSX hex migrated to `bg-maya-*` / `text-maya-*` / etc.
+   across `AtmosphereTimeline`, `LoadingScreen`, `Lesson01Overlay`, `LandingPage`,
+   `LessonPage`. The CSS `:root` block lost its color custom properties (now
+   declared only where CSS literally needs them).
+3. ✅ **Typed registry**: `runtimeState: any` → the slider-position type; replace
+   `Lesson01Scene`'s `find(...)` with lookups that fail visibly and early. _(The `find(...)!`
+   assertions were replaced with a throwing `requireModel(id)` helper — see TECH_DEBT M9.)_
+
+## 3.5. Asset hygiene
+
+1. ✅ **Lesson-asset cleanup on route change** — `useLessonAssetCleanup` hook evicts
+   the drei `useGLTF` + `useTexture` caches for the previous lesson on unmount.
+   Bound from `LessonPage`; survives the next lesson's GLB / sky decode cycle
+   without accumulating GPU-resident textures (TECH_DEBT L6).
+2. ✅ **Self-hosted webfonts** — Google Fonts `<link>` removed; `@fontsource/*`
+   imports for Cinzel 400/600/700, Plus Jakarta Sans 400/500/600/700, JetBrains
+   Mono 400/500 are hashed into the Vite build. Unused weights (300 / 900) no
+   longer shipped (TECH_DEBT L5, fonts half). The MD → config content pipeline
+   (4.3 below) remains open.
 
 ## 4. Future architecture (when lessons 02–05 arrive)
 
 1. **Lesson-switching state model** — keyed remount on route change; URL params for
    deep-linked slider positions are a candidate.
-2. **HDR pipeline** — real `.hdr`/KTX2 skies if IBL fidelity matters; add texture eviction
-   on lesson change (~8.4 MB decoded per panorama + its PMREM result).
+2. **HDR pipeline** — real `.hdr`/KTX2 skies if IBL fidelity matters. (The
+   lesson-change eviction that previously lived here was already shipped as
+   part of TECH_DEBT L6 / ROADMAP 3.5.1.)
 3. **Content pipeline** — generate lesson `content` blocks from `LearningMaterial/*.md`
    instead of hand-duplicating facts into config.
 4. **Guardrails** — asset budget CI check (GLB/texture size ceilings), a smoke test for

@@ -60,7 +60,8 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   // landing at Step 2, which is what made the Step 2 click feel broken.
   const [isHotspotOpen, setIsHotspotOpen] = useState<boolean>(false);
 
-  const selectedTopic = config.content.topics.find((t) => t.id === selectedTopicId) || config.content.topics[0];
+  const selectedTopic =
+    config.content.topics.find((t) => t.id === selectedTopicId) || config.content.topics[0];
 
   // Nearest timeline keyframe — drives the contextual callout and the
   // right-side sun blueprint. Uses the active skyTimeline (topic-owned
@@ -77,22 +78,24 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         <div className="flex items-center gap-3">
           <Link
             to="/"
-            className="group flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#12151e]/85 backdrop-blur-md border border-[#d4af37]/25 hover:border-[#d4af37]/70 text-[#e6dfd3] hover:text-[#d4af37] text-xs md:text-sm font-medium transition-all shadow-lg hover:shadow-[#d4af37]/10 cursor-pointer"
+            className="group flex items-center gap-2 px-3.5 py-2 rounded-xl bg-maya-surface/85 backdrop-blur-md border border-maya-gold/25 hover:border-maya-gold/70 text-maya-text hover:text-maya-gold text-xs md:text-sm font-medium transition-all shadow-lg hover:shadow-maya-gold/10 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
             <span className="hidden sm:inline">All Lessons</span>
           </Link>
 
-          <div className="bg-[#12151e]/85 backdrop-blur-md border border-[#d4af37]/20 rounded-xl px-4 py-2 shadow-lg">
+          <div className="bg-maya-surface/85 backdrop-blur-md border border-maya-gold/20 rounded-xl px-4 py-2 shadow-lg">
             <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-[#d4af37]/20 text-[#d4af37] border border-[#d4af37]/30">
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-maya-gold/20 text-maya-gold border border-maya-gold/30">
                 Lesson {config.id}
               </span>
-              <h1 className="font-serif text-xs md:text-sm font-bold text-[#f5ecd7] tracking-wide truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+              <h1 className="font-serif text-xs md:text-sm font-bold text-maya-cream tracking-wide truncate max-w-[200px] sm:max-w-xs md:max-w-md">
                 {config.content.monumentName}
               </h1>
             </div>
-            <p className="text-[11px] text-[#a59f93] hidden md:block">{config.content.location}</p>
+            <p className="text-[11px] text-maya-textDim hidden md:block">
+              {config.content.location}
+            </p>
           </div>
         </div>
       </header>
@@ -103,16 +106,16 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           onClick={() => setIsStudyPanelOpen(!isStudyPanelOpen)}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
             isStudyPanelOpen
-              ? 'bg-[#d4af37]/20 border-[#d4af37] text-[#f5ecd7]'
-              : 'bg-[#12151e]/85 border-[#d4af37]/20 text-[#e6dfd3] hover:border-[#d4af37]/50'
+              ? 'bg-maya-gold/20 border-maya-gold text-maya-cream'
+              : 'bg-maya-surface/85 border-maya-gold/20 text-maya-text hover:border-maya-gold/50'
           }`}
           aria-expanded={isStudyPanelOpen}
           aria-controls="curriculum-drawer"
         >
-          <BookOpen className="w-4 h-4 text-[#d4af37]" />
+          <BookOpen className="w-4 h-4 text-maya-gold" />
           <span>Curriculum</span>
           <ChevronRight
-            className={`w-3.5 h-3.5 text-[#d4af37] transition-transform ${
+            className={`w-3.5 h-3.5 text-maya-gold transition-transform ${
               isStudyPanelOpen ? 'rotate-90' : ''
             }`}
           />
@@ -123,7 +126,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
       {isStudyPanelOpen && (
         <aside
           id="curriculum-drawer"
-          className="pointer-events-auto self-start max-w-lg w-full bg-[#12151e]/90 backdrop-blur-xl border border-[#d4af37]/30 rounded-2xl p-5 shadow-2xl mt-4 max-h-[calc(100vh-140px)] flex flex-col overflow-hidden text-[#e6dfd3] animate-fadeIn"
+          className="pointer-events-auto self-start max-w-lg w-full bg-maya-surface/90 backdrop-blur-xl border border-maya-gold/30 rounded-2xl p-5 shadow-2xl mt-4 max-h-[calc(100vh-140px)] flex flex-col overflow-hidden text-maya-text animate-fadeIn"
         >
           {/* Tab Navigation */}
           <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
@@ -132,29 +135,29 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                 onClick={() => setActiveTab('topics')}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   activeTab === 'topics'
-                    ? 'bg-[#d4af37]/20 text-[#f5ecd7] border border-[#d4af37]/40'
-                    : 'text-[#a39e93] hover:text-[#e6dfd3]'
+                    ? 'bg-maya-gold/20 text-maya-cream border border-maya-gold/40'
+                    : 'text-maya-textDim hover:text-maya-text'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#d4af37]" />
+                <Sparkles className="w-3.5 h-3.5 text-maya-gold" />
                 Astronomical Alignments
               </button>
               <button
                 onClick={() => setActiveTab('monument')}
                 className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                   activeTab === 'monument'
-                    ? 'bg-[#d4af37]/20 text-[#f5ecd7] border border-[#d4af37]/40'
-                    : 'text-[#a39e93] hover:text-[#e6dfd3]'
+                    ? 'bg-maya-gold/20 text-maya-cream border border-maya-gold/40'
+                    : 'text-maya-textDim hover:text-maya-text'
                 }`}
               >
-                <Layers className="w-3.5 h-3.5 text-[#d4af37]" />
+                <Layers className="w-3.5 h-3.5 text-maya-gold" />
                 Architecture
               </button>
             </div>
 
             <button
               onClick={() => setIsStudyPanelOpen(false)}
-              className="text-[#a39e93] hover:text-white text-xs px-2 py-1 rounded hover:bg-white/5 cursor-pointer"
+              className="text-maya-textDim hover:text-white text-xs px-2 py-1 rounded hover:bg-white/5 cursor-pointer"
             >
               Minimize
             </button>
@@ -173,11 +176,11 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                       onClick={() => onSelectTopic(topic.id)}
                       className={`flex items-center gap-2 p-2 rounded-xl text-left text-xs transition-all border cursor-pointer ${
                         isSelected
-                          ? 'bg-[#d4af37]/20 border-[#d4af37] text-[#f5ecd7] font-semibold shadow-md'
-                          : 'bg-[#181c28]/60 border-white/5 text-[#a39e93] hover:bg-[#1f2536]/80 hover:text-[#e6dfd3]'
+                          ? 'bg-maya-gold/20 border-maya-gold text-maya-cream font-semibold shadow-md'
+                          : 'bg-maya-surfaceHover/60 border-white/5 text-maya-textDim hover:bg-maya-surfaceHover/80 hover:text-maya-text'
                       }`}
                     >
-                      <span className={`${isSelected ? 'text-[#d4af37]' : 'text-[#8e897e]'}`}>
+                      <span className={`${isSelected ? 'text-maya-gold' : 'text-maya-textDim'}`}>
                         {topicIcons[topic.id] || <Sparkles className="w-4 h-4" />}
                       </span>
                       <span className="truncate text-[11px]">{topic.title}</span>
@@ -187,31 +190,31 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
               </div>
 
               {/* Selected Topic Content */}
-              <div className="bg-[#181c28]/70 border border-[#d4af37]/20 rounded-xl p-4 space-y-3">
+              <div className="bg-maya-surfaceHover/70 border border-maya-gold/20 rounded-xl p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="font-serif text-sm font-bold text-[#f5ecd7] flex items-center gap-2">
-                    <span className="text-[#d4af37]">{topicIcons[selectedTopic.id]}</span>
+                  <h2 className="font-serif text-sm font-bold text-maya-cream flex items-center gap-2">
+                    <span className="text-maya-gold">{topicIcons[selectedTopic.id]}</span>
                     {selectedTopic.title}
                   </h2>
                 </div>
 
-                <p className="text-xs text-[#d8d2c4] leading-relaxed italic border-l-2 border-[#d4af37]/50 pl-3">
+                <p className="text-xs text-maya-textDim leading-relaxed italic border-l-2 border-maya-gold/50 pl-3">
                   "{selectedTopic.summary}"
                 </p>
 
-                <ul className="space-y-2 text-xs text-[#b8b2a5]">
+                <ul className="space-y-2 text-xs text-maya-textDim">
                   {selectedTopic.details.map((detail, idx) => (
                     <li key={idx} className="flex items-start gap-2">
-                      <ChevronRight className="w-3.5 h-3.5 text-[#d4af37] shrink-0 mt-0.5" />
+                      <ChevronRight className="w-3.5 h-3.5 text-maya-gold shrink-0 mt-0.5" />
                       <span>{detail}</span>
                     </li>
                   ))}
                 </ul>
 
                 {selectedTopic.keyFact && (
-                  <div className="bg-[#d4af37]/10 border border-[#d4af37]/30 rounded-lg p-2.5 flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-[#d4af37] shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-[#f5ecd7] font-medium font-mono">
+                  <div className="bg-maya-gold/10 border border-maya-gold/30 rounded-lg p-2.5 flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-maya-gold shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-maya-cream font-medium font-mono">
                       {selectedTopic.keyFact}
                     </p>
                   </div>
@@ -223,34 +226,35 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           {/* Tab 2: Monument & Architectural Context */}
           {activeTab === 'monument' && (
             <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
-              <div className="bg-[#181c28]/70 border border-white/10 rounded-xl p-4 space-y-2">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#d4af37]">Archaeological Overview</span>
-                <p className="text-xs text-[#c9c4b7] leading-relaxed">
+              <div className="bg-maya-surfaceHover/70 border border-white/10 rounded-xl p-4 space-y-2">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-maya-gold">
+                  Archaeological Overview
+                </span>
+                <p className="text-xs text-maya-textDim leading-relaxed">
                   {config.content.overview}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-[#181c28]/50 border border-white/5 p-3 rounded-lg">
-                  <span className="text-[10px] text-[#8e897e] block mb-1">Culture</span>
-                  <span className="text-[#f5ecd7] font-medium">{config.content.culture}</span>
+                <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
+                  <span className="text-[10px] text-maya-textDim block mb-1">Culture</span>
+                  <span className="text-maya-cream font-medium">{config.content.culture}</span>
                 </div>
-                <div className="bg-[#181c28]/50 border border-white/5 p-3 rounded-lg">
-                  <span className="text-[10px] text-[#8e897e] block mb-1">Chronology</span>
-                  <span className="text-[#f5ecd7] font-medium">{config.content.timePeriod}</span>
+                <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
+                  <span className="text-[10px] text-maya-textDim block mb-1">Chronology</span>
+                  <span className="text-maya-cream font-medium">{config.content.timePeriod}</span>
                 </div>
               </div>
 
-              <div className="bg-[#181c28]/70 border border-amber-500/20 rounded-xl p-3.5 flex items-start gap-2.5">
-                <Info className="w-4 h-4 text-[#d4af37] shrink-0 mt-0.5" />
-                <p className="text-[11px] text-[#b8b2a5] leading-relaxed">
-                  <strong className="text-[#f5ecd7] block mb-0.5">Scholarly Caution:</strong>
+              <div className="bg-maya-surfaceHover/70 border border-amber-500/20 rounded-xl p-3.5 flex items-start gap-2.5">
+                <Info className="w-4 h-4 text-maya-gold shrink-0 mt-0.5" />
+                <p className="text-[11px] text-maya-textDim leading-relaxed">
+                  <strong className="text-maya-cream block mb-0.5">Scholarly Caution:</strong>
                   {config.content.archaeologicalNotes}
                 </p>
               </div>
             </div>
           )}
-
         </aside>
       )}
 
@@ -258,24 +262,28 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           Only rendered for focused-mode topics (Snake Descent). Anchored to the bottom of the 16:9 frame. */}
       {showFocusedUI && (
         <div className="pointer-events-auto mt-auto">
-          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-[#12151e] border border-[#d4af37]/40 rounded-2xl px-4 py-3 shadow-2xl animate-fadeIn">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-maya-surface border border-maya-gold/40 rounded-2xl px-4 py-3 shadow-2xl animate-fadeIn">
             {/* Left — contextual callout (1st contact / The descent) */}
             <div className="min-w-0 text-left" title={activeCallout?.tooltip} aria-live="polite">
               {activeCallout && (
                 <>
-                  <h2 className="font-serif text-base md:text-lg font-bold text-[#f5ecd7] leading-tight mb-0.5">
+                  <h2 className="font-serif text-base md:text-lg font-bold text-maya-cream leading-tight mb-0.5">
                     {activeCallout.label ?? activeKeyframe?.name}
                   </h2>
                   {activeCallout.sublabel && (
-                    <p className="text-[11px] font-mono text-[#a59f93] mb-1.5">{activeCallout.sublabel}</p>
+                    <p className="text-[11px] font-mono text-maya-textDim mb-1.5">
+                      {activeCallout.sublabel}
+                    </p>
                   )}
                   {calloutLines.length > 0 && (
-                    <div className="space-y-1 border-l-2 border-[#d4af37]/50 pl-2.5 mb-1.5">
+                    <div className="space-y-1 border-l-2 border-maya-gold/50 pl-2.5 mb-1.5">
                       {calloutLines.map((line, i) => (
                         <p
                           key={i}
                           className={`text-[12px] leading-snug ${
-                            i === calloutLines.length - 1 ? 'text-[#f5ecd7] font-medium' : 'text-[#d8d2c4]'
+                            i === calloutLines.length - 1
+                              ? 'text-maya-cream font-medium'
+                              : 'text-maya-textDim'
                           }`}
                         >
                           {line}
@@ -287,7 +295,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsHotspotOpen(true)}
-                      className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#d4af37] hover:text-[#f3e5ab] transition-colors cursor-pointer"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-medium text-maya-gold hover:text-maya-goldLight transition-colors cursor-pointer"
                     >
                       <Hand className="w-3.5 h-3.5" />
                       Tap serpent head — {activeCallout.hotspot.label}
@@ -306,7 +314,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                 onStepSelect={onStepSelect}
               />
               {activeCallout?.prompt && (
-                <p className="mt-2 text-center text-[11px] text-[#d4af37] font-medium">
+                <p className="mt-2 text-center text-[11px] text-maya-gold font-medium">
                   {activeCallout.prompt}
                 </p>
               )}
@@ -315,30 +323,32 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
             {/* Right — Sun astronomical data for the active step */}
             <div className="min-w-0 flex flex-col items-end gap-1.5 text-right">
               <div className="flex items-center gap-2">
-                <h3 className="font-serif text-sm font-bold text-[#f5ecd7]">Sun · Astronomical Data</h3>
-                <Sun className="w-4 h-4 text-[#d4af37]" />
+                <h3 className="font-serif text-sm font-bold text-maya-cream">
+                  Sun · Astronomical Data
+                </h3>
+                <Sun className="w-4 h-4 text-maya-gold" />
               </div>
               {activeCallout?.astro ? (
-                <dl className="space-y-1 text-[11px] font-mono text-[#d8d2c4]">
+                <dl className="space-y-1 text-[11px] font-mono text-maya-textDim">
                   <div className="flex justify-between gap-4">
-                    <dt className="text-[#8e897e]">Azimuth</dt>
-                    <dd className="text-[#d4af37]">{activeCallout.astro.azimuth}</dd>
+                    <dt className="text-maya-textDim">Azimuth</dt>
+                    <dd className="text-maya-gold">{activeCallout.astro.azimuth}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="text-[#8e897e]">Altitude</dt>
-                    <dd className="text-[#d4af37]">{activeCallout.astro.altitude}</dd>
+                    <dt className="text-maya-textDim">Altitude</dt>
+                    <dd className="text-maya-gold">{activeCallout.astro.altitude}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="text-[#8e897e]">Declination</dt>
-                    <dd className="text-[#d4af37]">{activeCallout.astro.declination}</dd>
+                    <dt className="text-maya-textDim">Declination</dt>
+                    <dd className="text-maya-gold">{activeCallout.astro.declination}</dd>
                   </div>
                   <div className="flex justify-between gap-4">
-                    <dt className="text-[#8e897e]">Local time</dt>
-                    <dd className="text-[#d4af37]">{activeCallout.astro.time}</dd>
+                    <dt className="text-maya-textDim">Local time</dt>
+                    <dd className="text-maya-gold">{activeCallout.astro.time}</dd>
                   </div>
                 </dl>
               ) : (
-                <p className="text-[11px] text-[#8e897e]">No astronomical data</p>
+                <p className="text-[11px] text-maya-textDim">No astronomical data</p>
               )}
             </div>
           </div>
@@ -350,28 +360,28 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           via the "Tap serpent head" link in the callout (no auto-open). */}
       {showFocusedUI && isHotspotOpen && activeCallout?.hotspot && (
         <div
-          className="pointer-events-auto absolute right-4 md:right-6 top-32 max-w-xs bg-[#12151e]/95 backdrop-blur-xl border-2 border-[#d4af37] rounded-2xl p-4 shadow-2xl shadow-[#d4af37]/20 text-[#e6dfd3] animate-fadeIn z-30"
+          className="pointer-events-auto absolute right-4 md:right-6 top-32 max-w-xs bg-maya-surface/95 backdrop-blur-xl border-2 border-maya-gold rounded-2xl p-4 shadow-2xl shadow-maya-gold/20 text-maya-text animate-fadeIn z-30"
           role="dialog"
           aria-labelledby="hotspot-title"
         >
           <div className="flex items-start justify-between gap-2 mb-2">
             <h3
               id="hotspot-title"
-              className="font-serif text-base font-bold text-[#f5ecd7] flex items-center gap-2"
+              className="font-serif text-base font-bold text-maya-cream flex items-center gap-2"
             >
-              <Hand className="w-4 h-4 text-[#d4af37]" />
+              <Hand className="w-4 h-4 text-maya-gold" />
               {activeCallout.hotspot.label}
             </h3>
             <button
               type="button"
               onClick={() => setIsHotspotOpen(false)}
-              className="text-[#a39e93] hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
+              className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
               aria-label="Dismiss"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <p className="text-[12px] text-[#d8d2c4] leading-relaxed">
+          <p className="text-[12px] text-maya-textDim leading-relaxed">
             {activeCallout.hotspot.text}
           </p>
         </div>

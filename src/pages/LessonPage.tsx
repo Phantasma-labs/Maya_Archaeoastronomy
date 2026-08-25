@@ -3,17 +3,37 @@ import { useParams, Link } from 'react-router-dom';
 import { getLessonEntry } from '../lessons/registry';
 import { SceneCanvas } from '../core/components/SceneCanvas';
 import { sampleAtmosphere } from '../core/utils/atmosphere';
+import { useLessonAssetCleanup } from '../core/utils/useLessonAssetCleanup';
 import { ArrowLeft, AlertCircle, Clock } from 'lucide-react';
 
 /** Eased sweep duration for step-marker clicks (ADR-001), in ms. */
 const SWEEP_MS = 600;
 
-const easeInOutCubic = (t: number) =>
-  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 export const LessonPage: React.FC = () => {
   const { lessonId = '01' } = useParams<{ lessonId: string }>();
   const lessonEntry = useMemo(() => getLessonEntry(lessonId), [lessonId]);
+
+  // Evict this lesson's GLBs + equirect skies from drei's caches on unmount
+  // (TECH_DEBT L6). Without this, each visited lesson leaves ~8.4 MB of
+  // decoded panorama + ~8 MB of PMREM result resident in GPU memory. The
+  // hook's cleanup fires on unmount OR when the url set reference changes.
+  // We collect EVERY sky url (lesson default + any topic-owned timeline) so
+  // a topic switch can't strand a topic-only keyframe in cache.
+  const gltfUrls = useMemo(
+    () => lessonEntry?.config.assets.models.map((m) => m.url) ?? [],
+    [lessonEntry]
+  );
+  const equirectUrls = useMemo(() => {
+    if (!lessonEntry) return [];
+    const lessonUrls = lessonEntry.config.assets.environment.skyTimeline.map((k) => k.url);
+    const topicUrls = lessonEntry.config.content.topics
+      .flatMap((t) => t.skyTimeline ?? [])
+      .map((k) => k.url);
+    return Array.from(new Set([...lessonUrls, ...topicUrls]));
+  }, [lessonEntry]);
+  useLessonAssetCleanup(gltfUrls, equirectUrls);
 
   /**
    * ADR-001 — single runtime writer for the whole scene: the Atmosphere
@@ -41,7 +61,7 @@ export const LessonPage: React.FC = () => {
   const [selectedTopicId, setSelectedTopicId] = useState<string>(() => {
     if (!lessonEntry) return '';
     const snake = lessonEntry.config.content.topics.find((t) => t.id === 'snake-descent');
-    return snake ? snake.id : lessonEntry.config.content.topics[0]?.id ?? '';
+    return snake ? snake.id : (lessonEntry.config.content.topics[0]?.id ?? '');
   });
 
   // The active skyTimeline is the selected topic's own (if it owns one)
@@ -49,8 +69,9 @@ export const LessonPage: React.FC = () => {
   // focused timeline; every other topic falls back to the lesson default.
   const activeSkyTimeline = useMemo(() => {
     if (!lessonEntry) return [];
-    const topic = lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId)
-      ?? lessonEntry.config.content.topics[0];
+    const topic =
+      lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId) ??
+      lessonEntry.config.content.topics[0];
     return topic?.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline;
   }, [lessonEntry, selectedTopicId]);
 
@@ -68,8 +89,9 @@ export const LessonPage: React.FC = () => {
   // skyTimeline always has N=3, so step 3 is always a valid position.
   useEffect(() => {
     if (!lessonEntry) return;
-    const topic = lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId)
-      ?? lessonEntry.config.content.topics[0];
+    const topic =
+      lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId) ??
+      lessonEntry.config.content.topics[0];
     setSliderPosition(topic?.skyTimeline ? 1 : 3);
   }, [selectedTopicId, lessonEntry]);
 
@@ -126,17 +148,17 @@ export const LessonPage: React.FC = () => {
 
   if (!lessonEntry || !atmosphere) {
     return (
-      <div className="min-h-screen bg-[#090b10] text-[#e6dfd3] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-amber-950/40 border border-[#d4af37]/30 flex items-center justify-center mb-6 text-[#d4af37]">
+      <div className="min-h-screen bg-maya-bg text-maya-text flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-amber-950/40 border border-maya-gold/30 flex items-center justify-center mb-6 text-maya-gold">
           <AlertCircle className="w-8 h-8" />
         </div>
-        <h1 className="font-serif text-2xl font-bold text-[#f5ecd7] mb-2">Lesson Not Found</h1>
-        <p className="text-sm text-[#a39e93] max-w-md mb-6">
+        <h1 className="font-serif text-2xl font-bold text-maya-cream mb-2">Lesson Not Found</h1>
+        <p className="text-sm text-maya-textDim max-w-md mb-6">
           Lesson "{lessonId}" is not registered in the lesson catalog.
         </p>
         <Link
           to="/"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#d4af37] text-black font-semibold text-xs tracking-wider uppercase hover:brightness-110 transition-all shadow-lg"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-maya-gold text-black font-semibold text-xs tracking-wider uppercase hover:brightness-110 transition-all shadow-lg"
         >
           <ArrowLeft className="w-4 h-4" />
           Return to Lesson Catalog
@@ -149,19 +171,19 @@ export const LessonPage: React.FC = () => {
   // assumes its own model ids and would crash on an empty models array.
   if (lessonEntry.config.status === 'coming-soon') {
     return (
-      <div className="min-h-screen bg-[#090b10] text-[#e6dfd3] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-amber-950/40 border border-[#d4af37]/30 flex items-center justify-center mb-6 text-[#d4af37]">
+      <div className="min-h-screen bg-maya-bg text-maya-text flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-amber-950/40 border border-maya-gold/30 flex items-center justify-center mb-6 text-maya-gold">
           <Clock className="w-8 h-8" />
         </div>
-        <h1 className="font-serif text-2xl font-bold text-[#f5ecd7] mb-2">
+        <h1 className="font-serif text-2xl font-bold text-maya-cream mb-2">
           {lessonEntry.config.title}
         </h1>
-        <p className="text-sm text-[#a39e93] max-w-md mb-6">
+        <p className="text-sm text-maya-textDim max-w-md mb-6">
           This module is still in production — assets and curriculum are being authored.
         </p>
         <Link
           to="/"
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#d4af37] text-black font-semibold text-xs tracking-wider uppercase hover:brightness-110 transition-all shadow-lg"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-maya-gold text-black font-semibold text-xs tracking-wider uppercase hover:brightness-110 transition-all shadow-lg"
         >
           <ArrowLeft className="w-4 h-4" />
           Return to Lesson Catalog
@@ -173,7 +195,7 @@ export const LessonPage: React.FC = () => {
   const { config, SceneComponent, OverlayComponent } = lessonEntry;
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-[#090b10] relative select-none flex items-center justify-center">
+    <div className="w-screen h-screen overflow-hidden bg-maya-bg relative select-none flex items-center justify-center">
       {/* Cinematic 16:9 frame — on horizontal/widescreen viewports the scene
           and overlay are letterboxed to a 16:9 frame (centered) instead of
           stretching across the full width. On narrow/tall viewports the
@@ -186,10 +208,7 @@ export const LessonPage: React.FC = () => {
         }}
       >
         {/* 3D Scene Viewport — fills the 16:9 frame */}
-        <SceneCanvas
-          cameraConfig={config.camera}
-          gltfUrls={config.assets.models.map((m) => m.url)}
-        >
+        <SceneCanvas cameraConfig={config.camera} gltfUrls={gltfUrls}>
           <SceneComponent config={config} atmosphere={atmosphere} />
         </SceneCanvas>
 

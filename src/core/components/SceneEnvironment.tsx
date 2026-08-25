@@ -73,12 +73,17 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
   } | null>(null);
 
   // Release every PMREM resource on unmount (keyframe caches, live blend).
-  // NOTE: we deliberately do NOT call `pmrem.dispose()` here — React StrictMode
+  // The PMREMGenerator itself is intentionally NOT disposed here — StrictMode
   // double-invokes effect cleanups on mount (cleanup then re-run), and a
-  // disposed PMREMGenerator cannot be reused by the re-run. The render targets
-  // we created above are safely recreated on remount; the generator itself is
-  // a singleton that lives for the component's lifetime (freed with the GL
-  // context on real teardown).
+  // disposed PMREMGenerator cannot be reused by the re-run. The generator is
+  // a singleton that lives for the component's lifetime and is freed with the
+  // GL context on real teardown. The render targets we created above ARE
+  // safely recreated on remount.
+  //
+  // The useTexture(equirect) call above caches via drei's texture cache, and
+  // the panorama + its PMREM together cost ~16 MB per sky. LessonPage's
+  // useLessonAssetCleanup() hook evicts these URLs on lesson change so the
+  // next lesson doesn't accumulate resident textures (TECH_DEBT L6).
   useEffect(() => {
     return () => {
       keyframeRTsRef.current.forEach((rt) => rt.dispose());
@@ -98,8 +103,7 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
       typeof config.scale === 'number' && Number.isFinite(config.scale) && config.scale > 0
         ? config.scale
         : 1;
-    const py =
-      typeof config.panY === 'number' && Number.isFinite(config.panY) ? config.panY : 0;
+    const py = typeof config.panY === 'number' && Number.isFinite(config.panY) ? config.panY : 0;
 
     textures.forEach((texture) => {
       texture.mapping = THREE.EquirectangularReflectionMapping;
@@ -111,9 +115,15 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
       texture.generateMipmaps = false;
       texture.matrixAutoUpdate = false;
       texture.matrix.set(
-        1 / s, 0,     0.5 - 0.5 / s,        // u' column
-        0,     1 / s, 0.5 - 0.5 / s + py,   // v' column (panY in v translation)
-        0,     0,     1
+        1 / s,
+        0,
+        0.5 - 0.5 / s, // u' column
+        0,
+        1 / s,
+        0.5 - 0.5 / s + py, // v' column (panY in v translation)
+        0,
+        0,
+        1
       );
       texture.needsUpdate = true;
     });
@@ -182,11 +192,7 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
 
     scene.environment = env;
     scene.environmentIntensity = iblIntensity;
-    scene.environmentRotation.set(
-      config.rotation[0],
-      config.rotation[1],
-      config.rotation[2]
-    );
+    scene.environmentRotation.set(config.rotation[0], config.rotation[1], config.rotation[2]);
 
     return () => {
       scene.environment = null;
@@ -204,11 +210,14 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
     pmrem
   ]);
 
-  // Skydome brightness tint, shared by both domes (memoized to avoid
-  // re-allocating a Color every render).
+  // Skydome brightness tint, shared by both domes. Mutate a single reusable
+  // Color instance rather than allocating per render (TECH_DEBT L4). The tint
+  // is memoized by config.intensity so it only re-mutates when the config
+  // actually changes — a constant intensity does zero allocation per frame.
+  const tintRef = useRef<THREE.Color>(new THREE.Color());
   const tint = useMemo(
     () =>
-      new THREE.Color().setScalar(
+      tintRef.current.setScalar(
         typeof config.intensity === 'number' ? Math.max(0, config.intensity) : 1
       ),
     [config.intensity]
@@ -223,11 +232,7 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
   return (
     <>
       {/* Dome A — opaque base sky (keyframe indexA) */}
-      <mesh
-        renderOrder={-1000}
-        frustumCulled={false}
-        rotation={config.rotation}
-      >
+      <mesh renderOrder={-1000} frustumCulled={false} rotation={config.rotation}>
         <sphereGeometry args={[500, 64, 32]} />
         <meshBasicMaterial
           map={textureA}

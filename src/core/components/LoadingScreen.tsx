@@ -6,37 +6,39 @@ interface LoadingScreenProps {
   label?: string;
 }
 
-export const LoadingScreen: React.FC<LoadingScreenProps> = ({ label = 'Loading Archaeological Scene...' }) => {
+export const LoadingScreen: React.FC<LoadingScreenProps> = ({
+  label = 'Loading Archaeological Scene...'
+}) => {
   const { progress, item, active } = useProgress();
 
   if (!active && progress === 100) return null;
 
   return (
-    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#090b10] text-[#e6dfd3] px-6">
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-maya-bg text-maya-text px-6">
       <div className="relative flex items-center justify-center mb-8">
-        <div className="w-20 h-20 rounded-full border-2 border-[#d4af37]/20 animate-ping absolute" />
-        <div className="w-16 h-16 rounded-full border-2 border-[#d4af37] border-t-transparent animate-spin flex items-center justify-center">
-          <Compass className="w-6 h-6 text-[#d4af37] animate-pulse" />
+        <div className="w-20 h-20 rounded-full border-2 border-maya-gold/20 animate-ping absolute" />
+        <div className="w-16 h-16 rounded-full border-2 border-maya-gold border-t-transparent animate-spin flex items-center justify-center">
+          <Compass className="w-6 h-6 text-maya-gold animate-pulse" />
         </div>
       </div>
 
       <div className="text-center max-w-md w-full">
-        <h3 className="font-serif text-xl tracking-wider text-[#f5ecd7] mb-2 uppercase font-semibold">
+        <h3 className="font-serif text-xl tracking-wider text-maya-cream mb-2 uppercase font-semibold">
           {label}
         </h3>
-        
-        <p className="text-xs text-[#a39e93] font-mono mb-4 truncate h-4">
+
+        <p className="text-xs text-maya-textDim font-mono mb-4 truncate h-4">
           {item ? `Loading: ${item.split('/').pop()}` : 'Initializing 3D geometry & textures...'}
         </p>
 
-        <div className="w-full bg-[#1c202a] h-1.5 rounded-full overflow-hidden border border-[#d4af37]/20 p-[1px]">
+        <div className="w-full bg-maya-surfaceHover h-1.5 rounded-full overflow-hidden border border-maya-gold/20 p-[1px]">
           <div
-            className="bg-gradient-to-r from-[#8b6b23] via-[#d4af37] to-[#f3e5ab] h-full rounded-full transition-all duration-300 ease-out"
+            className="bg-gradient-to-r from-maya-goldDark via-maya-gold to-maya-goldLight h-full rounded-full transition-all duration-300 ease-out"
             style={{ width: `${Math.max(5, Math.round(progress))}%` }}
           />
         </div>
 
-        <div className="flex justify-between items-center mt-2 text-[11px] text-[#8e897e] font-mono">
+        <div className="flex justify-between items-center mt-2 text-[11px] text-maya-textDim font-mono">
           <span>Maya Archaeoastronomy Engine</span>
           <span>{Math.round(progress)}%</span>
         </div>
@@ -56,11 +58,11 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorB
       <div className="w-16 h-16 rounded-full bg-red-950/50 border border-red-500/40 flex items-center justify-center mb-6 text-red-400">
         <AlertTriangle className="w-8 h-8" />
       </div>
-      
+
       <h2 className="font-serif text-2xl font-bold text-red-200 mb-3 tracking-wide">
         Scene Loading Error
       </h2>
-      
+
       <p className="max-w-lg text-sm text-red-300/80 mb-6 bg-red-950/30 p-4 rounded-lg border border-red-900/50 font-mono text-left break-all">
         {error.message || 'An unexpected error occurred while initializing the 3D scene.'}
       </p>

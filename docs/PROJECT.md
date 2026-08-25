@@ -15,19 +15,22 @@ with no assets and a placeholder scene.
 
 ## Technology stack
 
-| Area | Choice | Version (installed) |
-|---|---|---|
-| Build | Vite | 6.4.3 |
-| Language | TypeScript (strict, `noUnusedLocals/ Parameters`) | 5.7 |
-| UI | React | 18.3.1 |
-| Routing | react-router-dom (2 routes + catch-all) | 6.29 |
-| 3D | three + @react-three/fiber + @react-three/drei | 0.174.0 / 8.18.0 / 9.122.0 |
-| Styling | Tailwind CSS 3.4 + PostCSS + autoprefixer | — |
-| Icons | lucide-react | 0.475 |
-| Package manager | npm (package-lock.json) | — |
+| Area            | Choice                                            | Version (installed)        |
+| --------------- | ------------------------------------------------- | -------------------------- |
+| Build           | Vite                                              | 6.4.3                      |
+| Language        | TypeScript (strict, `noUnusedLocals/ Parameters`) | 5.7                        |
+| UI              | React                                             | 18.3.1                     |
+| Routing         | react-router-dom (2 routes + catch-all)           | 6.29                       |
+| 3D              | three + @react-three/fiber + @react-three/drei    | 0.174.0 / 8.18.0 / 9.122.0 |
+| Styling         | Tailwind CSS 3.4 + PostCSS + autoprefixer         | —                          |
+| Icons           | lucide-react                                      | 0.475                      |
+| Package manager | npm (package-lock.json)                           | —                          |
 
-Scripts: `dev` (vite, port 3000), `build` (`tsc && vite build` — tsc type-checks, `noEmit`),
-`preview`. **No lint, format, typecheck or test scripts. No eslint/prettier config, no CI.**
+Scripts: `dev` (vite, port 3000), `build` (`tsc --noEmit && vite build` — tsc
+type-checks only, no emit), `preview`, `typecheck` (alias for `tsc --noEmit`),
+`lint` / `lint:fix` (ESLint 9 flat config, `typescript-eslint` +
+`eslint-plugin-react-hooks` + `eslint-plugin-react-refresh`),
+`format` / `format:check` (Prettier 3). **No test scripts. No CI.**
 
 ## Major features
 
@@ -46,6 +49,9 @@ Scripts: `dev` (vite, port 3000), `build` (`tsc && vite build` — tsc type-chec
   Preserve that tone when editing content.
 - Assets live in `public/assets/lesson_01/` (GLBs) with self-hosted Draco decoders in
   `public/draco/`. Sky panoramas are **LDR WebP (2048×1024), not HDR** despite UI labels.
+- Fonts are **self-hosted** via `@fontsource/cinzel`, `@fontsource/plus-jakarta-sans`,
+  `@fontsource/jetbrains-mono` (only the weights used in the UI). No third-party
+  font CDN requests at runtime.
 - No environment variables, no backend, no persistence. Fully static SPA.
 
 ## Current project status
@@ -53,6 +59,9 @@ Scripts: `dev` (vite, port 3000), `build` (`tsc && vite build` — tsc type-chec
 - Builds clean: `tsc --noEmit` passes, `vite build` succeeds. Route-level code splitting
   keeps the landing page at ~190 KB JS (62 KB gzip); the three/drei/R3F stack loads only on
   the lesson route. Vite still warns about the three.js chunk size (unavoidable library).
+- ESLint 9 runs clean: 0 errors, 3 pre-existing warnings (all StrictMode-safe
+  patterns documented in their files). Prettier is the source of truth for
+  formatting; the `format` script covers `src/`, `docs/`, and config files.
 - Git is initialized with commits; `.gitignore` covers `dist/` and editor/OS noise.
 - Root debug residue (`inspect_tree*.mjs`, `probe*`, `dev-*.log`) and the unused
   `01 - Copy.webp` asset were removed.

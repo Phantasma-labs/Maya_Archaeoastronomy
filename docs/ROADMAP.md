@@ -14,33 +14,34 @@ component, eased step sweep in `LessonPage`, coming-soon route guard.
 
 ## 1. Must fix (protect the project)
 
-1. **Version control baseline.** Extend `.gitignore` (`dist`, `LearningMaterial` or move it
-   under `docs/`, editor/OS files). Make the initial commit. Nothing else is safe until this lands.
-2. **Remove debug residue.** Delete `inspect_tree*.mjs`, `inspect_tree_output.txt`,
-   `probe.mjs`, `probe_output.txt`, and `public/assets/lesson_01/01 - Copy.webp`
-   (955 KB shipped per build). Verify no references first (grep — currently clean).
-3. **Stop `/lesson/02` from crashing.** Cheapest correct: `LessonPage` checks
-   `config.status` and renders a not-available state for `coming-soon` lessons.
-4. **`frameloop="demand"`** — schedule AFTER Batch 0 and verify against it: React state
-   updates auto-invalidate in demand mode, but confirm slider drags stay live and click
-   sweeps still animate (the tween must drive state or call `invalidate()`).
+1. ✅ **Version control baseline.** `.gitignore` covers `dist/` + editor/OS noise; repo has commits.
+2. ✅ **Remove debug residue.** Deleted `inspect_tree*.mjs`, `inspect_tree_output.txt`,
+   `probe.mjs`, `probe_output.txt`, `dev-stderr.log`, `dev-stdout.log`, and
+   `public/assets/lesson_01/01 - Copy.webp` (955 KB shipped per build).
+3. ✅ **Stop `/lesson/02` from crashing.** `LessonPage` checks `config.status` and renders a
+   not-available state for `coming-soon` lessons (Batch 0).
+4. ✅ **`frameloop="demand"`** — `SceneCanvas` sets it; R3F auto-invalidates on re-render, so
+   slider drags stay live and click sweeps still animate (the tween drives `sliderPosition`
+   state each rAF tick).
 
 ## 2. Should fix (unblock growth)
 
 1. **Tooling minimum.** Add ESLint (react-hooks) + Prettier + `lint`/`typecheck` npm
    scripts; run the existing eslint-disable comments against a real config.
-2. **Remove dead code** (TECH_DEBT M3–M6, M8): vite middleware alias, `clsx`,
+2. ✅ **Remove dead code** (TECH_DEBT M3, M4, M6, M8): vite middleware alias, `clsx`,
    `ModelLoader.onLoaded`, `customSceneRenderer`, `CameraConfig.source`,
-   `LearningTopic.icon`, stray `scene.background` cleanup — each after a usage grep.
+   `LearningTopic.icon`, stray `scene.background` cleanup — each verified by grep.
 
 ## 3. Nice to have (quality & headroom)
 
-1. **Route-level code splitting**: `React.lazy` the lesson scene/overlay via the registry;
-   move GLB preloading from module scope into the lesson route. Landing drops to <200 KB JS.
+1. ✅ **Route-level code splitting** — `App` lazy-loads `LessonPage`; the registry
+   lazy-loads the lesson scene/overlay. Landing main chunk dropped to ~190 KB (62 KB gzip);
+   the 3D stack + GLB preload load only on the lesson route.
 2. **Consolidate the design tokens** into the Tailwind `maya.*` palette; delete the CSS
    vars and hardcoded hex drift. Decide the canonical surface color (`#12151e` vs `#121622`).
 3. **Typed registry**: `runtimeState: any` → the slider-position type; replace
-   `Lesson01Scene`'s `find(...)` with lookups that fail visibly and early.
+   `Lesson01Scene`'s `find(...)` with lookups that fail visibly and early. *(The `find(...)!`
+   assertions were replaced with a throwing `requireModel(id)` helper — see TECH_DEBT M9.)*
 
 ## 4. Future architecture (when lessons 02–05 arrive)
 

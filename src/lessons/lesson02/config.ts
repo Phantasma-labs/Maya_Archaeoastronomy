@@ -37,7 +37,6 @@ export const lesson02Config: LessonConfig = {
   },
 
   camera: {
-    source: 'manual',
     position: [0, 5, 20],
     rotation: [0, 0, 0],
     fov: 45,

@@ -3,7 +3,7 @@ import { ModelLoader, preloadLessonModels } from '../../core/components/ModelLoa
 import { FixedGlbCamera } from '../../core/components/FixedGlbCamera';
 import { SceneEnvironment } from '../../core/components/SceneEnvironment';
 import { SceneLighting } from '../../core/components/SceneLighting';
-import { AtmosphereSample, LessonConfig } from '../../core/types/lesson.types';
+import { AtmosphereSample, LessonConfig, ModelAsset } from '../../core/types/lesson.types';
 
 interface Lesson01SceneProps {
   config: LessonConfig;
@@ -29,9 +29,22 @@ preloadLessonModels([
  *   - ModelLoader × 3 — Floor, Layout (pyramid), Trees (independently cached)
  */
 export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({ config, atmosphere }) => {
-  const floorAsset = config.assets.models.find((m) => m.id === 'floor')!;
-  const layoutAsset = config.assets.models.find((m) => m.id === 'layout')!;
-  const treesAsset = config.assets.models.find((m) => m.id === 'trees')!;
+  // Resolve the three required models by id. These lookups are hard-coded to
+  // this scene's assembly, so a missing id is a config/scene desync — fail
+  // loudly (the error boundary surfaces it) instead of a silent undefined.
+  const requireModel = (id: string): ModelAsset => {
+    const asset = config.assets.models.find((m) => m.id === id);
+    if (!asset) {
+      throw new Error(
+        `Lesson01Scene: required model "${id}" is missing from config.assets.models. ` +
+          'The lesson config and scene assembly are out of sync.'
+      );
+    }
+    return asset;
+  };
+  const floorAsset = requireModel('floor');
+  const layoutAsset = requireModel('layout');
+  const treesAsset = requireModel('trees');
 
   return (
     <>

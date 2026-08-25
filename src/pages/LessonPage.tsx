@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getLessonEntry } from '../lessons/registry';
 import { SceneCanvas } from '../core/components/SceneCanvas';
@@ -186,22 +186,29 @@ export const LessonPage: React.FC = () => {
         }}
       >
         {/* 3D Scene Viewport — fills the 16:9 frame */}
-        <SceneCanvas cameraConfig={config.camera}>
+        <SceneCanvas
+          cameraConfig={config.camera}
+          gltfUrls={config.assets.models.map((m) => m.url)}
+        >
           <SceneComponent config={config} atmosphere={atmosphere} />
         </SceneCanvas>
 
-        {/* Educational UI Overlay — sits above the canvas, over the frame */}
+        {/* Educational UI Overlay — sits above the canvas, over the frame.
+            Wrapped in Suspense because the registry lazy-loads the overlay
+            module (route-level code splitting, TECH_DEBT H3). */}
         {OverlayComponent && (
-          <OverlayComponent
-            config={config}
-            sliderPosition={sliderPosition}
-            onSliderPositionChange={handleLiveChange}
-            onStepSelect={handleStepSelect}
-            selectedTopicId={selectedTopicId}
-            onSelectTopic={handleSelectTopic}
-            skyTimeline={activeSkyTimeline}
-            showFocusedUI={showFocusedUI}
-          />
+          <Suspense fallback={null}>
+            <OverlayComponent
+              config={config}
+              sliderPosition={sliderPosition}
+              onSliderPositionChange={handleLiveChange}
+              onStepSelect={handleStepSelect}
+              selectedTopicId={selectedTopicId}
+              onSelectTopic={handleSelectTopic}
+              skyTimeline={activeSkyTimeline}
+              showFocusedUI={showFocusedUI}
+            />
+          </Suspense>
         )}
       </div>
     </div>

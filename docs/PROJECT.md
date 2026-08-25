@@ -50,9 +50,10 @@ Scripts: `dev` (vite, port 3000), `build` (`tsc && vite build` — tsc type-chec
 
 ## Current project status
 
-- Builds clean: `tsc --noEmit` passes, `vite build` succeeds (single 1.31 MB JS chunk,
-  378 KB gzip; Vite warns about chunk size).
-- **Git is initialized but has zero commits**; `.gitignore` covers only `node_modules`.
-- Root contains leftover GLB-inspection scripts (`inspect_tree*.mjs`, `probe*`,
-  empty `inspect_tree_output.txt`) from a past debugging session.
+- Builds clean: `tsc --noEmit` passes, `vite build` succeeds. Route-level code splitting
+  keeps the landing page at ~190 KB JS (62 KB gzip); the three/drei/R3F stack loads only on
+  the lesson route. Vite still warns about the three.js chunk size (unavoidable library).
+- Git is initialized with commits; `.gitignore` covers `dist/` and editor/OS noise.
+- Root debug residue (`inspect_tree*.mjs`, `probe*`, `dev-*.log`) and the unused
+  `01 - Copy.webp` asset were removed.
 - See `docs/TECH_DEBT.md` for the ranked issue list and `docs/ROADMAP.md` for sequencing.

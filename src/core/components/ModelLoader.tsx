@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { ModelAsset } from '../types/lesson.types';
@@ -16,7 +16,6 @@ useGLTF.setDecoderPath('/draco/');
 
 interface ModelLoaderProps {
   asset: ModelAsset;
-  onLoaded?: (gltf: ReturnType<typeof useGLTF>) => void;
 }
 
 /**
@@ -26,10 +25,8 @@ interface ModelLoaderProps {
  * - Applies shadow casting & receiving recursively to all meshes
  * - Filters out camera nodes so they are not rendered as geometry
  */
-export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset, onLoaded }) => {
+export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset }) => {
   const gltf = useGLTF(asset.url);
-  const onLoadedRef = useRef(onLoaded);
-  onLoadedRef.current = onLoaded;
 
   // Clone and configure scene — run once per loaded GLTF
   const clonedScene = useMemo(() => {
@@ -104,13 +101,6 @@ export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset, onLoaded }) => 
 
     return clone;
   }, [gltf.scene, asset.castShadow, asset.receiveShadow]);
-
-  // Notify parent when loaded (stable via ref)
-  useEffect(() => {
-    if (onLoadedRef.current) {
-      onLoadedRef.current(gltf);
-    }
-  }, [gltf]);
 
   return (
     <primitive

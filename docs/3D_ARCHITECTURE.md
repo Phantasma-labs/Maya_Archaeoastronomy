@@ -8,9 +8,11 @@ powerPreference: 'high-performance' }`. No post-processing. Camera props are pas
 Canvas level, then **overwritten** by `FixedGlbCamera` — two initialization paths for the
 same camera; `FixedGlbCamera` is the authoritative one.
 
-**Render loop: default `frameloop='always'`** — the scene re-renders every frame even
-though nothing animates (no `useFrame` anywhere). This is the top GPU finding in
-`docs/TECH_DEBT.md`; the scene is a candidate for `frameloop="demand"` + `invalidate()`.
+**Render loop: `frameloop="demand"`** — the scene is fully static (no `useFrame` anywhere),
+so it renders once and only re-renders when invalidated. R3F auto-invalidates on any
+re-render, so the Atmosphere Timeline drags and the eased step sweeps (which drive
+`sliderPosition` state each rAF tick) still animate one frame per update. This was the top
+GPU finding in `docs/TECH_DEBT.md` (C2).
 
 ## Camera
 
@@ -25,8 +27,9 @@ first-frame race against GLB traversal. `FixedGlbCamera` applies it once in
   `public/draco/` (~1 MB). All 3 GLBs are Draco-compressed (verified):
   Floor 348 KB (1 mesh/1 mat), Layout 1.85 MB (4 meshes/3 mats/**1 camera node**),
   Trees 1.18 MB (1 mesh/2 mats).
-- `preloadLessonModels()` runs **at module scope of Lesson01Scene.tsx** → importing the
-  registry (as `LandingPage` does) starts all GLB downloads immediately.
+- `preloadLessonModels()` runs **at module scope of Lesson01Scene.tsx** — but that module is
+  now lazy-loaded (route-level code splitting, TECH_DEBT H3), so the GLB downloads start only
+  when the user navigates to the lesson route, never on the landing page.
 - `ModelLoader` clones `gltf.scene` per instance, hides camera nodes, applies
   `castShadow`/`receiveShadow`, and renders via `<primitive>`.
 
@@ -77,8 +80,10 @@ cast shadows (deliberate: cleaner plaza, less canopy self-shadow noise).
 ## Performance characteristics (measured)
 
 - Scene: ~6 meshes / <10 draw calls, small footprint; DPR clamped; MSAA on. GPU load is
-  light *per frame* — waste comes from rendering a static frame forever.
-- Bundle: single 1.31 MB JS chunk (three+drei+leva+router+icons) loaded by the landing page.
+  light *per frame* — and with `frameloop="demand"` (C2) a static frame is no longer redrawn
+  forever.
+- Bundle: route-level code splitting (H3) keeps the landing page at ~190 KB JS (62 KB gzip);
+  the three/drei/R3F stack (~890 KB / 240 KB gzip) loads only on the lesson route.
 - No disposal policy exists (models, textures, cloned scenes); acceptable for the current
   single-lesson SPA, undefined behavior territory once lessons switch in-app.
 

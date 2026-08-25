@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { AtmosphereSample, LessonConfig, SkyKeyframe } from '../core/types/lesson.types';
 import { lesson01Config } from './lesson01/config';
-import { Lesson01Scene } from './lesson01/Lesson01Scene';
-import { Lesson01Overlay } from './lesson01/Lesson01Overlay';
 import { lesson02Config } from './lesson02/config';
+
+// Route-level code splitting (TECH_DEBT H3): the scene/overlay modules pull in
+// the whole three/drei/R3F stack and preload the lesson GLBs at module scope.
+// Lazy-loading them keeps the landing page free of the 3D stack — importing
+// this registry (as LandingPage does) only loads the small config modules.
+// The scene/overlay chunks load on first visit to a lesson route.
+const Lesson01Scene = lazy(() =>
+  import('./lesson01/Lesson01Scene').then((m) => ({ default: m.Lesson01Scene }))
+);
+const Lesson01Overlay = lazy(() =>
+  import('./lesson01/Lesson01Overlay').then((m) => ({ default: m.Lesson01Overlay }))
+);
 
 export interface LessonEntry {
   config: LessonConfig;

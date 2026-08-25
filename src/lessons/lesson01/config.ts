@@ -133,7 +133,6 @@ export const lesson01Config: LessonConfig = {
 
   // Authoring camera extracted from Lesson01_Layout_v003.glb
   camera: {
-    source: 'glb-camera',
     position: [-44.413162, 1.700000, -73.157776],
     quaternion: [0.032250, -0.956887, 0.116925, 0.263923],
     fov: 48.455, // yfov 0.845708 rad
@@ -162,7 +161,6 @@ export const lesson01Config: LessonConfig = {
       {
         id: 'snake-descent',
         title: 'Snake Descent',
-        icon: 'Sun',
         summary:
           'Around the equinoxes, the setting sun projects undulating triangular shadows along the northern balustrade that merge with the Kukulkán serpent head at the staircase base.',
         details: [
@@ -218,7 +216,6 @@ export const lesson01Config: LessonConfig = {
       {
         id: 'solar-zenith',
         title: 'Zenith',
-        icon: 'Compass',
         summary:
           'At the tropical latitude of Chichén Itzá (~20.68° N), the Sun passes directly overhead at local noon twice annually.',
         details: [
@@ -230,7 +227,6 @@ export const lesson01Config: LessonConfig = {
       {
         id: 'solar-calendar',
         title: 'Calendar',
-        icon: 'Calendar',
         summary:
           'The pyramid embodies the 365-day Haab solar year through its four staircases and summit platform, while its 52 panels mirror the 52-year Calendar Round that synchronizes the sacred and solar calendars.',
         details: [

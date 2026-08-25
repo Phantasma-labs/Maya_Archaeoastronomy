@@ -67,7 +67,9 @@ lessonXX/config.ts ──► registry ──► LessonPage ── useState: slid
 1. ~~Dual source of truth~~, ~~mount-once seeding~~, ~~dev tooling load-bearing~~ —
    all **resolved by ADR-001 / Batch 0** (single-writer slider + derived sample;
    no dev tooling ships).
-2. **Static registry imports** prevent route-level code splitting and trigger Lesson01Scene's
-   module-level GLB preload (~3.4 MB + Draco) even on the landing page.
-3. `Lesson01Scene` uses non-null assertions on hard-coded model ids — fine under the new
-   `coming-soon` page guard, but should become a visible early failure (ROADMAP 3.3).
+2. ~~Static registry imports~~ — **resolved:** `App` lazy-loads `LessonPage` and the registry
+   lazy-loads the lesson scene/overlay, so the landing page no longer pulls in the 3D stack
+   or triggers the module-level GLB preload (TECH_DEBT H3).
+3. ~~Non-null assertions on hard-coded model ids~~ — **resolved:** `Lesson01Scene` now uses a
+   `requireModel(id)` helper that throws a descriptive error on a config/scene desync
+   (TECH_DEBT M9).

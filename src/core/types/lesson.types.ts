@@ -1,5 +1,3 @@
-import { ReactNode } from 'react';
-
 /**
  * Lighting Configuration for a 3D Lesson Scene
  *
@@ -122,7 +120,6 @@ export interface EnvironmentConfig {
  * Camera Configuration
  */
 export interface CameraConfig {
-  source: 'glb-camera' | 'manual';
   position: [number, number, number];
   quaternion?: [number, number, number, number]; // [x, y, z, w]
   rotation?: [number, number, number]; // [Euler X, Euler Y, Euler Z]
@@ -151,7 +148,6 @@ export interface ModelAsset {
 export interface LearningTopic {
   id: string;
   title: string;
-  icon?: string;
   summary: string;
   details: string[];
   keyFact?: string;
@@ -197,9 +193,6 @@ export interface LessonConfig {
   camera: CameraConfig;
   lighting: LightingConfig;
   content: LessonContent;
-  
-  // Custom scene renderer or component hook if needed
-  customSceneRenderer?: () => ReactNode;
 }
 
 /**

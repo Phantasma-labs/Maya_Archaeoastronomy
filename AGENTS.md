@@ -21,8 +21,7 @@ Known, ranked issues live in `docs/TECH_DEBT.md`; sequencing in `docs/ROADMAP.md
 
 ### TypeScript
 - `strict` is on and stays on. `tsc --noEmit` must pass before completion.
-- No `any` in new code. The existing `runtimeState: any` in `registry.ts` is registered
-  debt — do not copy that pattern.
+- No `any` in new code.
 - Avoid non-null assertions (`find(...)!`). If a lookup can fail, handle it or fail loudly.
 - Shared domain types live only in `src/core/types/lesson.types.ts`.
 
@@ -86,12 +85,12 @@ Known, ranked issues live in `docs/TECH_DEBT.md`; sequencing in `docs/ROADMAP.md
   edit. Never assume an architecture decision was wrong just because another shape is
   theoretically cleaner — challenge it in prose, not in code, unless asked.
 - **No new dependencies** without demonstrating that an existing one cannot do the job.
-  `clsx` is registered as unused — do not import it speculatively; that is a roadmap item.
 - **Preserve working behavior.** If behavior change is not explicitly required, it is
   forbidden. "Looks unused" is never sufficient grounds for deletion — verify with a
   project-wide usage grep (code, configs, `index.html`, assets) and say what you checked.
-- **Do not duplicate state.** Before adding a field to `runtimeState`, check whether it is
-  derivable from lesson config or existing state. One owner per piece of state.
+- **Do not duplicate state.** Before adding a new runtime value, check whether it is
+  derivable from lesson config or existing state — ADR-001: `sliderPosition` is the only
+  writer. One owner per piece of state.
 - **Explain tradeoffs** in the PR/task summary when a change has architectural weight
   (state ownership, render-loop behavior, asset pipeline, bundle size).
 - **Comments with "CRITICAL", "regression", or a rationale are load-bearing.** Move them
@@ -116,7 +115,7 @@ Known, ranked issues live in `docs/TECH_DEBT.md`; sequencing in `docs/ROADMAP.md
 3. Run `npm run build` for anything touching `src/` — confirm it succeeds and record the
    chunk-size warning state (it currently warns; do not make it worse).
 4. For runtime-visible changes, run `npm run dev` and verify behavior manually where
-   possible (scene renders, no console errors, presets still work, Alt+D panel intact).
+   possible (scene renders, no console errors).
 5. Verify unrelated functionality was not broken (both routes, landing catalog, overlays).
 6. Summarize **exactly** what changed: files, behavior, and any tradeoff accepted.
 7. If you discover new debt while working, add it to `docs/TECH_DEBT.md` with a rank —

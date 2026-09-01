@@ -9,9 +9,6 @@ history.
 
 ### P3 — Low
 
-- **V2-7 — AGENTS.md stale references.** Still lists `runtimeState: any` in
-  `registry.ts` and unused `clsx` as registered debt; both resolved long ago.
-  One-pass doc cleanup.
 - **V2-10 — Lesson02 reuses `Lesson01Scene` as placeholder.** Harmless today
   (the coming-soon guard prevents render) but a latent trap if the guard is ever
   removed. Resolve by authoring a real `Lesson02Scene` when the lesson's assets
@@ -64,6 +61,7 @@ history.
 |---|---|---|
 | V2-3 | `LearningMaterial/lesson_01.md` missing | Restored byte-exact from git blob `f507112b` (the file was deleted as collateral in `8505f18`); one copy drift fixed in `config.ts` — the 584-day line now reads "Venus synodic cycle" per the vetted doc's caution (584 is the synodic period as observed from Earth, not the orbital period). |
 | V2-6 | `@` path alias unused | Alias stripped from `vite.config.ts` + `tsconfig.json` — zero imports used it |
+| V2-7 | AGENTS.md stale references | Refreshed — dropped `runtimeState`/`clsx`/Alt+D references (ADR-001: no dev panel, `sliderPosition` is the only writer) |
 
 ## How to add to this file
 

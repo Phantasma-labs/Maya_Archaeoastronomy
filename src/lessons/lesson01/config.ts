@@ -6,7 +6,7 @@ export const lesson01Config: LessonConfig = {
   title: 'The Temple of Kukulkán: Calendars, Shadows, and Solar Alignments',
   subtitle: 'El Castillo at Chichén Itzá, Yucatán',
   tagline: 'Explore how Maya monumental architecture encodes the 365-day solar year, the 52-year Calendar Round, Venus synodic cycles, and equinox shadow phenomena.',
-  thumbnail: '/assets/lesson_01/01.webp',
+  thumbnail: '/assets/landing/lesson-01-thumb.webp',
   status: 'available',
   difficulty: 'Introductory',
   duration: '15 min interactive study',

@@ -6,7 +6,7 @@ export const lesson02Config: LessonConfig = {
   title: 'The Caracol Observatory: Venus Extremes and Horizon Sightlines',
   subtitle: 'The Cylindrical Tower of Chichén Itzá',
   tagline: 'Investigate the asymmetric observation slits and horizon sightlines used by Maya astronomers to track extreme northern and southern Venus risings.',
-  thumbnail: '/assets/lesson_01/02.webp',
+  thumbnail: '/assets/landing/lesson-02-thumb.webp',
   status: 'coming-soon',
   difficulty: 'Intermediate',
   duration: '20 min interactive study',

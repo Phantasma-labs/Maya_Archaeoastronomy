@@ -8,6 +8,10 @@ The V02 redesign ("Digital Archaeological Observatory") shipped to `main` on
 **2026-09-01** (commit `88ce647`). All sections below §4 are historical record
 of what was already done to get here.
 
+> The V02 audit, design plan, vision review instructions, and final vision
+> review report are archived under `docs/archive/v02/` — read them when you
+> need to know *why* a design decision was made, not what to do next.
+
 ## Status as of 2026-09-01
 
 | Phase | Status | Reference |

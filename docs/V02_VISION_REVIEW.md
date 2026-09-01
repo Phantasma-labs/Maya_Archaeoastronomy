@@ -48,6 +48,93 @@ Visit and capture screenshots at minimum these viewports: **Desktop 1920×1080**
 checklists below at each relevant viewport. Name files meaningfully
 (e.g. `01-landing-hero-1920.png`).
 
+### 3b. One-command screenshot recipes (every checklist interaction)
+
+The app ships four **URL state seeds** as a real feature — `?topic=<id>`, `?step=<n>`,
+`?guide=<1|topics|monument>`, `?hotspot=1` — that drive the opening overlay state. Every
+topic/step/panel/dialog state is therefore renderable by plain headless Chrome with **no
+clicks**: each recipe below is a single deterministic command. Topic ids: `serpent-descent`
+· `solar-zenith` · `solar-calendar`.
+
+Run these in git-bash from the repo root; `PORT` must match your dev server (3000, or 3001
+if you started the fallback):
+
+```bash
+#!/usr/bin/env bash
+PORT=3001                        # ← CHANGE THIS if your dev server is on 3000
+CHROME="/c/Program Files/Google/Chrome/Application/chrome.exe"   # Windows (git-bash)
+# macOS/Linux alternative:
+# CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+BASE="http://localhost:$PORT"
+LES="$BASE/lesson/01"
+mkdir -p shots
+
+shot() {                          # shot <name> <url> <width> <height>
+  "$CHROME" --headless=new --disable-gpu --hide-scrollbars \
+    --window-size="$3,$4" --screenshot="shots/$1.png" "$2"
+}
+```
+
+| Checklist | Recipe | What the shot must show |
+|---|---|---|
+| **L1–L2** hero + CTA | `shot 01-hero-1920 "$BASE/" 1920 1080` | Serif headline, gold CTA, sky dimmed behind text |
+| **L3** catalog | `shot 02-catalog-1920 "$BASE/" 1920 2600` (tall viewport) | Expedition cards, gold badge + stone lock, whole card a link |
+| **L4** rhythm | `shot 03-hero-mobile "$BASE/" 390 844` | No cramped/overflowing hero at 390 px |
+| **L5** fonts | `shot 01-hero-1920 …` zoomed by eye | No clipped glyphs on "É"/"á" in Cinzel; no FOUT |
+| **D1/D2/D11** entry | `shot 10-entry "$LES" 1920 1080` | Field Guide **closed**, instrument 3-col, 16:9 letterbox, vignette |
+| **D3** 2-step track | `shot 11-descent-step1 "$LES?topic=serpent-descent&step=1" 1920 1080` | Thumb + both diamonds inside the track |
+| **D3** 3-step track | `shot 12-calendar-step3 "$LES?topic=solar-calendar&step=3" 1920 1080` | 3 labels not clipped, thumb at extreme |
+| **D5** callout | `shot 11-descent-step1 …` | Serif headline, mono sublabel, gold-border lines, prompt below timeline |
+| **D6** sun data | `shot 13-descent-step2 "$LES?topic=serpent-descent&step=2" 1920 1080` | Azimuth/Altitude/Declination/Local time, gold mono values |
+| **D7** Calendar topic | `shot 12-calendar-step3 …` | Instrument renders; right column shows the "Select Serpent Descent…" prompt |
+| **D8** Zenith labels + shadow | `shot 14-zenith-step1 "$LES?topic=solar-zenith&step=1"`, `…step=2`, `…step=3`, each `1920 1080` | Labels read May 23 / Jun 21 / Jul 19; step 2 has the visible solstice shadow |
+| **D9** hotspot marker | `shot 13-descent-step2 …` | Small gold sphere at the staircase base; must not float or occlude the head |
+| **D10** hotspot dialog | `shot 15-hotspot-open "$LES?topic=serpent-descent&step=2&hotspot=1" 1920 1080` | Card top-right, gold border, not covering the slider |
+| **D12** Field Guide (topics) | `shot 20-guide-topics "$LES?guide=topics" 1920 1080` | Pills + selected topic content + key fact; solid surface |
+| **D12** Field Guide (architecture) | `shot 21-guide-monument "$LES?guide=monument" 1920 1080` | Overview, culture/chronology, scholarly-caution box |
+| **M1** stacking | `shot 40-mobile-entry "$LES" 390 844`, `shot 41-mobile-zenith "$LES?topic=solar-zenith&step=2" 390 844` | Timeline (order-1) stacks first, then callout, then astro; no horizontal scroll |
+| **M2** panel on mobile | `shot 42-mobile-guide "$LES?guide=topics" 390 844` | Panel inside the viewport, scrolls internally |
+| **M3 / M4** touch + chrome | `shot 41-mobile-zenith …`, `shot 43-tablet-entry "$LES" 768 1024` | Marker/knot sizes look comfortable (hit areas are 24 px — see note); header doesn't wrap/overlap |
+
+PowerShell equivalent of one line:
+
+```powershell
+& "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless=new --disable-gpu --hide-scrollbars --window-size=1920,1080 --screenshot="shots\01-hero-1920.png" "http://localhost:3001/"
+```
+
+**Two checks cannot come from a static screenshot** — capture their states above, then verify
+the *feel* with the Playwright pass (system Chrome, no app dependency, `npm i --no-save
+playwright-core` keeps package.json untouched):
+
+```mjs
+// vision-interact.mjs
+import { chromium } from 'playwright-core';
+const browser = await chromium.launch({ channel: 'chrome' });          // reuse installed Chrome
+const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
+const B = 'http://localhost:3001/lesson/01';                            // ← match your port
+
+await page.goto(B);
+await page.getByRole('button', { name: 'Field Guide' }).click();        // D12 toggle actually opens
+await page.screenshot({ path: 'shots/20-guide-clicked.png' });
+await page.getByRole('button', { name: 'Architecture' }).click();
+await page.screenshot({ path: 'shots/21-guide-tab-clicked.png' });
+
+await page.goto(B);
+await page.getByRole('button', { name: 'Sweep to The descent' }).click(); // D4 eased sweep (600 ms)
+await page.waitForTimeout(900);                                          // wait for it to settle
+await page.screenshot({ path: 'shots/13-sweep-settled.png' });
+
+await page.goto(B);
+await page.getByRole('button', { name: /Tap serpent head/ }).click();    // D10 open → dialog focused
+await page.screenshot({ path: 'shots/15-hotspot-clicked.png' });
+await page.keyboard.press('Escape');                                     // closes + focus returns to link
+await page.screenshot({ path: 'shots/16-hotspot-escaped.png' });
+await browser.close();
+```
+
+Report D4's mid-sweep frames and M3's hit-area feel as **"verified by interaction script,
+not captured"** if you don't run this pass — never as "probably fine."
+
 ## 4. The design contract (what you are judging against)
 
 Condensed from `docs/V02_DESIGN_PLAN.md` §2 — read the full section before judging:

@@ -240,4 +240,10 @@ export interface AtmosphereSample {
   directionalIntensity: number | undefined;
   /** Nearest keyframe index (0-based) for UI "active" badges. */
   activeIndex: number;
+  /**
+   * Anchor name of the active keyframe's hotspot (StepCallout.hotspot.anchor),
+   * if any — drives the in-scene marker cue. Undefined when the active
+   * keyframe has no hotspot.
+   */
+  hotspotAnchor?: string;
 }

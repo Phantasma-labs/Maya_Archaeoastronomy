@@ -197,7 +197,7 @@ export const LessonPage: React.FC = () => {
   const { config, SceneComponent, OverlayComponent } = lessonEntry;
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-maya-bg relative select-none flex items-center justify-center">
+    <div className="w-screen h-screen overflow-hidden bg-maya-bg relative flex items-center justify-center">
       {/* Cinematic 16:9 frame — on horizontal/widescreen viewports the scene
           and overlay are letterboxed to a 16:9 frame (centered) instead of
           stretching across the full width. On narrow/tall viewports the

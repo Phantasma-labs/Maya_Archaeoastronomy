@@ -5,6 +5,9 @@ interface AtmosphereTimelineProps {
   keyframes: {
     id: string;
     name: string;
+    /** Calendar date label (e.g. "May 23") — preferred over callout.label
+     *  when present (V02 design plan §4: dates read as the primary label). */
+    meta?: { dateLabel?: string };
     /** Optional pedagogical label — preferred over `name` when present. */
     callout?: { label?: string; sublabel?: string; tooltip?: string };
   }[];
@@ -16,9 +19,9 @@ interface AtmosphereTimelineProps {
   onStepSelect: (step: number) => void;
 }
 
-/** Display label prefers the callout label, falls back to the keyframe name. */
+/** Display label prefers the calendar date, then the callout label, then the keyframe name. */
 const displayLabel = (kf: AtmosphereTimelineProps['keyframes'][number]) =>
-  kf.callout?.label ?? kf.name;
+  kf.meta?.dateLabel ?? kf.callout?.label ?? kf.name;
 
 /**
  * AtmosphereTimeline — the lesson's single environment control (ADR-001).
@@ -130,7 +133,7 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
         aria-valuemin={1}
         aria-valuemax={N}
         aria-valuenow={Math.round(value * 100) / 100}
-        aria-valuetext={keyframes[activeIndex].name}
+        aria-valuetext={displayLabel(keyframes[activeIndex])}
         tabIndex={0}
         className="relative h-8 cursor-pointer touch-none select-none outline-none focus-visible:ring-1 focus-visible:ring-maya-gold/60 rounded"
         onPointerDown={handlePointerDown}

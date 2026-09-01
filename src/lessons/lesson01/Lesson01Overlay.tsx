@@ -32,13 +32,13 @@ interface Lesson01OverlayProps {
   /** Active skyTimeline: the selected topic's own, or the lesson default. */
   skyTimeline: SkyKeyframe[];
   /** Show the focused UI (slider, callout, sun blueprint) — only true
-   *  for topics that own a skyTimeline (Snake Descent). */
+   *  for topics that own a skyTimeline (Serpent Descent, Zenith). */
   showFocusedUI: boolean;
 }
 
 const topicIcons: Record<string, React.ReactNode> = {
   'solar-calendar': <Calendar className="w-4 h-4" />,
-  'snake-descent': <Sun className="w-4 h-4" />,
+  'serpent-descent': <Sun className="w-4 h-4" />,
   'solar-zenith': <Compass className="w-4 h-4" />
 };
 
@@ -259,7 +259,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
       )}
 
       {/* Footer Dashboard — single row: left callout · center Atmosphere Timeline · right Sun astronomical data.
-          Only rendered for focused-mode topics (Snake Descent). Anchored to the bottom of the 16:9 frame. */}
+          Only rendered for focused-mode topics (Serpent Descent, Zenith). Anchored to the bottom of the 16:9 frame. */}
       {showFocusedUI && (
         <div className="pointer-events-auto mt-auto">
           <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-maya-surface border border-maya-gold/40 rounded-2xl px-4 py-3 shadow-2xl animate-fadeIn">
@@ -305,7 +305,13 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
               )}
             </div>
 
-            {/* Center — Atmosphere Timeline (single environment control, ADR-001) */}
+            {/* Center — Atmosphere Timeline (single environment control, ADR-001).
+                All focused-mode topics (Serpent Descent, Zenith) share the same
+                linear slider. The Zenith timeline's three keyframes (May 23,
+                Jun 21, Jul 19) sit on a horizontal track; Step 1 / Step 3 are
+                both zenith passes (`03.webp`), Step 2 is the solstice
+                (`03before.webp`). IBL stays at 0.66 across the three so the
+                only thing that changes is the directional sun rotation. */}
             <div className="w-full min-w-0">
               <AtmosphereTimeline
                 keyframes={skyTimeline}

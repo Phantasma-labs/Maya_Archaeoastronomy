@@ -54,10 +54,13 @@ export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({ config, atmosphere
       {/* Sky crossfade + IBL, driven by the Atmosphere Timeline sample */}
       <SceneEnvironment config={config.assets.environment} sample={atmosphere} />
 
-      {/* Directional Sun Light — rotation interpolates between timeline keyframes */}
+      {/* Directional Sun Light — rotation + intensity both interpolate between
+          timeline keyframes. Intensity falls back to the lesson-level constant
+          when neither adjacent keyframe sets it (e.g. the lesson default's
+          3-step timeline doesn't override the sun). */}
       <SceneLighting
         rotation={atmosphere.lightRotation}
-        intensity={config.lighting.directional.intensity}
+        intensity={atmosphere.directionalIntensity ?? config.lighting.directional.intensity}
         color={config.lighting.directional.color}
         castShadow={config.lighting.directional.castShadow}
       />

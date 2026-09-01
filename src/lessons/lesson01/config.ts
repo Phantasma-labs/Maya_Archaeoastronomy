@@ -159,8 +159,8 @@ export const lesson01Config: LessonConfig = {
       'The Temple of Kukulkán at Chichén Itzá is a monumental stepped pyramid strongly associated with calendrical, astronomical, and agricultural symbolism. Rising 30 meters above the northern plaza, the structure harmonizes solar mechanics, geometrical orientation, and sacred number sequences into stone.',
     topics: [
       {
-        id: 'snake-descent',
-        title: 'Snake Descent',
+        id: 'serpent-descent',
+        title: 'Serpent Descent',
         summary:
           'Around the equinoxes, the setting sun projects undulating triangular shadows along the northern balustrade that merge with the Kukulkán serpent head at the staircase base.',
         details: [
@@ -219,9 +219,106 @@ export const lesson01Config: LessonConfig = {
         summary:
           'At the tropical latitude of Chichén Itzá (~20.68° N), the Sun passes directly overhead at local noon twice annually.',
         details: [
+          'May 23 or 24: The first zenith passage coincides with planting preparations and marks the beginning of the rainy season in the Maya worldview.',
+          'July 19 or 20: The second zenith passage occurs approximately 28 days after the summer solstice (and roughly 56 days after the first zenith passage).',
           'During subsolar zenith passage (occurring in late May and mid-July at Chichén Itzá), vertical objects cast zero shadow at local solar noon.',
           'These zenith events served as sacred solar markers closely correlated with agricultural planting and rain ceremonies (Chak rituals).',
           'Academic consensus treats these as significant cultural markers while maintaining careful separation between astronomical calculations and archaeological interpretations.'
+        ],
+        // Focused-view skyTimeline (mirrors the Serpent Descent pattern): a
+        // 3-keyframe May 23 / Jun 21 / Jul 19 arc scoped to the Zenith topic.
+        // All three keyframes share the same sky and the same IBL contribution
+        // (0.66) — only the directional sun's position changes. The sun's
+        // altitude at the zeniths is 90° (no shadow at noon); at the solstice
+        // it's exaggerated to ~80° so the south-side shadow is clearly visible
+        // in the camera frame. In reality, Chichén Itzá's latitude makes the
+        // solstice-to-zenith altitude delta only ~0.7°; we exaggerate it for
+        // teaching visibility. The SkyKeyframe.meta.days / meta.dateLabel
+        // fields drive the AtmosphereTimeline's step labels (May 23 / Jun 21
+        // / Jul 19). IBL stays at 0.66 across all three — the lesson is about
+        // the sun's position, not the sky; only Step 2's panorama changes
+        // (03before.webp vs. 03.webp).
+        skyTimeline: [
+          {
+            id: 'sz-01',
+            name: 'Zenith 1',
+            url: '/assets/lesson_01/03.webp',
+            description: 'Sun directly overhead at Chichén Itzá (20.68° N) — the first zenith passage.',
+            lightRotation: [-0.2, 0, 0],
+            iblIntensity: 0.66,
+            meta: { dateLabel: 'May 23', days: 0 },
+            callout: {
+              label: 'Zenith 1',
+              sublabel: 'May 23  ·  First zenith passage  ·  0 days from start',
+              tooltip: 'The Sun stands directly overhead. Vertical objects cast no shadow at local solar noon.',
+              lines: [
+                'Subsolar point over Chichén Itzá.',
+                'No shadow at local solar noon.',
+                'First rains approaching.'
+              ],
+              astro: {
+                azimuth: '≈ 180°',
+                altitude: '≈ 90°',
+                declination: '≈ +20.68°',
+                time: '~12:00 local'
+              }
+            }
+          },
+          {
+            id: 'sz-02',
+            name: 'Solstice',
+            url: '/assets/lesson_01/03before.webp',
+            description: 'Summer solstice — the Sun at its northernmost declination.',
+            // Sky switches to 03before.webp for the solstice — a slightly
+            // different sun position in the panorama. The sun has tilted
+            // ~0.15 rad (~8.6°) further from zenith, exaggerated from the real
+            // ~0.7° delta so the south-side shadow is visible in the camera
+            // frame. IBL stays at 0.66 (matches the two zenith keyframes).
+            lightRotation: [-0.35, 0, 0],
+            iblIntensity: 0.66,
+            meta: { dateLabel: 'Jun 21', days: 29 },
+            callout: {
+              label: 'Summer Solstice',
+              sublabel: 'Jun 21  ·  ~29 days from first zenith  ·  Sun at its northernmost',
+              tooltip: 'The Sun has tilted slightly north of zenith. A short south-side shadow appears at noon.',
+              lines: [
+                'Sun’s declination peaks at +23.4°.',
+                'Still very high — the south-side shadow is short.',
+                '29 days since the first zenith passage.'
+              ],
+              astro: {
+                azimuth: '≈ 180°',
+                altitude: '≈ 80° (exaggerated; real ≈ 89.3°)',
+                declination: '≈ +23.4°',
+                time: '~12:00 local'
+              }
+            }
+          },
+          {
+            id: 'sz-03',
+            name: 'Zenith 2',
+            url: '/assets/lesson_01/03.webp',
+            description: 'Sun directly overhead again — the second zenith passage.',
+            lightRotation: [-0.2, 0, 0],
+            iblIntensity: 0.66,
+            meta: { dateLabel: 'Jul 19', days: 57 },
+            callout: {
+              label: 'Zenith 2',
+              sublabel: 'Jul 19  ·  Second zenith passage  ·  57 days from start',
+              tooltip: 'The Sun returns to the zenith. The shadow shrinks back to zero.',
+              lines: [
+                'The mirror image of May 23.',
+                'No shadow at local solar noon.',
+                'The ritual year closes.'
+              ],
+              astro: {
+                azimuth: '≈ 180°',
+                altitude: '≈ 90°',
+                declination: '≈ +20.68°',
+                time: '~12:00 local'
+              }
+            }
+          }
         ]
       },
       {

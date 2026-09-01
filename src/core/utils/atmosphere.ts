@@ -32,6 +32,22 @@ export function sampleAtmosphere(keyframes: SkyKeyframe[], position: number): At
   const a = keyframes[indexA];
   const b = keyframes[indexB];
 
+  // directionalIntensity is optional per keyframe. If neither adjacent
+  // keyframe sets it, return undefined so the consumer can fall back to the
+  // lesson-level constant. If exactly one defines it, hold that value across
+  // the blend (no extrapolation from a missing endpoint). If both define it,
+  // lerp normally.
+  const dirA = a.directionalIntensity;
+  const dirB = b.directionalIntensity;
+  let directionalIntensity: number | undefined;
+  if (dirA !== undefined && dirB !== undefined) {
+    directionalIntensity = lerp(dirA, dirB, mix);
+  } else if (dirA !== undefined) {
+    directionalIntensity = dirA;
+  } else if (dirB !== undefined) {
+    directionalIntensity = dirB;
+  }
+
   return {
     indexA,
     indexB,
@@ -42,6 +58,7 @@ export function sampleAtmosphere(keyframes: SkyKeyframe[], position: number): At
       lerp(a.lightRotation[2], b.lightRotation[2], mix)
     ],
     iblIntensity: lerp(a.iblIntensity, b.iblIntensity, mix),
+    directionalIntensity,
     activeIndex: Math.min(n - 1, Math.max(0, Math.round(p) - 1))
   };
 }

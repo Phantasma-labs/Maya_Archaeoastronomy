@@ -41,7 +41,7 @@ export const LessonPage: React.FC = () => {
    * sun rotation, IBL intensity — is DERIVED from it via sampleAtmosphere.
    * There is deliberately no env/light React state to get out of sync.
    *
-   * Default is 1 (the snake-descent 1st-contact keyframe) so the lesson
+   * Default is 1 (the serpent-descent 1st-contact keyframe) so the lesson
    * opens on the focused serpent-shadow view. Other topics reset to step 3.
    */
   const [sliderPosition, setSliderPosition] = useState<number>(1);
@@ -55,18 +55,19 @@ export const LessonPage: React.FC = () => {
   /**
    * The selected topic id is lifted here so the page can swap the active
    * skyTimeline and reset the slider position when the user navigates
-   * between topics. Defaults to the Snake Descent topic (step 1) so the
+   * between topics. Defaults to the Serpent Descent topic (step 1) so the
    * lesson opens on the focused serpent-shadow view.
    */
   const [selectedTopicId, setSelectedTopicId] = useState<string>(() => {
     if (!lessonEntry) return '';
-    const snake = lessonEntry.config.content.topics.find((t) => t.id === 'snake-descent');
-    return snake ? snake.id : (lessonEntry.config.content.topics[0]?.id ?? '');
+    const serpent = lessonEntry.config.content.topics.find((t) => t.id === 'serpent-descent');
+    return serpent ? serpent.id : (lessonEntry.config.content.topics[0]?.id ?? '');
   });
 
   // The active skyTimeline is the selected topic's own (if it owns one)
-  // or the lesson's default 3-step timeline. Snake Descent owns a 2-step
-  // focused timeline; every other topic falls back to the lesson default.
+  // or the lesson's default 3-step timeline. Serpent Descent and Zenith
+  // each own a 2-step focused timeline; the Calendar topic falls back
+  // to the lesson default.
   const activeSkyTimeline = useMemo(() => {
     if (!lessonEntry) return [];
     const topic =
@@ -76,7 +77,8 @@ export const LessonPage: React.FC = () => {
   }, [lessonEntry, selectedTopicId]);
 
   // Whether to render the focused UI (slider, callout, sun blueprint):
-  // true only for topics that own their own skyTimeline (Snake Descent).
+  // true only for topics that own their own skyTimeline (Serpent Descent,
+  // Zenith).
   const showFocusedUI = useMemo(() => {
     if (!lessonEntry) return false;
     const topic = lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId);

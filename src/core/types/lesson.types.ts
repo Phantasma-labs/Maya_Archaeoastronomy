@@ -80,6 +80,26 @@ export interface SkyKeyframe {
   lightRotation: [number, number, number];
   /** IBL contribution (scene.environmentIntensity) at this keyframe. */
   iblIntensity: number;
+  /**
+   * Optional directional-light intensity multiplier at this keyframe. When
+   * omitted, the consumer falls back to the lesson-level
+   * `lighting.directional.intensity` constant. Set to 0 to fade the sun out
+   * (e.g. a day→night arc where IBL should stay constant).
+   */
+  directionalIntensity?: number;
+  /**
+   * Optional keyframe metadata for topic-specific pedagogical data. The
+   * Zenith topic uses this to carry the calendar date (`dateLabel`, e.g.
+   * "May 23") and a "days passed" counter (`days`) that the Atmosphere
+   * Timeline reads back into its step labels and right-side astro readout.
+   * Other topics ignore it.
+   */
+  meta?: {
+    /** Calendar date label, e.g. "May 23". */
+    dateLabel?: string;
+    /** Days elapsed since the timeline's first keyframe (0 at the start). */
+    days?: number;
+  };
   /** Optional pedagogical content shown when this keyframe is active. */
   callout?: StepCallout;
 }
@@ -155,8 +175,8 @@ export interface LearningTopic {
    * Optional focused-view skyTimeline. When present, this topic owns its
    * own Atmosphere Timeline (overrides the lesson's default) and the
    * overlay renders the focused UI (slider, callout, sun blueprint).
-   * Used by Snake Descent to scope the timeline to the two
-   * serpent-shadow keyframes (1st contact → The descent).
+   * Used by focused topics (Serpent Descent, Zenith) to scope the
+   * timeline to that topic's own keyframes and enable the focused UI.
    */
   skyTimeline?: SkyKeyframe[];
 }
@@ -211,6 +231,13 @@ export interface AtmosphereSample {
   lightRotation: [number, number, number];
   /** Interpolated IBL contribution → scene.environmentIntensity. */
   iblIntensity: number;
+  /**
+   * Interpolated directional-light intensity (resolved at the consumer:
+   * undefined when neither adjacent keyframe sets the field, in which case
+   * the lesson-level constant applies). Drives the sun's brightness across
+   * the timeline.
+   */
+  directionalIntensity: number | undefined;
   /** Nearest keyframe index (0-based) for UI "active" badges. */
   activeIndex: number;
 }

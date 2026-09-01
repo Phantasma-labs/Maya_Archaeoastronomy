@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -58,12 +58,6 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   // the immediate pedagogy; the guide is the on-demand reference.
   const [isFieldGuideOpen, setIsFieldGuideOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'topics' | 'monument'>('topics');
-  // Step 2's serpent-head hotspot popup — user-dismissed, defaults closed.
-  // The user opens it explicitly via the "Tap serpent head" link in the
-  // callout. No auto-open: the popup used to cover the slider area on
-  // landing at Step 2, which is what made the Step 2 click feel broken.
-  const [isHotspotOpen, setIsHotspotOpen] = useState<boolean>(false);
-
   const selectedTopic =
     config.content.topics.find((t) => t.id === selectedTopicId) || config.content.topics[0];
 
@@ -75,12 +69,59 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   const activeCallout = activeKeyframe?.callout;
   const calloutLines = activeCallout?.lines ?? [];
 
+  // Step 2's serpent-head hotspot popup — user-dismissed, defaults closed.
+  // The user opens it explicitly via the "Tap serpent head" link in the
+  // callout. No auto-open: the popup used to cover the slider area on
+  // landing at Step 2, which is what made the Step 2 click feel broken.
+  const [isHotspotOpen, setIsHotspotOpen] = useState<boolean>(false);
+  const hotspotDialogRef = useRef<HTMLDivElement>(null);
+  const hotspotTriggerRef = useRef<HTMLButtonElement>(null);
+
+  const closeHotspot = useCallback(() => {
+    setIsHotspotOpen(false);
+    hotspotTriggerRef.current?.focus();
+  }, []);
+
+  // Focus management for the hotspot dialog (V02 Phase E): move focus into
+  // the dialog when it opens; explicit dismissal (X / Escape) returns focus
+  // to the trigger. A keyframe change closes the dialog without restoring
+  // focus (the trigger may no longer exist).
+  useEffect(() => {
+    if (isHotspotOpen) {
+      hotspotDialogRef.current?.focus();
+    }
+  }, [isHotspotOpen]);
+
+  useEffect(() => {
+    if (!isHotspotOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeHotspot();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isHotspotOpen, closeHotspot]);
+
+  // Close the popup when the active keyframe changes — its hotspot may no
+  // longer apply (e.g. the user dragged to a step without one).
+  useEffect(() => {
+    setIsHotspotOpen(false);
+  }, [activeKeyframe?.id]);
+
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col p-4 md:p-6 z-20">
       {/* Bottom vignette — grounds the instrument against the sky so the
           panel reads as an instrument, not a floating card (V02 design plan
           §4). Earlier sibling of the instrument, so it paints beneath it. */}
       <div className="absolute inset-x-0 bottom-0 h-32 md:h-40 bg-gradient-to-t from-maya-bg/70 via-maya-bg/30 to-transparent pointer-events-none" />
+
+      {/* Skip link — keyboard users jump straight to the observation
+          instrument, past the 3D canvas (V02 Phase E). */}
+      <a
+        href="#lesson-instrument"
+        className="sr-only focus:not-sr-only focus:pointer-events-auto focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-maya-gold focus:text-maya-bg focus:text-sm focus:font-medium"
+      >
+        Skip to the observation instrument
+      </a>
 
       {/* Top Navigation Bar */}
       <header className="flex items-center justify-between gap-4 pointer-events-auto">
@@ -278,9 +319,18 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           data; the Calendar topic falls back to the lesson default timeline,
           so no topic ever lands on a dead panel (V02 design plan §4). */}
       <div className="pointer-events-auto mt-auto">
-        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-maya-surface border border-maya-gold/40 rounded-2xl px-4 py-3 shadow-2xl animate-fadeIn">
-          {/* Left — contextual callout (1st contact / The descent) */}
-          <div className="min-w-0 text-left" title={activeCallout?.tooltip} aria-live="polite">
+        <div
+          id="lesson-instrument"
+          className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-maya-surface border border-maya-gold/40 rounded-2xl px-3 py-2.5 md:px-4 md:py-3 shadow-2xl animate-fadeIn"
+        >
+          {/* Left — contextual callout (1st contact / The descent). On mobile
+              the timeline is the primary control, so it stacks first (V02
+              Phase E bottom-sheet behavior). */}
+          <div
+            className="min-w-0 text-left order-2 md:order-1"
+            title={activeCallout?.tooltip}
+            aria-live="polite"
+          >
             {activeCallout && (
               <>
                 <h2 className="font-serif text-base md:text-lg font-bold text-maya-cream leading-tight mb-0.5">
@@ -309,6 +359,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                 )}
                 {activeCallout.hotspot && (
                   <button
+                    ref={hotspotTriggerRef}
                     type="button"
                     onClick={() => setIsHotspotOpen(true)}
                     className="inline-flex items-center gap-1.5 text-[11px] font-medium text-maya-gold hover:text-maya-goldLight transition-colors cursor-pointer"
@@ -328,7 +379,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
               both zenith passes (`03.webp`), Step 2 is the solstice
               (`03before.webp`). IBL stays at 0.66 across the three so the
               only thing that changes is the directional sun rotation. */}
-          <div className="w-full min-w-0">
+          <div className="w-full min-w-0 order-1 md:order-2">
             <AtmosphereTimeline
               keyframes={skyTimeline}
               value={sliderPosition}
@@ -343,7 +394,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           </div>
 
           {/* Right — observation log for the active step */}
-          <div className="min-w-0 flex flex-col items-end gap-1.5 text-right">
+          <div className="min-w-0 flex flex-col items-end gap-1.5 text-right order-3">
             <div className="flex items-center gap-2">
               <h3 className="font-serif text-sm font-bold text-maya-cream">
                 Sun · Astronomical Data
@@ -385,6 +436,8 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           via the "Tap serpent head" link in the callout (no auto-open). */}
       {isHotspotOpen && activeCallout?.hotspot && (
         <div
+          ref={hotspotDialogRef}
+          tabIndex={-1}
           className="pointer-events-auto absolute right-4 md:right-6 top-32 max-w-xs bg-maya-surface/95 backdrop-blur-xl border-2 border-maya-gold rounded-2xl p-4 shadow-2xl shadow-maya-gold/20 text-maya-text animate-fadeIn z-30"
           role="dialog"
           aria-labelledby="hotspot-title"
@@ -399,7 +452,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
             </h3>
             <button
               type="button"
-              onClick={() => setIsHotspotOpen(false)}
+              onClick={closeHotspot}
               className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
               aria-label="Dismiss"
             >

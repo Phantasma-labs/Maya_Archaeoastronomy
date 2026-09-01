@@ -118,7 +118,10 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
   // the overflow where the percentage-based centering pushed the step-2
   // marker and the thumb past the track boundary.
   const trackInsetRatio = N > 1 ? (value - 1) / (N - 1) : 0;
-  const thumbInsetRem = 0.5; // 8px — matches the thumb's half-width
+  // 0.75rem = 12px — half of the 24px thumb hit area (V02 Phase E: touch
+  // targets ≥ 24px). The visual knob inside is 16px; the inset keeps the
+  // full hit area inside the track at both extremes.
+  const thumbInsetRem = 0.75;
   const trackInsetStyle = (axis: 'left' | 'width') => ({
     [axis]: `calc(${thumbInsetRem}rem + (100% - ${thumbInsetRem * 2}rem) * ${trackInsetRatio})`
   });
@@ -170,25 +173,33 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
                 title={titleText}
                 aria-label={`Sweep to ${displayLabel(keyframe)}`}
                 onClick={() => onStepSelect(step)}
-                className={`pointer-events-auto w-3 h-3 rotate-45 border transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-maya-gold border-maya-goldLight scale-110'
-                    : 'bg-maya-surface border-maya-gold/50 hover:border-maya-gold hover:bg-maya-goldDark/50'
-                }`}
-              />
+                className="pointer-events-auto w-6 h-6 flex items-center justify-center cursor-pointer"
+              >
+                {/* 12px visual diamond inside a 24px hit area (V02 Phase E). */}
+                <span
+                  className={`w-3 h-3 rotate-45 border transition-all ${
+                    isActive
+                      ? 'bg-maya-gold border-maya-goldLight scale-110'
+                      : 'bg-maya-surface border-maya-gold/50 hover:border-maya-gold hover:bg-maya-goldDark/50'
+                  }`}
+                />
+              </button>
             );
           })}
         </div>
         {/* Thumb (draggable handle — captures its own pointer so it stays
             grabbable even when it overlaps a step marker at the extremes) */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-maya-goldLight border-2 border-maya-gold shadow-[0_0_10px_rgba(212,175,55,0.45)] pointer-events-auto cursor-grab active:cursor-grabbing touch-none"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 flex items-center justify-center pointer-events-auto cursor-grab active:cursor-grabbing touch-none"
           style={trackInsetStyle('left')}
           onPointerDown={handleThumbPointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={endDrag}
           onPointerCancel={endDrag}
-        />
+        >
+          {/* 16px visual knob inside a 24px hit area (V02 Phase E). */}
+          <div className="w-4 h-4 rounded-full bg-maya-goldLight border-2 border-maya-gold shadow-[0_0_10px_rgba(212,175,55,0.45)]" />
+        </div>
       </div>
 
       {/* Step labels — flex justify-between with edge-aligned text so labels

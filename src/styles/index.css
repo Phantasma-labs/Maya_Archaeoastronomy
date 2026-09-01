@@ -74,3 +74,19 @@ body,
 .animate-fadeIn {
   animation: fadeIn 0.25s ease-out forwards;
 }
+
+/* Reduced Motion — respect the OS-level preference (V02 Phase E). The
+   timeline sweep is handled in JS (LessonPage jumps straight to the step);
+   this kills the CSS fadeIn/translate entrance animations. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fadeIn {
+    animation: none;
+  }
+}
+
+/* Global focus ring — keyboard users get a visible gold outline on every
+   interactive element; mouse users see nothing (focus-visible only). */
+:focus-visible {
+  outline: 2px solid rgba(212, 175, 55, 0.7);
+  outline-offset: 2px;
+}

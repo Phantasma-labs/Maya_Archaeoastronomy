@@ -84,11 +84,11 @@ export const lesson01Config: LessonConfig = {
             label: 'The descent',
             sublabel: 'Apr 9 / Sep 2  ·  73 days from summer solstice',
             tooltip:
-              'All 9 triangles lock in. Kukulcán’s body is complete. 73 × 8 = 584 — the Venus period.',
+              'All 9 triangles lock in. Kukulcán’s body is complete. 73 × 8 = 584 — the Venus synodic period.',
             lines: [
               '9 triangles = 9 terraces.',
               '73 days × 8 = 584 days.',
-              '584 days = 1 Venus year.',
+              '584 days = 1 Venus synodic cycle.',
               'The serpent descends. Venus is encoded.'
             ],
             prompt: '→ Drag to Step 3 to open the zenith gate'

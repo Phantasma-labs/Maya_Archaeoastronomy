@@ -52,9 +52,10 @@ visibly suffers from the LDR ceiling — none does today.
 ### 4.3 — Content pipeline
 
 `docs/PROJECT.md` cites `LearningMaterial/lesson_01.md` as the vetted source
-text, but the folder is missing (TECH_DEBT V2-3). When it exists, the goal is to
-generate lesson `content` blocks from the vetted Markdown instead of
-hand-duplicating facts into `config.ts`. Defer until V2-3 is resolved.
+text — the folder was restored byte-exact from git on 2026-09-01 (TECH_DEBT
+V2-3 resolved). The goal is now unblocked: generate lesson `content` blocks from
+the vetted Markdown instead of hand-duplicating facts into `config.ts`. Still
+future work — no pipeline exists yet.
 
 ### 4.4 — Guardrails
 

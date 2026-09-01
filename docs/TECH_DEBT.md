@@ -7,15 +7,6 @@ history.
 
 ## Active issues (2026-09-01)
 
-### P1 — High
-
-- **V2-3 — `LearningMaterial/` missing.** `docs/PROJECT.md` cites
-  `LearningMaterial/lesson_01.md` as the vetted source text, but the folder does
-  not exist in the repo. The lesson copy in `config.ts` is the de-facto source;
-  the vetted text must be located or recreated before any content edits.
-  **Why:** content accuracy and the scholarly-caution tone depend on a vetted
-  source; we are currently editing from memory of the original write.
-
 ### P3 — Low
 
 - **V2-6 — `@` path alias unused.** Configured in `vite.config.ts` +
@@ -68,6 +59,12 @@ history.
 | V2-4 | Zenith feature loose ends | `AtmosphereTimeline` consumes `SkyKeyframe.meta.dateLabel`; orphan skies + scratch files deleted |
 | V2-5 | `hotspot.anchor` dead config | **Superseded:** the serpent-head hotspot feature (in-scene marker, "Tap serpent head" link, popup dialog) was removed from lesson 01 as a design decision. The `hotspot` field and `hotspotAnchor` were dropped from the core types and `sampleAtmosphere`; `HOTSPOT_ANCHORS` and the dialog UI are deleted. |
 | V2-9 | Accessibility gaps | `prefers-reduced-motion` honored; touch targets ≥ 24 px; skip links on landing + lesson; `select-none` removed from lesson/overlay roots; global `:focus-visible` ring; contrast audit passes WCAG AA. (The hotspot dialog's focus management was removed with the hotspot feature — see V2-5.) |
+
+### Resolved by V02 cleanup pass (2026-09-01)
+
+| ID | Item | Resolution |
+|---|---|---|
+| V2-3 | `LearningMaterial/lesson_01.md` missing | Restored byte-exact from git blob `f507112b` (the file was deleted as collateral in `8505f18`); one copy drift fixed in `config.ts` — the 584-day line now reads "Venus synodic cycle" per the vetted doc's caution (584 is the synodic period as observed from Earth, not the orbital period). |
 
 ## How to add to this file
 

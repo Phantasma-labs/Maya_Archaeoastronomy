@@ -31,23 +31,9 @@ those references; new items carry the `V2-` prefix.
   `LearningMaterial/lesson_01.md` as the vetted source text, but the folder does not
   exist in the repo. The lesson copy in `config.ts` is the de-facto source; the vetted
   text must be located or recreated before content edits.
-- **V2-4 — Zenith feature loose ends.** The feature shipped (commit `c844c87`), but:
-  `SkyKeyframe.meta.dateLabel`/`days` are populated yet **not consumed** by
-  `AtmosphereTimeline` (step labels still come from `callout.label`); `03after.webp`
-  and `04.webp` are unreferenced; `overlay-raw.txt` / `tsc-output.txt` scratch files
-  sit in the repo root.
-
-### P2 — Medium
-
-- **V2-9 — Accessibility gaps.** No `prefers-reduced-motion` handling (sweep, fades);
-  small touch targets (12 px step markers, 16 px slider thumb); no focus management for
-  the hotspot dialog; no skip link; `select-none` on the lesson page root blocks
-  selecting educational text.
 
 ### P3 — Low
 
-- **V2-5 — `hotspot.anchor` is dead config.** Defined in `StepCallout`, populated in
-  config, never rendered. Either consume it (in-scene marker) or remove it.
 - **V2-6 — `@` path alias unused.** Configured in `vite.config.ts` + `tsconfig.json`,
   no imports use it.
 - **V2-7 — AGENTS.md stale references.** Still lists `runtimeState: any` in
@@ -64,3 +50,20 @@ those references; new items carry the `V2-` prefix.
 - **V2-8 — ErrorFallback hardcoded hex.** `LoadingScreen.tsx` error UI moved onto the
   palette (`bg-maya-bg`, Tailwind red status colors), matching the emerald/stone
   status-color convention used elsewhere.
+
+## Resolved by V02 Phases C–F (2026-09-01)
+
+- **V2-4 — Zenith feature loose ends.** `AtmosphereTimeline` now consumes
+  `SkyKeyframe.meta.dateLabel` as the primary step label (Phase C); the orphan skies
+  `03after.webp` / `04.webp` and the `overlay-raw.txt` / `tsc-output.txt` scratch files
+  were deleted (Phase F).
+- **V2-5 — `hotspot.anchor` dead config.** `AtmosphereSample` now carries
+  `hotspotAnchor` (derived in `sampleAtmosphere`); `Lesson01Scene` renders an in-scene
+  gold marker at the anchor position (Phase D). The serpent-descent topic's Step 2 also
+  gained the Kukulcán hotspot so the marker is reachable in the primary topic.
+- **V2-9 — Accessibility gaps.** `prefers-reduced-motion` honored (sweep jumps, CSS
+  fades disabled); touch targets ≥ 24 px (step markers, slider thumb); hotspot dialog
+  focus management + Escape-to-close; skip links on landing + lesson; `select-none`
+  removed from lesson/overlay roots; global `:focus-visible` ring; contrast audit
+  passes WCAG AA. Remaining: no full focus trap in the hotspot dialog (intentional —
+  it is a lightweight popup, not a modal), no automated a11y testing.

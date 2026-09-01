@@ -77,6 +77,11 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col p-4 md:p-6 z-20">
+      {/* Bottom vignette — grounds the instrument against the sky so the
+          panel reads as an instrument, not a floating card (V02 design plan
+          §4). Earlier sibling of the instrument, so it paints beneath it. */}
+      <div className="absolute inset-x-0 bottom-0 h-32 md:h-40 bg-gradient-to-t from-maya-bg/70 via-maya-bg/30 to-transparent pointer-events-none" />
+
       {/* Top Navigation Bar */}
       <header className="flex items-center justify-between gap-4 pointer-events-auto">
         <div className="flex items-center gap-3">

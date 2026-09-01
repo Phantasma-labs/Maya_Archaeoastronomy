@@ -48,6 +48,8 @@ export function sampleAtmosphere(keyframes: SkyKeyframe[], position: number): At
     directionalIntensity = dirB;
   }
 
+  const activeIndex = Math.min(n - 1, Math.max(0, Math.round(p) - 1));
+
   return {
     indexA,
     indexB,
@@ -59,6 +61,7 @@ export function sampleAtmosphere(keyframes: SkyKeyframe[], position: number): At
     ],
     iblIntensity: lerp(a.iblIntensity, b.iblIntensity, mix),
     directionalIntensity,
-    activeIndex: Math.min(n - 1, Math.max(0, Math.round(p) - 1))
+    activeIndex,
+    hotspotAnchor: keyframes[activeIndex].callout?.hotspot?.anchor
   };
 }

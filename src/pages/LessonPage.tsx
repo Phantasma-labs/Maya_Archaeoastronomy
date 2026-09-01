@@ -118,6 +118,13 @@ export const LessonPage: React.FC = () => {
       cancelSweep();
       const from = positionRef.current;
       if (Math.abs(step - from) < 0.0001) return;
+      // Respect prefers-reduced-motion: jump straight to the step instead of
+      // the ~0.6s eased sweep (V02 Phase E).
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        positionRef.current = step;
+        setSliderPosition(step);
+        return;
+      }
       const start = performance.now();
       const tick = (now: number) => {
         const t = Math.min((now - start) / SWEEP_MS, 1);

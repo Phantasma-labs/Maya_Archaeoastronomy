@@ -18,6 +18,15 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-maya-bg text-maya-text flex flex-col selection:bg-maya-gold/30 selection:text-maya-cream">
+      {/* Skip link — keyboard users jump straight to the expedition catalog
+          (V02 Phase E). */}
+      <a
+        href="#expeditions"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-maya-gold focus:text-maya-bg focus:text-sm focus:font-medium"
+      >
+        Skip to expeditions
+      </a>
+
       {/* Top Header */}
       <header className="border-b border-maya-gold/20 bg-maya-bg/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -88,7 +97,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Expedition Catalog */}
-      <main className="flex-1 max-w-7xl mx-auto px-6 pb-24 w-full">
+      <main id="expeditions" className="flex-1 max-w-7xl mx-auto px-6 pb-24 w-full">
         <div className="flex items-end justify-between mb-8 border-b border-white/10 pb-4">
           <div>
             <h3 className="font-serif text-xl sm:text-2xl font-bold text-maya-cream">

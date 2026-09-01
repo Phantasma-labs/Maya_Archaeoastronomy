@@ -190,11 +190,22 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         </button>
       </div>
 
-      {/* Field Guide panel — the lesson's reference material, on demand. */}
+      {/* Field Guide panel — the lesson's reference material, on demand.
+          Desktop (lg+): inline in the overlay column, max-h sized to the
+          viewport (the 16:9 frame leaves plenty of vertical room).
+          Tablet (md): slide-over anchored top-left, leaving room for the
+          bottom instrument and not crowding the 16:9 frame's narrow height
+          (V02 design plan §5 — "field guide becomes a slide-over").
+          Mobile (no md): full-screen sheet covering everything except the
+          top header — the 16:9 frame on portrait is too small to host the
+          panel inline with the bottom instrument. */}
       {isFieldGuideOpen && (
         <aside
           id="field-guide"
-          className="pointer-events-auto self-start max-w-lg w-full bg-maya-surface/90 backdrop-blur-xl border border-maya-gold/30 rounded-2xl p-5 shadow-2xl mt-4 max-h-[calc(100vh-140px)] flex flex-col overflow-hidden text-maya-text animate-fadeIn"
+          className="pointer-events-auto bg-maya-surface/95 backdrop-blur-xl border border-maya-gold/30 rounded-2xl p-5 shadow-2xl max-h-[calc(100vh-140px)] flex flex-col overflow-hidden text-maya-text animate-fadeIn z-10
+            fixed inset-x-3 top-32 bottom-3
+            md:absolute md:inset-x-auto md:left-6 md:right-auto md:bottom-32 md:w-[26rem] md:max-w-none
+            lg:static lg:w-full lg:max-w-lg lg:max-h-[calc(100vh-200px)] lg:mt-4 lg:z-auto"
         >
           {/* Panel header */}
           <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
@@ -336,7 +347,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           topics (Serpent Descent, Zenith) use their own timeline and astro
           data; the Calendar topic falls back to the lesson default timeline,
           so no topic ever lands on a dead panel (V02 design plan §4). */}
-      <div className="pointer-events-auto mt-auto">
+      <div className={`pointer-events-auto mt-auto ${isFieldGuideOpen ? 'hidden md:block' : ''}`}>
         <div
           id="lesson-instrument"
           className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-maya-surface border border-maya-gold/40 rounded-2xl px-3 py-2.5 md:px-4 md:py-3 shadow-2xl animate-fadeIn"
@@ -456,7 +467,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         <div
           ref={hotspotDialogRef}
           tabIndex={-1}
-          className="pointer-events-auto absolute right-4 md:right-6 top-32 max-w-xs bg-maya-surface/95 backdrop-blur-xl border-2 border-maya-gold rounded-2xl p-4 shadow-2xl shadow-maya-gold/20 text-maya-text animate-fadeIn z-30"
+          className="pointer-events-auto absolute left-4 right-4 top-20 md:left-auto md:right-6 md:top-32 md:max-w-xs md:w-auto bg-maya-surface/95 backdrop-blur-xl border-2 border-maya-gold rounded-2xl p-4 shadow-2xl shadow-maya-gold/20 text-maya-text animate-fadeIn z-30"
           role="dialog"
           aria-labelledby="hotspot-title"
         >

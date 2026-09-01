@@ -31,8 +31,9 @@ interface Lesson01OverlayProps {
   onSelectTopic: (id: string) => void;
   /** Active skyTimeline: the selected topic's own, or the lesson default. */
   skyTimeline: SkyKeyframe[];
-  /** Show the focused UI (slider, callout, sun blueprint) — only true
-   *  for topics that own a skyTimeline (Serpent Descent, Zenith). */
+  /** True for topics that own a skyTimeline (Serpent Descent, Zenith).
+   *  Used to phrase the right-hand observation log when a step carries no
+   *  astro data — the instrument itself renders for every topic. */
   showFocusedUI: boolean;
 }
 
@@ -52,7 +53,10 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   skyTimeline,
   showFocusedUI
 }) => {
-  const [isStudyPanelOpen, setIsStudyPanelOpen] = useState<boolean>(true);
+  // Field Guide panel — collapsible, defaults CLOSED so the scene is the
+  // subject on entry (V02 design plan §4). The bottom instrument carries
+  // the immediate pedagogy; the guide is the on-demand reference.
+  const [isFieldGuideOpen, setIsFieldGuideOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'topics' | 'monument'>('topics');
   // Step 2's serpent-head hotspot popup — user-dismissed, defaults closed.
   // The user opens it explicitly via the "Tap serpent head" link in the
@@ -64,7 +68,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
     config.content.topics.find((t) => t.id === selectedTopicId) || config.content.topics[0];
 
   // Nearest timeline keyframe — drives the contextual callout and the
-  // right-side sun blueprint. Uses the active skyTimeline (topic-owned
+  // right-side observation log. Uses the active skyTimeline (topic-owned
   // or lesson default) passed in by LessonPage.
   const activeIndex = Math.min(Math.max(Math.round(sliderPosition) - 1, 0), skyTimeline.length - 1);
   const activeKeyframe = skyTimeline[activeIndex];
@@ -72,7 +76,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   const calloutLines = activeCallout?.lines ?? [];
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex flex-col p-4 md:p-6 select-none z-20">
+    <div className="pointer-events-none absolute inset-0 flex flex-col p-4 md:p-6 z-20">
       {/* Top Navigation Bar */}
       <header className="flex items-center justify-between gap-4 pointer-events-auto">
         <div className="flex items-center gap-3">
@@ -100,66 +104,71 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         </div>
       </header>
 
-      {/* Curriculum toggle — sits beneath the header row, below All Lessons. */}
+      {/* Field Guide toggle — sits beneath the header row, below All Lessons. */}
       <div className="pointer-events-auto mt-3 self-start">
         <button
-          onClick={() => setIsStudyPanelOpen(!isStudyPanelOpen)}
+          onClick={() => setIsFieldGuideOpen(!isFieldGuideOpen)}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
-            isStudyPanelOpen
+            isFieldGuideOpen
               ? 'bg-maya-gold/20 border-maya-gold text-maya-cream'
               : 'bg-maya-surface/85 border-maya-gold/20 text-maya-text hover:border-maya-gold/50'
           }`}
-          aria-expanded={isStudyPanelOpen}
-          aria-controls="curriculum-drawer"
+          aria-expanded={isFieldGuideOpen}
+          aria-controls="field-guide"
         >
           <BookOpen className="w-4 h-4 text-maya-gold" />
-          <span>Curriculum</span>
+          <span>Field Guide</span>
           <ChevronRight
             className={`w-3.5 h-3.5 text-maya-gold transition-transform ${
-              isStudyPanelOpen ? 'rotate-90' : ''
+              isFieldGuideOpen ? 'rotate-90' : ''
             }`}
           />
         </button>
       </div>
 
-      {/* Main Interactive Pedagogical Drawer / Overlay */}
-      {isStudyPanelOpen && (
+      {/* Field Guide panel — the lesson's reference material, on demand. */}
+      {isFieldGuideOpen && (
         <aside
-          id="curriculum-drawer"
+          id="field-guide"
           className="pointer-events-auto self-start max-w-lg w-full bg-maya-surface/90 backdrop-blur-xl border border-maya-gold/30 rounded-2xl p-5 shadow-2xl mt-4 max-h-[calc(100vh-140px)] flex flex-col overflow-hidden text-maya-text animate-fadeIn"
         >
-          {/* Tab Navigation */}
+          {/* Panel header */}
           <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setActiveTab('topics')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  activeTab === 'topics'
-                    ? 'bg-maya-gold/20 text-maya-cream border border-maya-gold/40'
-                    : 'text-maya-textDim hover:text-maya-text'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-maya-gold" />
-                Astronomical Alignments
-              </button>
-              <button
-                onClick={() => setActiveTab('monument')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                  activeTab === 'monument'
-                    ? 'bg-maya-gold/20 text-maya-cream border border-maya-gold/40'
-                    : 'text-maya-textDim hover:text-maya-text'
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5 text-maya-gold" />
-                Architecture
-              </button>
-            </div>
-
+            <h2 className="font-serif text-sm font-bold text-maya-cream tracking-wide">
+              Field Guide
+            </h2>
             <button
-              onClick={() => setIsStudyPanelOpen(false)}
-              className="text-maya-textDim hover:text-white text-xs px-2 py-1 rounded hover:bg-white/5 cursor-pointer"
+              onClick={() => setIsFieldGuideOpen(false)}
+              className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
+              aria-label="Close field guide"
             >
-              Minimize
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setActiveTab('topics')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                activeTab === 'topics'
+                  ? 'bg-maya-gold/20 text-maya-cream border border-maya-gold/40'
+                  : 'text-maya-textDim hover:text-maya-text'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-maya-gold" />
+              Astronomical Alignments
+            </button>
+            <button
+              onClick={() => setActiveTab('monument')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                activeTab === 'monument'
+                  ? 'bg-maya-gold/20 text-maya-cream border border-maya-gold/40'
+                  : 'text-maya-textDim hover:text-maya-text'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5 text-maya-gold" />
+              Architecture
             </button>
           </div>
 
@@ -258,113 +267,118 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         </aside>
       )}
 
-      {/* Footer Dashboard — single row: left callout · center Atmosphere Timeline · right Sun astronomical data.
-          Only rendered for focused-mode topics (Serpent Descent, Zenith). Anchored to the bottom of the 16:9 frame. */}
-      {showFocusedUI && (
-        <div className="pointer-events-auto mt-auto">
-          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-maya-surface border border-maya-gold/40 rounded-2xl px-4 py-3 shadow-2xl animate-fadeIn">
-            {/* Left — contextual callout (1st contact / The descent) */}
-            <div className="min-w-0 text-left" title={activeCallout?.tooltip} aria-live="polite">
-              {activeCallout && (
-                <>
-                  <h2 className="font-serif text-base md:text-lg font-bold text-maya-cream leading-tight mb-0.5">
-                    {activeCallout.label ?? activeKeyframe?.name}
-                  </h2>
-                  {activeCallout.sublabel && (
-                    <p className="text-[11px] font-mono text-maya-textDim mb-1.5">
-                      {activeCallout.sublabel}
-                    </p>
-                  )}
-                  {calloutLines.length > 0 && (
-                    <div className="space-y-1 border-l-2 border-maya-gold/50 pl-2.5 mb-1.5">
-                      {calloutLines.map((line, i) => (
-                        <p
-                          key={i}
-                          className={`text-[12px] leading-snug ${
-                            i === calloutLines.length - 1
-                              ? 'text-maya-cream font-medium'
-                              : 'text-maya-textDim'
-                          }`}
-                        >
-                          {line}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                  {activeCallout.hotspot && (
-                    <button
-                      type="button"
-                      onClick={() => setIsHotspotOpen(true)}
-                      className="inline-flex items-center gap-1.5 text-[11px] font-medium text-maya-gold hover:text-maya-goldLight transition-colors cursor-pointer"
-                    >
-                      <Hand className="w-3.5 h-3.5" />
-                      Tap serpent head — {activeCallout.hotspot.label}
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
+      {/* Bottom instrument — single row: left callout · center Atmosphere
+          Timeline · right observation log. Rendered for EVERY topic: focused
+          topics (Serpent Descent, Zenith) use their own timeline and astro
+          data; the Calendar topic falls back to the lesson default timeline,
+          so no topic ever lands on a dead panel (V02 design plan §4). */}
+      <div className="pointer-events-auto mt-auto">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-maya-surface border border-maya-gold/40 rounded-2xl px-4 py-3 shadow-2xl animate-fadeIn">
+          {/* Left — contextual callout (1st contact / The descent) */}
+          <div className="min-w-0 text-left" title={activeCallout?.tooltip} aria-live="polite">
+            {activeCallout && (
+              <>
+                <h2 className="font-serif text-base md:text-lg font-bold text-maya-cream leading-tight mb-0.5">
+                  {activeCallout.label ?? activeKeyframe?.name}
+                </h2>
+                {activeCallout.sublabel && (
+                  <p className="text-[11px] font-mono text-maya-textDim mb-1.5">
+                    {activeCallout.sublabel}
+                  </p>
+                )}
+                {calloutLines.length > 0 && (
+                  <div className="space-y-1 border-l-2 border-maya-gold/50 pl-2.5 mb-1.5">
+                    {calloutLines.map((line, i) => (
+                      <p
+                        key={i}
+                        className={`text-[12px] leading-snug ${
+                          i === calloutLines.length - 1
+                            ? 'text-maya-cream font-medium'
+                            : 'text-maya-textDim'
+                        }`}
+                      >
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                )}
+                {activeCallout.hotspot && (
+                  <button
+                    type="button"
+                    onClick={() => setIsHotspotOpen(true)}
+                    className="inline-flex items-center gap-1.5 text-[11px] font-medium text-maya-gold hover:text-maya-goldLight transition-colors cursor-pointer"
+                  >
+                    <Hand className="w-3.5 h-3.5" />
+                    Tap serpent head — {activeCallout.hotspot.label}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
 
-            {/* Center — Atmosphere Timeline (single environment control, ADR-001).
-                All focused-mode topics (Serpent Descent, Zenith) share the same
-                linear slider. The Zenith timeline's three keyframes (May 23,
-                Jun 21, Jul 19) sit on a horizontal track; Step 1 / Step 3 are
-                both zenith passes (`03.webp`), Step 2 is the solstice
-                (`03before.webp`). IBL stays at 0.66 across the three so the
-                only thing that changes is the directional sun rotation. */}
-            <div className="w-full min-w-0">
-              <AtmosphereTimeline
-                keyframes={skyTimeline}
-                value={sliderPosition}
-                onLiveChange={onSliderPositionChange}
-                onStepSelect={onStepSelect}
-              />
-              {activeCallout?.prompt && (
-                <p className="mt-2 text-center text-[11px] text-maya-gold font-medium">
-                  {activeCallout.prompt}
-                </p>
-              )}
-            </div>
+          {/* Center — Atmosphere Timeline (single environment control, ADR-001).
+              All focused-mode topics (Serpent Descent, Zenith) share the same
+              linear slider. The Zenith timeline's three keyframes (May 23,
+              Jun 21, Jul 19) sit on a horizontal track; Step 1 / Step 3 are
+              both zenith passes (`03.webp`), Step 2 is the solstice
+              (`03before.webp`). IBL stays at 0.66 across the three so the
+              only thing that changes is the directional sun rotation. */}
+          <div className="w-full min-w-0">
+            <AtmosphereTimeline
+              keyframes={skyTimeline}
+              value={sliderPosition}
+              onLiveChange={onSliderPositionChange}
+              onStepSelect={onStepSelect}
+            />
+            {activeCallout?.prompt && (
+              <p className="mt-2 text-center text-[11px] text-maya-gold font-medium">
+                {activeCallout.prompt}
+              </p>
+            )}
+          </div>
 
-            {/* Right — Sun astronomical data for the active step */}
-            <div className="min-w-0 flex flex-col items-end gap-1.5 text-right">
-              <div className="flex items-center gap-2">
-                <h3 className="font-serif text-sm font-bold text-maya-cream">
-                  Sun · Astronomical Data
-                </h3>
-                <Sun className="w-4 h-4 text-maya-gold" />
-              </div>
-              {activeCallout?.astro ? (
-                <dl className="space-y-1 text-[11px] font-mono text-maya-textDim">
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-maya-textDim">Azimuth</dt>
-                    <dd className="text-maya-gold">{activeCallout.astro.azimuth}</dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-maya-textDim">Altitude</dt>
-                    <dd className="text-maya-gold">{activeCallout.astro.altitude}</dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-maya-textDim">Declination</dt>
-                    <dd className="text-maya-gold">{activeCallout.astro.declination}</dd>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <dt className="text-maya-textDim">Local time</dt>
-                    <dd className="text-maya-gold">{activeCallout.astro.time}</dd>
-                  </div>
-                </dl>
-              ) : (
-                <p className="text-[11px] text-maya-textDim">No astronomical data</p>
-              )}
+          {/* Right — observation log for the active step */}
+          <div className="min-w-0 flex flex-col items-end gap-1.5 text-right">
+            <div className="flex items-center gap-2">
+              <h3 className="font-serif text-sm font-bold text-maya-cream">
+                Sun · Astronomical Data
+              </h3>
+              <Sun className="w-4 h-4 text-maya-gold" />
             </div>
+            {activeCallout?.astro ? (
+              <dl className="space-y-1 text-[11px] font-mono text-maya-textDim">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-maya-textDim">Azimuth</dt>
+                  <dd className="text-maya-gold">{activeCallout.astro.azimuth}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-maya-textDim">Altitude</dt>
+                  <dd className="text-maya-gold">{activeCallout.astro.altitude}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-maya-textDim">Declination</dt>
+                  <dd className="text-maya-gold">{activeCallout.astro.declination}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-maya-textDim">Local time</dt>
+                  <dd className="text-maya-gold">{activeCallout.astro.time}</dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="text-[11px] text-maya-textDim">
+                {showFocusedUI
+                  ? 'No astronomical data for this step'
+                  : 'Select Serpent Descent or Zenith for focused astronomical data'}
+              </p>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Step 2 — Serpent-head hotspot popup. Only renders when the active
           keyframe provides hotspot content (currently Step 2). User-opened
           via the "Tap serpent head" link in the callout (no auto-open). */}
-      {showFocusedUI && isHotspotOpen && activeCallout?.hotspot && (
+      {isHotspotOpen && activeCallout?.hotspot && (
         <div
           className="pointer-events-auto absolute right-4 md:right-6 top-32 max-w-xs bg-maya-surface/95 backdrop-blur-xl border-2 border-maya-gold rounded-2xl p-4 shadow-2xl shadow-maya-gold/20 text-maya-text animate-fadeIn z-30"
           role="dialog"

@@ -9,8 +9,6 @@ history.
 
 ### P3 — Low
 
-- **V2-6 — `@` path alias unused.** Configured in `vite.config.ts` +
-  `tsconfig.json`, no imports use it. Either remove or apply. Trivial.
 - **V2-7 — AGENTS.md stale references.** Still lists `runtimeState: any` in
   `registry.ts` and unused `clsx` as registered debt; both resolved long ago.
   One-pass doc cleanup.
@@ -65,6 +63,7 @@ history.
 | ID | Item | Resolution |
 |---|---|---|
 | V2-3 | `LearningMaterial/lesson_01.md` missing | Restored byte-exact from git blob `f507112b` (the file was deleted as collateral in `8505f18`); one copy drift fixed in `config.ts` — the 584-day line now reads "Venus synodic cycle" per the vetted doc's caution (584 is the synodic period as observed from Earth, not the orbital period). |
+| V2-6 | `@` path alias unused | Alias stripped from `vite.config.ts` + `tsconfig.json` — zero imports used it |
 
 ## How to add to this file
 

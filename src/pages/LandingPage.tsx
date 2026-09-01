@@ -128,22 +128,22 @@ export const LandingPage: React.FC = () => {
 
                   {/* Status Badges */}
                   <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase bg-maya-bg/90 backdrop-blur-md border border-maya-gold/40 text-maya-gold">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold uppercase bg-maya-bg/90 backdrop-blur-md border border-maya-gold/40 text-maya-gold">
                       Lesson {lesson.id}
                     </span>
-                    <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-maya-bg/80 backdrop-blur-md text-maya-textDim">
+                    <span className="px-2.5 py-1 rounded-lg text-[11px] font-mono bg-maya-bg/80 backdrop-blur-md text-maya-textDim">
                       {lesson.difficulty}
                     </span>
                   </div>
 
                   <div className="absolute top-3 right-3">
                     {isAvailable ? (
-                      <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 backdrop-blur-md flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 backdrop-blur-md flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                         Available Now
                       </span>
                     ) : (
-                      <span className="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-stone-900/80 border border-white/10 text-stone-400 backdrop-blur-md flex items-center gap-1">
+                      <span className="px-2.5 py-1 rounded-lg text-[11px] font-mono bg-stone-900/80 border border-white/10 text-stone-400 backdrop-blur-md flex items-center gap-1">
                         <Lock className="w-3 h-3" />
                         Upcoming
                       </span>

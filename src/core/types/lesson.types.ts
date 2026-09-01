@@ -22,9 +22,8 @@ export interface LightingConfig {
  *
  * `lines` is the on-screen text callout body (rendered as a stacked
  * multi-line block). `prompt` is the "drag to next step" line shown
- * below the callout. `hotspot` is the optional tap-to-open card
- * (e.g. Step 2's Kukulcán serpent-head popup). `completion` is the
- * optional end-of-lesson reveal panel.
+ * below the callout. `completion` is the optional end-of-lesson reveal
+ * panel.
  */
 export interface StepCallout {
   /** Big headline (e.g. "First contact"). Falls back to keyframe.name. */
@@ -37,14 +36,6 @@ export interface StepCallout {
   lines?: string[];
   /** Interaction prompt shown beneath the callout (e.g. "→ Drag to Step 2…"). */
   prompt?: string;
-  /** Optional tap-to-open hotspot card (Step 2's Kukulcán popup). */
-  hotspot?: {
-    label: string;
-    /** Body text shown inside the popup card. */
-    text: string;
-    /** Optional anchor direction toward the in-scene feature. */
-    anchor?: 'serpent-head' | 'temple-summit' | 'staircase-base';
-  };
   /** Per-keyframe astronomical data (sun azimuth/altitude/declination/time). */
   astro?: {
     /** Solar azimuth, e.g. "≈ 240°". */
@@ -240,10 +231,4 @@ export interface AtmosphereSample {
   directionalIntensity: number | undefined;
   /** Nearest keyframe index (0-based) for UI "active" badges. */
   activeIndex: number;
-  /**
-   * Anchor name of the active keyframe's hotspot (StepCallout.hotspot.anchor),
-   * if any — drives the in-scene marker cue. Undefined when the active
-   * keyframe has no hotspot.
-   */
-  hotspotAnchor?: string;
 }

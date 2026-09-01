@@ -91,12 +91,7 @@ export const lesson01Config: LessonConfig = {
               '584 days = 1 Venus year.',
               'The serpent descends. Venus is encoded.'
             ],
-            prompt: '→ Drag to Step 3 to open the zenith gate',
-            hotspot: {
-              label: 'Kukulcán',
-              text: 'The feathered serpent deity — associated with Venus, agriculture, and kingship across Mesoamerica.',
-              anchor: 'serpent-head'
-            }
+            prompt: '→ Drag to Step 3 to open the zenith gate'
           }
         },
         {
@@ -208,16 +203,6 @@ export const lesson01Config: LessonConfig = {
                 altitude: '≈ 7°',
                 declination: '≈ +8°',
                 time: '~18:37'
-              },
-              // Same hotspot as the lesson default's Step 2 — the serpent
-              // head is the subject of THIS topic, so the in-scene marker
-              // and "Tap serpent head" link must be reachable here (V02
-              // Phase D; previously only reachable via the Calendar topic's
-              // fallback timeline).
-              hotspot: {
-                label: 'Kukulcán',
-                text: 'The feathered serpent deity — associated with Venus, agriculture, and kingship across Mesoamerica.',
-                anchor: 'serpent-head'
               }
             }
           }

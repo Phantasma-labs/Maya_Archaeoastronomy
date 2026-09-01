@@ -61,7 +61,6 @@ export function sampleAtmosphere(keyframes: SkyKeyframe[], position: number): At
     ],
     iblIntensity: lerp(a.iblIntensity, b.iblIntensity, mix),
     directionalIntensity,
-    activeIndex,
-    hotspotAnchor: keyframes[activeIndex].callout?.hotspot?.anchor
+    activeIndex
   };
 }

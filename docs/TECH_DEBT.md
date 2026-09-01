@@ -61,9 +61,13 @@ those references; new items carry the `V2-` prefix.
   `hotspotAnchor` (derived in `sampleAtmosphere`); `Lesson01Scene` renders an in-scene
   gold marker at the anchor position (Phase D). The serpent-descent topic's Step 2 also
   gained the Kukulcán hotspot so the marker is reachable in the primary topic.
+  **Superseded 2026-09-01:** the serpent-head hotspot (in-scene marker, "Tap serpent
+  head" link, popup dialog) was removed from lesson 01 as a design decision. The
+  `hotspot` field and `hotspotAnchor` were dropped from the core types and
+  `sampleAtmosphere`; the `HOTSPOT_ANCHORS` map and dialog UI are deleted.
 - **V2-9 — Accessibility gaps.** `prefers-reduced-motion` honored (sweep jumps, CSS
-  fades disabled); touch targets ≥ 24 px (step markers, slider thumb); hotspot dialog
-  focus management + Escape-to-close; skip links on landing + lesson; `select-none`
-  removed from lesson/overlay roots; global `:focus-visible` ring; contrast audit
-  passes WCAG AA. Remaining: no full focus trap in the hotspot dialog (intentional —
-  it is a lightweight popup, not a modal), no automated a11y testing.
+  fades disabled); touch targets ≥ 24 px (step markers, slider thumb); skip links on
+  landing + lesson; `select-none` removed from lesson/overlay roots; global
+  `:focus-visible` ring; contrast audit passes WCAG AA. Remaining: no automated a11y
+  testing. (The hotspot dialog's focus management was removed with the hotspot feature —
+  see V2-5.)

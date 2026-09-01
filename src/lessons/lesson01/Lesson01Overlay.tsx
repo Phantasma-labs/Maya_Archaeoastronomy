@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   BookOpen,
@@ -53,11 +53,21 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   skyTimeline,
   showFocusedUI
 }) => {
+  // URL state seed — ?guide=<1|topics|monument>&hotspot=1 drive the opening
+  // panel/dialog state (peer of LessonPage's ?topic=?step= seed). Lesson
+  // states become linkable/shareable, and the vision review pass can
+  // screenshot them deterministically with plain headless Chrome
+  // (docs/V02_VISION_REVIEW.md). Unset params keep the closed defaults.
+  const [searchParams] = useSearchParams();
+  const guideSeed = searchParams.get('guide');
+
   // Field Guide panel — collapsible, defaults CLOSED so the scene is the
   // subject on entry (V02 design plan §4). The bottom instrument carries
   // the immediate pedagogy; the guide is the on-demand reference.
-  const [isFieldGuideOpen, setIsFieldGuideOpen] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'topics' | 'monument'>('topics');
+  const [isFieldGuideOpen, setIsFieldGuideOpen] = useState<boolean>(() => !!guideSeed);
+  const [activeTab, setActiveTab] = useState<'topics' | 'monument'>(
+    guideSeed === 'monument' ? 'monument' : 'topics'
+  );
   const selectedTopic =
     config.content.topics.find((t) => t.id === selectedTopicId) || config.content.topics[0];
 
@@ -71,9 +81,12 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
 
   // Step 2's serpent-head hotspot popup — user-dismissed, defaults closed.
   // The user opens it explicitly via the "Tap serpent head" link in the
-  // callout. No auto-open: the popup used to cover the slider area on
-  // landing at Step 2, which is what made the Step 2 click feel broken.
-  const [isHotspotOpen, setIsHotspotOpen] = useState<boolean>(false);
+  // callout (or the ?hotspot=1 URL seed). No auto-open on load: the popup
+  // used to cover the slider area on landing at Step 2, which is what made
+  // the Step 2 click feel broken.
+  const [isHotspotOpen, setIsHotspotOpen] = useState<boolean>(
+    () => searchParams.get('hotspot') === '1' && !!activeCallout?.hotspot
+  );
   const hotspotDialogRef = useRef<HTMLDivElement>(null);
   const hotspotTriggerRef = useRef<HTMLButtonElement>(null);
 
@@ -101,9 +114,14 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isHotspotOpen, closeHotspot]);
 
-  // Close the popup when the active keyframe changes — its hotspot may no
-  // longer apply (e.g. the user dragged to a step without one).
+  // Close the popup when the active keyframe CHANGES — its hotspot may no
+  // longer apply (e.g. the user dragged to a step without one). The mount
+  // run is a no-op (the id hasn't changed), so a ?hotspot=1 seeded dialog
+  // stays open — and StrictMode's double-invoke can't race it.
+  const lastKeyframeIdRef = useRef<string | undefined>(activeKeyframe?.id);
   useEffect(() => {
+    if (lastKeyframeIdRef.current === activeKeyframe?.id) return;
+    lastKeyframeIdRef.current = activeKeyframe?.id;
     setIsHotspotOpen(false);
   }, [activeKeyframe?.id]);
 

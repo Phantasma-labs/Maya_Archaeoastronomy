@@ -1,5 +1,5 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getLessonEntry } from '../lessons/registry';
 import { SceneCanvas } from '../core/components/SceneCanvas';
 import { sampleAtmosphere } from '../core/utils/atmosphere';
@@ -41,10 +41,31 @@ export const LessonPage: React.FC = () => {
    * sun rotation, IBL intensity — is DERIVED from it via sampleAtmosphere.
    * There is deliberately no env/light React state to get out of sync.
    *
-   * Default is 1 (the serpent-descent 1st-contact keyframe) so the lesson
-   * opens on the focused serpent-shadow view. Other topics reset to step 3.
+   * URL state seed — ?topic=<id>&step=<n> drive the opening overlay state:
+   * lesson states become linkable/shareable, and the vision review pass can
+   * screenshot every topic/step deterministically with plain headless Chrome
+   * (see docs/V02_VISION_REVIEW.md). Unset params fall back to the focused
+   * serpent-descent opening (position 1).
    */
-  const [sliderPosition, setSliderPosition] = useState<number>(1);
+  const [searchParams] = useSearchParams();
+  const urlTopicId = searchParams.get('topic');
+  const initialTopic = useMemo(() => {
+    if (!lessonEntry) return undefined;
+    const byId = lessonEntry.config.content.topics.find((t) => t.id === urlTopicId);
+    if (byId) return byId;
+    return (
+      lessonEntry.config.content.topics.find((t) => t.id === 'serpent-descent') ??
+      lessonEntry.config.content.topics[0]
+    );
+  }, [lessonEntry, urlTopicId]);
+
+  const [sliderPosition, setSliderPosition] = useState<number>(() => {
+    if (!lessonEntry || !initialTopic) return 1;
+    const n = (initialTopic.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline).length;
+    const step = Number(searchParams.get('step'));
+    if (Number.isFinite(step) && step >= 1) return Math.min(Math.round(step), n);
+    return initialTopic.skyTimeline ? 1 : 3;
+  });
 
   // Mirror of the latest position for the sweep driver — lets the rAF
   // callback read the current value without stale closures, and keeps
@@ -55,14 +76,10 @@ export const LessonPage: React.FC = () => {
   /**
    * The selected topic id is lifted here so the page can swap the active
    * skyTimeline and reset the slider position when the user navigates
-   * between topics. Defaults to the Serpent Descent topic (step 1) so the
-   * lesson opens on the focused serpent-shadow view.
+   * between topics. Defaults to Serpent Descent (the focused opening view),
+   * or the URL ?topic= seed when one is provided.
    */
-  const [selectedTopicId, setSelectedTopicId] = useState<string>(() => {
-    if (!lessonEntry) return '';
-    const serpent = lessonEntry.config.content.topics.find((t) => t.id === 'serpent-descent');
-    return serpent ? serpent.id : (lessonEntry.config.content.topics[0]?.id ?? '');
-  });
+  const [selectedTopicId, setSelectedTopicId] = useState<string>(() => initialTopic?.id ?? '');
 
   // The active skyTimeline is the selected topic's own (if it owns one)
   // or the lesson's default 3-step timeline. Serpent Descent and Zenith
@@ -88,9 +105,14 @@ export const LessonPage: React.FC = () => {
   // Reset the slider position when the selected topic changes. Topics that
   // own a skyTimeline start at step 1; topics using the lesson default
   // default to step 3 (the zenith keyframe). The lesson default's
-  // skyTimeline always has N=3, so step 3 is always a valid position.
+  // skyTimeline always has N=3, so step 3 is always a valid position. The
+  // initial mount does NOT reset — the ?step= URL seed (or the topic
+  // default) already set the opening position.
+  const previousTopicRef = useRef(selectedTopicId);
   useEffect(() => {
     if (!lessonEntry) return;
+    if (previousTopicRef.current === selectedTopicId) return;
+    previousTopicRef.current = selectedTopicId;
     const topic =
       lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId) ??
       lessonEntry.config.content.topics[0];

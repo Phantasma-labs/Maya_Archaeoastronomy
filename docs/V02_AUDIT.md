@@ -1,5 +1,10 @@
 # V02 AUDIT — Maya Archaeoastronomy
 
+> **STATUS: SHIPPED 2026-09-01.** The audit's recommendations drove the V02
+> Phases A–F implementation, which landed on `main` via commit `88ce647`. Kept
+> as historical record. See `docs/V02_VISION_REVIEW_REPORT.md` for the visual
+> review that confirmed the result.
+
 Baseline: V01 as shipped at commit `8505f18` plus the **uncommitted working-tree changes**
 (the in-progress Zenith topic feature). Audit date: 2026-09-01.
 
@@ -327,29 +332,27 @@ L5 (self-hosted fonts — **half**: subsetting remains), L6 (asset cleanup), C2
 
 ## Recommended Priorities
 
+> All recommendations below were executed during V02 Phases A–F (landed
+> 2026-09-01 in commit `88ce647`). Kept here as the audit trail.
+
 **P0 — Critical:** none. The app builds, typechecks, lints, and serves.
 
 **P1 — High:**
-1. **Preserve and land the in-progress Zenith work** (it is the current feature; the
-   audit must not disturb it). Complete the `meta` → timeline-label consumption so the
-   config's stated behavior matches reality.
-2. **Recreate `docs/TECH_DEBT.md`** — the debt ledger is the project's governance; its
-   absence is a real gap.
-3. **Font subsetting to latin-only** — measurable, low-risk performance win.
-4. **Landing page redesign** toward the "digital archaeological observatory" direction
-   (Phase B): retire the SaaS-template hero and gradient CTAs.
+1. ~~Preserve and land the in-progress Zenith work~~ — done (V02 Phase C/F)
+2. ~~Recreate `docs/TECH_DEBT.md`~~ — done (this file, V2-1)
+3. ~~Font subsetting to latin-only~~ — done (V02 Phase A, V2-2)
+4. ~~Landing page redesign~~ — done (V02 Phase B + landing polish in `88ce647`)
 
 **P2 — Medium:**
-5. **Lesson overlay de-densification** (Phase C): fewer simultaneous panels, editorial
-   callout, restrained controls; give the Calendar topic an interactive surface.
-6. **Accessibility pass** (Phase E): focus management, reduced motion, touch targets,
-   skip link, text size floor.
-7. **3D presentation polish** (Phase D): in-scene hotspot affordance (consume `anchor`),
-   subtle justified motion only.
+5. ~~Lesson overlay de-densification~~ — done (V02 Phase C)
+6. ~~Accessibility pass~~ — done (V02 Phase E)
+7. ~~3D presentation polish~~ — done (V02 Phase D; hotspot feature later
+   removed as a design decision — see V2-5)
 
 **P3 — Low:**
-8. Dead-config cleanup (`hotspot.anchor` if unused after Phase D, `@` alias), AGENTS.md
-   doc drift, ErrorFallback palette, scratch-file hygiene.
+8. Dead-config cleanup (`@` alias still unused — V2-6 open), AGENTS.md doc
+   drift (V2-7 open), ErrorFallback palette (V2-8 done), scratch-file hygiene
+   (V2-4 done).
 
 ---
 

@@ -1,5 +1,9 @@
 # V02 Visual Review — Handoff Instructions for the Vision Agent
 
+> **STATUS: COMPLETED 2026-09-01.** This handoff document drove the vision
+> review whose findings and fixes are recorded in
+> `docs/V02_VISION_REVIEW_REPORT.md`. Kept as historical record.
+
 You are the **vision review pass** for the V02 redesign of the Maya Archaeoastronomy
 platform. The code work is complete, committed on the `redesign` branch, and validated
 (typecheck / lint / build / dev-server boot) — but **no human or model has ever seen the

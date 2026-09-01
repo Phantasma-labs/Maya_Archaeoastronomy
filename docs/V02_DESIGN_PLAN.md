@@ -1,5 +1,10 @@
 # V02 DESIGN PLAN — Maya Archaeoastronomy
 
+> **STATUS: SHIPPED 2026-09-01.** Phases A–F all landed on `main` via commit
+> `88ce647`. This document is the design spec the implementation followed —
+> kept as historical record, not active planning. See `docs/ROADMAP.md` for
+> what's next and `docs/V02_VISION_REVIEW_REPORT.md` for the visual review.
+
 Direction: **Digital Archaeological Observatory.**
 
 The application should feel like an intersection of *Maya archaeology + archaeoastronomy +

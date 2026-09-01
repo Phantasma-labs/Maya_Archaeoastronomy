@@ -1,5 +1,11 @@
 # V02 Vision Review Report
 
+> **STATUS: APPROVED 2026-09-01.** The V02 redesign passed desktop and mobile
+> visual review (with three responsive fixes committed and a few deferred
+> nits). Subsequent landing polish (single-viewport compression, dedicated
+> landing asset bundle, hero CTA removal) was added in commit `88ce647` on top
+> of this base.
+
 **Date:** 2026-09-01
 **Branch:** `redesign`
 **Reviewer:** V02 vision pass (first-time visual review of V02 redesign)

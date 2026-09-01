@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -11,8 +11,7 @@ import {
   Sparkles,
   Layers,
   CheckCircle2,
-  X,
-  Hand
+  X
 } from 'lucide-react';
 import { LessonConfig, SkyKeyframe } from '../../core/types/lesson.types';
 import { AtmosphereTimeline } from '../../core/components/AtmosphereTimeline';
@@ -53,10 +52,10 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   skyTimeline,
   showFocusedUI
 }) => {
-  // URL state seed — ?guide=<1|topics|monument>&hotspot=1 drive the opening
-  // panel/dialog state (peer of LessonPage's ?topic=?step= seed). Lesson
-  // states become linkable/shareable, and the vision review pass can
-  // screenshot them deterministically with plain headless Chrome
+  // URL state seed — ?guide=<1|topics|monument> drives the opening panel
+  // state (peer of LessonPage's ?topic=?step= seed). Lesson states become
+  // linkable/shareable, and the vision review pass can screenshot them
+  // deterministically with plain headless Chrome
   // (docs/V02_VISION_REVIEW.md). Unset params keep the closed defaults.
   const [searchParams] = useSearchParams();
   const guideSeed = searchParams.get('guide');
@@ -78,52 +77,6 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   const activeKeyframe = skyTimeline[activeIndex];
   const activeCallout = activeKeyframe?.callout;
   const calloutLines = activeCallout?.lines ?? [];
-
-  // Step 2's serpent-head hotspot popup — user-dismissed, defaults closed.
-  // The user opens it explicitly via the "Tap serpent head" link in the
-  // callout (or the ?hotspot=1 URL seed). No auto-open on load: the popup
-  // used to cover the slider area on landing at Step 2, which is what made
-  // the Step 2 click feel broken.
-  const [isHotspotOpen, setIsHotspotOpen] = useState<boolean>(
-    () => searchParams.get('hotspot') === '1' && !!activeCallout?.hotspot
-  );
-  const hotspotDialogRef = useRef<HTMLDivElement>(null);
-  const hotspotTriggerRef = useRef<HTMLButtonElement>(null);
-
-  const closeHotspot = useCallback(() => {
-    setIsHotspotOpen(false);
-    hotspotTriggerRef.current?.focus();
-  }, []);
-
-  // Focus management for the hotspot dialog (V02 Phase E): move focus into
-  // the dialog when it opens; explicit dismissal (X / Escape) returns focus
-  // to the trigger. A keyframe change closes the dialog without restoring
-  // focus (the trigger may no longer exist).
-  useEffect(() => {
-    if (isHotspotOpen) {
-      hotspotDialogRef.current?.focus();
-    }
-  }, [isHotspotOpen]);
-
-  useEffect(() => {
-    if (!isHotspotOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeHotspot();
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isHotspotOpen, closeHotspot]);
-
-  // Close the popup when the active keyframe CHANGES — its hotspot may no
-  // longer apply (e.g. the user dragged to a step without one). The mount
-  // run is a no-op (the id hasn't changed), so a ?hotspot=1 seeded dialog
-  // stays open — and StrictMode's double-invoke can't race it.
-  const lastKeyframeIdRef = useRef<string | undefined>(activeKeyframe?.id);
-  useEffect(() => {
-    if (lastKeyframeIdRef.current === activeKeyframe?.id) return;
-    lastKeyframeIdRef.current = activeKeyframe?.id;
-    setIsHotspotOpen(false);
-  }, [activeKeyframe?.id]);
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col p-4 md:p-6 z-20">
@@ -386,17 +339,6 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                     ))}
                   </div>
                 )}
-                {activeCallout.hotspot && (
-                  <button
-                    ref={hotspotTriggerRef}
-                    type="button"
-                    onClick={() => setIsHotspotOpen(true)}
-                    className="inline-flex items-center gap-1.5 text-[11px] font-medium text-maya-gold hover:text-maya-goldLight transition-colors cursor-pointer"
-                  >
-                    <Hand className="w-3.5 h-3.5" />
-                    Tap serpent head — {activeCallout.hotspot.label}
-                  </button>
-                )}
               </>
             )}
           </div>
@@ -459,40 +401,6 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Step 2 — Serpent-head hotspot popup. Only renders when the active
-          keyframe provides hotspot content (currently Step 2). User-opened
-          via the "Tap serpent head" link in the callout (no auto-open). */}
-      {isHotspotOpen && activeCallout?.hotspot && (
-        <div
-          ref={hotspotDialogRef}
-          tabIndex={-1}
-          className="pointer-events-auto absolute left-4 right-4 top-20 md:left-auto md:right-6 md:top-32 md:max-w-xs md:w-auto bg-maya-surface/95 backdrop-blur-xl border-2 border-maya-gold rounded-2xl p-4 shadow-2xl shadow-maya-gold/20 text-maya-text animate-fadeIn z-30"
-          role="dialog"
-          aria-labelledby="hotspot-title"
-        >
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h3
-              id="hotspot-title"
-              className="font-serif text-base font-bold text-maya-cream flex items-center gap-2"
-            >
-              <Hand className="w-4 h-4 text-maya-gold" />
-              {activeCallout.hotspot.label}
-            </h3>
-            <button
-              type="button"
-              onClick={closeHotspot}
-              className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
-              aria-label="Dismiss"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <p className="text-[12px] text-maya-textDim leading-relaxed">
-            {activeCallout.hotspot.text}
-          </p>
-        </div>
-      )}
     </div>
   );
 };

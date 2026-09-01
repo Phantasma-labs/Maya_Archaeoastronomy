@@ -28,11 +28,11 @@ the result.
 | Path | Role |
 |---|---|
 | `src/pages/LandingPage.tsx` | Editorial landing + expedition catalog |
-| `src/lessons/lesson01/Lesson01Overlay.tsx` | Field Guide panel, bottom instrument, hotspot dialog |
-| `src/lessons/lesson01/Lesson01Scene.tsx` | 3D assembly + in-scene hotspot marker |
+| `src/lessons/lesson01/Lesson01Overlay.tsx` | Field Guide panel, bottom instrument |
+| `src/lessons/lesson01/Lesson01Scene.tsx` | 3D assembly |
 | `src/core/components/AtmosphereTimeline.tsx` | The slider (step labels, markers, thumb) |
 | `src/pages/LessonPage.tsx` | 16:9 frame, single `sliderPosition` writer (ADR-001) |
-| `src/lessons/lesson01/config.ts` | All lesson copy, keyframes, callouts, hotspots |
+| `src/lessons/lesson01/config.ts` | All lesson copy, keyframes, callouts |
 | `docs/V02_DESIGN_PLAN.md` | **The design authority** — judge against this |
 | `src/styles/index.css` + `tailwind.config.js` | Palette tokens (`maya.*`), animation policy |
 
@@ -50,9 +50,9 @@ checklists below at each relevant viewport. Name files meaningfully
 
 ### 3b. One-command screenshot recipes (every checklist interaction)
 
-The app ships four **URL state seeds** as a real feature — `?topic=<id>`, `?step=<n>`,
-`?guide=<1|topics|monument>`, `?hotspot=1` — that drive the opening overlay state. Every
-topic/step/panel/dialog state is therefore renderable by plain headless Chrome with **no
+The app ships three **URL state seeds** as a real feature — `?topic=<id>`, `?step=<n>`,
+`?guide=<1|topics|monument>` — that drive the opening overlay state. Every
+topic/step/panel state is therefore renderable by plain headless Chrome with **no
 clicks**: each recipe below is a single deterministic command. Topic ids: `serpent-descent`
 · `solar-zenith` · `solar-calendar`.
 
@@ -88,8 +88,6 @@ shot() {                          # shot <name> <url> <width> <height>
 | **D6** sun data | `shot 13-descent-step2 "$LES?topic=serpent-descent&step=2" 1920 1080` | Azimuth/Altitude/Declination/Local time, gold mono values |
 | **D7** Calendar topic | `shot 12-calendar-step3 …` | Instrument renders; right column shows the "Select Serpent Descent…" prompt |
 | **D8** Zenith labels + shadow | `shot 14-zenith-step1 "$LES?topic=solar-zenith&step=1"`, `…step=2`, `…step=3`, each `1920 1080` | Labels read May 23 / Jun 21 / Jul 19; step 2 has the visible solstice shadow |
-| **D9** hotspot marker | `shot 13-descent-step2 …` | Small gold sphere at the staircase base; must not float or occlude the head |
-| **D10** hotspot dialog | `shot 15-hotspot-open "$LES?topic=serpent-descent&step=2&hotspot=1" 1920 1080` | Card top-right, gold border, not covering the slider |
 | **D12** Field Guide (topics) | `shot 20-guide-topics "$LES?guide=topics" 1920 1080` | Pills + selected topic content + key fact; solid surface |
 | **D12** Field Guide (architecture) | `shot 21-guide-monument "$LES?guide=monument" 1920 1080` | Overview, culture/chronology, scholarly-caution box |
 | **M1** stacking | `shot 40-mobile-entry "$LES" 390 844`, `shot 41-mobile-zenith "$LES?topic=solar-zenith&step=2" 390 844` | Timeline (order-1) stacks first, then callout, then astro; no horizontal scroll |
@@ -102,9 +100,9 @@ PowerShell equivalent of one line:
 & "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless=new --disable-gpu --hide-scrollbars --window-size=1920,1080 --screenshot="shots\01-hero-1920.png" "http://localhost:3001/"
 ```
 
-**Two checks cannot come from a static screenshot** — capture their states above, then verify
-the *feel* with the Playwright pass (system Chrome, no app dependency, `npm i --no-save
-playwright-core` keeps package.json untouched):
+**One check cannot come from a static screenshot** — the D4 eased sweep's *feel* — so capture
+its settled state above, then verify the *motion* with the Playwright pass (system Chrome,
+no app dependency, `npm i --no-save playwright-core` keeps package.json untouched):
 
 ```mjs
 // vision-interact.mjs
@@ -123,12 +121,6 @@ await page.goto(B);
 await page.getByRole('button', { name: 'Sweep to The descent' }).click(); // D4 eased sweep (600 ms)
 await page.waitForTimeout(900);                                          // wait for it to settle
 await page.screenshot({ path: 'shots/13-sweep-settled.png' });
-
-await page.goto(B);
-await page.getByRole('button', { name: /Tap serpent head/ }).click();    // D10 open → dialog focused
-await page.screenshot({ path: 'shots/15-hotspot-clicked.png' });
-await page.keyboard.press('Escape');                                     // closes + focus returns to link
-await page.screenshot({ path: 'shots/16-hotspot-escaped.png' });
 await browser.close();
 ```
 
@@ -181,8 +173,6 @@ The lesson opens on the **Serpent Descent** topic by default (slider position 1)
 | D6 | Sun data | Right column shows Azimuth / Altitude / Declination / Local time (mono, gold values). Only on steps that carry `astro` data. |
 | D7 | **Calendar topic** | Select "Calendar" in the Field Guide → **the instrument still renders** (lesson-default 3-step timeline), right column shows the prompt text "Select Serpent Descent or Zenith…" instead of astro data. A dead/empty panel here is a regression. |
 | D8 | **Zenith topic** | Select "Zenith" → timeline step labels read **"May 23 / Jun 21 / Jul 19"** (the dates — the `meta.dateLabel` change). Step 1 and 3 are both zenith passes (same sky, sun overhead, "No shadow at noon"), Step 2 the solstice with a visible south-side shadow (exaggerated ~80°, intended). Astro values match the callout on each step. |
-| D9 | **Hotspot marker** | On Serpent Descent, drag to Step 2 → a small **gold sphere marker** is visible in the 3D scene at the base of the near-face staircase (the carved serpent head area; authored at `[4.03, 2.8, −33.78]`). It should read as a cue, not a blemish; **flag if it floats, occludes the head, or is invisible**. |
-| D10 | Hotspot dialog | The "Tap serpent head — Kukulcán" link opens a small card (top-right). Escape closes it. Keyboard focus moves into the card on open and returns to the link on close. |
 | D11 | Vignette | Subtle darkening behind the instrument at the frame's bottom edge — it must ground the UI, not appear as a visible band or fog the middle of the frame. |
 | D12 | Field Guide panel | Toggle opens a scrollable panel: "Astronomical Alignments" (topic pills + selected topic content + key fact) and "Architecture" (overview, culture/chronology, scholarly caution). Solid surface, gold hairline, closes with X or the toggle. |
 
@@ -199,12 +189,11 @@ The lesson opens on the **Serpent Descent** topic by default (slider position 1)
 
 1. Landing hero composition (L1) — first pair of eyes ever.
 2. Field-guide-defaults-closed + instrument-on-every-topic (D1, D7) — behavior change with no visual confirmation.
-3. Hotspot marker position (D9) — measured from the GLB mesh data, never seen.
-4. Mobile stacking (M1) — pragmatic implementation, not a true bottom sheet.
-5. Vignette strength (D11) — `from-maya-bg/70` may need tuning per sky.
-6. Timeline inset geometry at both extremes (D3).
-7. Zenith solstice shadow visibility (D8) — the teaching exaggeration.
-8. Font load: FOUT/no-font flash, glyph clipping on accented characters (L5).
+3. Mobile stacking (M1) — pragmatic implementation, not a true bottom sheet.
+4. Vignette strength (D11) — `from-maya-bg/70` may need tuning per sky.
+5. Timeline inset geometry at both extremes (D3).
+6. Zenith solstice shadow visibility (D8) — the teaching exaggeration.
+7. Font load: FOUT/no-font flash, glyph clipping on accented characters (L5).
 
 ## 9. Hard constraints — if something is wrong, report it; do not "fix" it by violating these
 

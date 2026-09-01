@@ -11,17 +11,6 @@ interface Lesson01SceneProps {
   atmosphere: AtmosphereSample;
 }
 
-// In-scene hotspot marker positions, keyed by StepCallout.hotspot.anchor
-// (TECH_DEBT V2-5 — the anchor was dead config; the scene now consumes it).
-// 'serpent-head' is measured from the GLB: the Snake mesh bbox center
-// (4.03, 1.44, -33.78), hovered up to y≈2.8 so the cue clears the carved
-// head. The other anchors are best-effort and unused by any config today.
-const HOTSPOT_ANCHORS: Record<string, [number, number, number]> = {
-  'serpent-head': [4.03, 2.8, -33.78],
-  'temple-summit': [0, 33, 0],
-  'staircase-base': [0, 0.6, -35]
-};
-
 // Preload all 3 GLBs in parallel at module init time.
 // useGLTF caches by URL so these are ready before Suspense fires.
 preloadLessonModels([
@@ -82,23 +71,6 @@ export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({ config, atmosphere
         <ModelLoader asset={layoutAsset} />
         <ModelLoader asset={treesAsset} />
       </group>
-
-      {/* In-scene hotspot marker — a small gold cue at the active keyframe's
-          hotspot anchor. Static mesh (no render-loop animation; the scene
-          stays frameloop="demand"). The overlay's "Tap serpent head" link
-          opens the popup; this marker is the persistent in-scene cue. */}
-      {atmosphere.hotspotAnchor && HOTSPOT_ANCHORS[atmosphere.hotspotAnchor] && (
-        <group position={HOTSPOT_ANCHORS[atmosphere.hotspotAnchor]}>
-          <mesh>
-            <sphereGeometry args={[0.6, 16, 16]} />
-            <meshStandardMaterial color="#d4af37" emissive="#d4af37" emissiveIntensity={0.5} />
-          </mesh>
-          <mesh>
-            <sphereGeometry args={[1.2, 16, 16]} />
-            <meshBasicMaterial color="#d4af37" transparent opacity={0.12} depthWrite={false} />
-          </mesh>
-        </group>
-      )}
     </>
   );
 };

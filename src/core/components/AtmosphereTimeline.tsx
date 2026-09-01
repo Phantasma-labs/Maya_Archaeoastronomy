@@ -190,7 +190,7 @@ export const AtmosphereTimeline: React.FC<AtmosphereTimelineProps> = ({
 
       {/* Step labels — flex justify-between with edge-aligned text so labels
           stay inside the track at any N (no left/right half overflow on N=2). */}
-      <div className="flex justify-between items-center h-4 mt-1 text-[9px] font-mono uppercase tracking-wider gap-2">
+      <div className="flex justify-between items-center h-4 mt-1 text-[11px] font-mono uppercase tracking-wider gap-2">
         {keyframes.map((keyframe, i) => {
           const step = i + 1;
           const isFirst = i === 0;

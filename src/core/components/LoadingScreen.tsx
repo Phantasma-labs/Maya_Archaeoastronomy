@@ -16,9 +16,8 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
   return (
     <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-maya-bg text-maya-text px-6">
       <div className="relative flex items-center justify-center mb-8">
-        <div className="w-20 h-20 rounded-full border-2 border-maya-gold/20 animate-ping absolute" />
         <div className="w-16 h-16 rounded-full border-2 border-maya-gold border-t-transparent animate-spin flex items-center justify-center">
-          <Compass className="w-6 h-6 text-maya-gold animate-pulse" />
+          <Compass className="w-6 h-6 text-maya-gold" />
         </div>
       </div>
 
@@ -54,7 +53,7 @@ interface ErrorFallbackProps {
 
 export const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
   return (
-    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#0d0707] text-[#f8d7da] p-8 text-center">
+    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-maya-bg text-red-200 p-8 text-center">
       <div className="w-16 h-16 rounded-full bg-red-950/50 border border-red-500/40 flex items-center justify-center mb-6 text-red-400">
         <AlertTriangle className="w-8 h-8" />
       </div>
@@ -70,7 +69,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorB
       {resetErrorBoundary && (
         <button
           onClick={resetErrorBoundary}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[#8b2323] hover:bg-[#a82e2e] text-white text-sm font-medium rounded-lg transition-colors border border-red-400/30 shadow-lg cursor-pointer"
+          className="flex items-center gap-2 px-5 py-2.5 bg-red-900 hover:bg-red-800 text-white text-sm font-medium rounded-lg transition-colors border border-red-400/30 shadow-lg cursor-pointer"
         >
           <RefreshCw className="w-4 h-4" />
           Retry Initialization

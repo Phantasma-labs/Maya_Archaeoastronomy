@@ -86,7 +86,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
 
           <div className="bg-maya-surface/85 backdrop-blur-md border border-maya-gold/20 rounded-xl px-4 py-2 shadow-lg">
             <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-maya-gold/20 text-maya-gold border border-maya-gold/30">
+              <span className="px-1.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase bg-maya-gold/20 text-maya-gold border border-maya-gold/30">
                 Lesson {config.id}
               </span>
               <h1 className="font-serif text-xs md:text-sm font-bold text-maya-cream tracking-wide truncate max-w-[200px] sm:max-w-xs md:max-w-md">
@@ -227,7 +227,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           {activeTab === 'monument' && (
             <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
               <div className="bg-maya-surfaceHover/70 border border-white/10 rounded-xl p-4 space-y-2">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-maya-gold">
+                <span className="text-[11px] font-mono uppercase tracking-wider text-maya-gold">
                   Archaeological Overview
                 </span>
                 <p className="text-xs text-maya-textDim leading-relaxed">
@@ -237,11 +237,11 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
 
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
-                  <span className="text-[10px] text-maya-textDim block mb-1">Culture</span>
+                  <span className="text-[11px] text-maya-textDim block mb-1">Culture</span>
                   <span className="text-maya-cream font-medium">{config.content.culture}</span>
                 </div>
                 <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
-                  <span className="text-[10px] text-maya-textDim block mb-1">Chronology</span>
+                  <span className="text-[11px] text-maya-textDim block mb-1">Chronology</span>
                   <span className="text-maya-cream font-medium">{config.content.timePeriod}</span>
                 </div>
               </div>

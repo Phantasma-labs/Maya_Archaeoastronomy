@@ -195,57 +195,8 @@ export const lesson01Config: LessonConfig = {
         ]
       },
       {
-        id: 'solar-zenith',
-        title: 'Zenith',
-        summary:
-          'Twice a year, around May 23–24 and July 19–20, the Sun passes directly overhead at Chichén Itzá.',
-        details: [
-          'At local solar noon, vertical objects cast almost no shadow.',
-          'These special solar events were important markers in the Maya calendar and were closely connected to planting, rain, and ceremonies.'
-        ],
-        // Topic-owned skyTimeline (mirrors the Serpent Descent pattern): a
-        // 2-step arc scoped to the Zenith topic. Step 1 uses 03before.webp
-        // (sun near the zenith — short south-side shadow at noon); Step 2
-        // uses 03.webp (sun directly overhead, the zenith passage). IBL is
-        // constant at 0.5 across both steps.
-        skyTimeline: [
-          {
-            id: 'sz-01',
-            name: 'Step 1 · 1st contact',
-            url: '/assets/lesson_01/03before.webp',
-            lightRotation: [-0.4, 0, 0],
-            iblIntensity: 0.5,
-            callout: {
-              label: '1st contact',
-              sublabel: 'Feb 12  ·  52 days from winter solstice',
-              tooltip: 'The first shadow triangle pierces the staircase. ',
-              lines: ['The first shadow triangle pierces the staircase. ']
-            }
-          },
-          {
-            id: 'sz-02',
-            name: 'Solstice',
-            url: '/assets/lesson_01/03.webp',
-            description: 'Summer solstice — the Sun at its northernmost declination.',
-            lightRotation: [-0.2, 0, 0],
-            iblIntensity: 0.5,
-            meta: { dateLabel: 'Jun 21' },
-            callout: {
-              label: 'Summer Solstice',
-              sublabel: 'Jun 21  ·  Sun at its northernmost',
-              tooltip:
-                'The Sun has tilted slightly north of zenith. A short south-side shadow appears at noon.',
-              lines: [
-                'Sun’s declination peaks at +23.4°.',
-                'Still very high — the south-side shadow is short.'
-              ]
-            }
-          }
-        ]
-      },
-      {
         id: 'solar-calendar',
-        title: 'Calendar',
+        title: 'Calendar & Architecture',
         summary:
           'The pyramid of Kukulkán is connected to the Maya calendars through its architecture.',
         details: [

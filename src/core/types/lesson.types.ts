@@ -61,8 +61,8 @@ export interface SkyKeyframe {
   directionalIntensity?: number;
   /**
    * Optional keyframe metadata for topic-specific pedagogical data. The
-   * Zenith topic uses this to carry the calendar date (`dateLabel`, e.g.
-   * "Jun 21") that the Atmosphere Timeline reads into the slider's
+   * Serpent Descent topic uses this to carry the clock time (`dateLabel`,
+   * e.g. "3:00 PM") that the Atmosphere Timeline reads into the slider's
    * accessible value text. Other topics ignore it.
    */
   meta?: {
@@ -145,9 +145,9 @@ export interface LearningTopic {
   /**
    * Optional topic-owned skyTimeline. When present, this topic owns its
    * own Atmosphere Timeline (overrides the lesson's default) and the
-   * slider is shown for it. Used by the sky setups (Serpent Descent,
-   * Zenith) to scope the timeline to that topic's own keyframes; topics
-   * without one (Calendar) fall back to the lesson default.
+   * slider is shown for it. Used by the sky setup (Serpent Descent) to
+   * scope the timeline to that topic's own keyframes; topics without one
+   * (Calendar & Architecture) fall back to the lesson default.
    */
   skyTimeline?: SkyKeyframe[];
 }

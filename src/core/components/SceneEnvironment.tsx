@@ -41,8 +41,7 @@ interface SceneEnvironmentProps {
  * ACTIVE timeline — a topic's own, or the lesson default), NOT from
  * config.skyTimeline: the sample and the texture array must index the
  * same keyframes or a topic-owned timeline would show the lesson
- * default's sky (e.g. Zenith step 2 rendering 02.webp instead of
- * 03.webp).
+ * default's sky (a topic step rendering the wrong keyframe's texture).
  *
  * The visible sky is a skydome mesh rather than scene.background because
  * the timeline needs shared UV framing (scale/panY), which three's
@@ -72,10 +71,11 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
   // Per-keyframe PMREM render targets — created once per sky on first visit so
   // sitting on a step never regenerates anything (no per-frame work at a
   // keyframe). Keyed by texture uuid, NOT by index: the active timeline can
-  // change (topic switch) and reuse an index for a different sky (e.g. Zenith
-  // step 2 puts 03before.webp at index 1 where Serpent Descent had 02.webp).
-  // An index-keyed cache would serve the previous timeline's PMREM — the
-  // "IBL doesn't match the sky at the end of the slider" regression.
+  // change (topic switch) and reuse an index for a different sky (a topic
+  // timeline can put a different texture at the same index as the lesson
+  // default). An index-keyed cache would serve the previous timeline's
+  // PMREM — the "IBL doesn't match the sky at the end of the slider"
+  // regression.
   const keyframeRTsRef = useRef<Map<string, THREE.WebGLRenderTarget>>(new Map());
   // The transient blended-env render target + its canvas source, disposed on
   // swap. Carries the source texture uuids so a cached blend from a previous

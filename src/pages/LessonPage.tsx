@@ -81,9 +81,9 @@ export const LessonPage: React.FC = () => {
   const [selectedTopicId, setSelectedTopicId] = useState<string>(() => initialTopic?.id ?? '');
 
   // The active skyTimeline is the selected topic's own (if it owns one)
-  // or the lesson's default 3-step timeline. Serpent Descent and Zenith
-  // each own a 2-step focused timeline; the Calendar topic falls back
-  // to the lesson default.
+  // or the lesson's default 3-step timeline. Serpent Descent owns a
+  // 2-step focused timeline; the Calendar & Architecture topic falls
+  // back to the lesson default.
   const activeSkyTimeline = useMemo(() => {
     if (!lessonEntry) return [];
     const topic =

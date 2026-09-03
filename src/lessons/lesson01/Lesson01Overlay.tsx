@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Home,
   Sun,
   Calendar,
-  Compass,
-  Info,
   ChevronRight,
   Sparkles,
-  Layers,
   CheckCircle2,
   X
 } from 'lucide-react';
@@ -34,8 +31,7 @@ interface Lesson01OverlayProps {
 
 const topicIcons: Record<string, React.ReactNode> = {
   'solar-calendar': <Calendar className="w-4 h-4" />,
-  'serpent-descent': <Sun className="w-4 h-4" />,
-  'solar-zenith': <Compass className="w-4 h-4" />
+  'serpent-descent': <Sun className="w-4 h-4" />
 };
 
 export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
@@ -47,20 +43,11 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   onSelectTopic,
   skyTimeline
 }) => {
-  // URL state seed — ?guide=<topics|monument> drives the opening panel state
-  // (peer of LessonPage's ?topic=?step= seed), so lesson states are
-  // linkable/shareable. With no seed the current setup's panel is open on
-  // landing (Serpent Descent on a fresh visit).
-  const [searchParams] = useSearchParams();
-  const guideSeed = searchParams.get('guide');
-
-  // Topic / Architecture buttons — one caption panel open at a time. Clicking
-  // a topic button selects that topic (parent resets the timeline) and opens
-  // its caption; clicking the open button again collapses; clicking another
-  // switches. 'monument' is the Architecture panel (no topic selection).
-  const [activePanel, setActivePanel] = useState<string | null>(() =>
-    guideSeed === 'monument' ? 'monument' : selectedTopicId
-  );
+  // One caption panel open at a time. Clicking a topic button selects that
+  // topic (parent resets the timeline) and opens its caption; clicking the
+  // open button again collapses; clicking another switches. The opening panel
+  // follows the selected topic (Serpent Descent on a fresh visit).
+  const [activePanel, setActivePanel] = useState<string | null>(() => selectedTopicId);
 
   const handleButtonClick = (id: string) => {
     if (activePanel === id) {
@@ -68,20 +55,16 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
       return;
     }
     setActivePanel(id);
-    if (id !== 'monument') {
-      onSelectTopic(id);
-    }
+    onSelectTopic(id);
   };
 
-  const activeTopic =
-    activePanel && activePanel !== 'monument'
-      ? config.content.topics.find((t) => t.id === activePanel)
-      : undefined;
+  const activeTopic = activePanel
+    ? config.content.topics.find((t) => t.id === activePanel)
+    : undefined;
 
-  // The slider is the environment control for the sky setups (Serpent
-  // Descent, Zenith). Calendar and the Architecture panel are reference
-  // views — no slider there.
-  const sliderHidden = selectedTopicId === 'solar-calendar' || activePanel === 'monument';
+  // The slider is the environment control for the sky setup (Serpent
+  // Descent). Calendar & Architecture is a reference view — no slider.
+  const sliderHidden = selectedTopicId === 'solar-calendar';
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col p-4 md:p-6 z-20">
@@ -149,21 +132,6 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                 </button>
               );
             })}
-            <button
-              onClick={() => handleButtonClick('monument')}
-              aria-expanded={activePanel === 'monument'}
-              aria-controls="field-guide"
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                activePanel === 'monument'
-                  ? 'bg-maya-gold/20 text-maya-cream'
-                  : 'text-maya-textDim hover:text-maya-text'
-              }`}
-            >
-              <span className={activePanel === 'monument' ? 'text-maya-gold' : 'text-maya-textDim'}>
-                <Layers className="w-4 h-4" />
-              </span>
-              <span>Architecture</span>
-            </button>
           </nav>
         </div>
       </header>
@@ -179,7 +147,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         aria-hidden={activePanel ? undefined : true}
         className={`pointer-events-auto flex flex-col p-5 overflow-hidden text-maya-text text-[14.4px] z-10
           origin-top motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out
-          -mx-4 md:-mx-0 md:-ml-6 md:w-64
+          -mx-4 md:-mx-0 md:-ml-6 md:w-[21.16rem]
           bg-maya-surface/95 backdrop-blur-xl border border-t-0 border-maya-gold/30 rounded-b-lg shadow-xl
           ${
             activePanel
@@ -187,53 +155,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
               : 'opacity-0 invisible max-h-0 pointer-events-none'
           }`}
       >
-          {activePanel === 'monument' ? (
-            <>
-              {/* Panel header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-                <h2 className="font-serif text-[15.75px] font-bold text-maya-cream tracking-wide">
-                  Architecture
-                </h2>
-                <button
-                  onClick={() => setActivePanel(null)}
-                  className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
-                  aria-label="Close panel"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
-                <div className="bg-maya-surfaceHover/70 border border-white/10 rounded-xl p-4 space-y-2">
-                  <span className="text-[12.5px] font-mono uppercase tracking-wider text-maya-gold">
-                    Archaeological Overview
-                  </span>
-                  <p className="text-[13.5px] text-maya-textDim leading-relaxed">
-                    {config.content.overview}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-[13.5px]">
-                  <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
-                    <span className="text-[12.5px] text-maya-textDim block mb-1">Culture</span>
-                    <span className="text-maya-cream font-medium">{config.content.culture}</span>
-                  </div>
-                  <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
-                    <span className="text-[12.5px] text-maya-textDim block mb-1">Chronology</span>
-                    <span className="text-maya-cream font-medium">{config.content.timePeriod}</span>
-                  </div>
-                </div>
-
-                <div className="bg-maya-surfaceHover/70 border border-amber-500/20 rounded-xl p-3.5 flex items-start gap-2.5">
-                  <Info className="w-4 h-4 text-maya-gold shrink-0 mt-0.5" />
-                  <p className="text-[12.5px] text-maya-textDim leading-relaxed">
-                    <strong className="text-maya-cream block mb-0.5">Scholarly Caution:</strong>
-                    {config.content.archaeologicalNotes}
-                  </p>
-                </div>
-              </div>
-            </>
-          ) : activeTopic ? (
+          {activeTopic ? (
             <>
               {/* Panel header */}
               <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
@@ -274,6 +196,35 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                     </p>
                   </div>
                 )}
+
+                {/* Calendar & Architecture is the merged reference section:
+                    the topic's calendar facts above, then the monument's
+                    architecture reference content (previously its own
+                    "Architecture" panel). */}
+                {activeTopic.id === 'solar-calendar' && (
+                  <>
+                    <div className="bg-maya-surfaceHover/70 border border-white/10 rounded-xl p-4 space-y-2">
+                      <span className="text-[12.5px] font-mono uppercase tracking-wider text-maya-gold">
+                        Archaeological Overview
+                      </span>
+                      <p className="text-[13.5px] text-maya-textDim leading-relaxed">
+                        {config.content.overview}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 text-[13.5px]">
+                      <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
+                        <span className="text-[12.5px] text-maya-textDim block mb-1">Culture</span>
+                        <span className="text-maya-cream font-medium">{config.content.culture}</span>
+                      </div>
+                      <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
+                        <span className="text-[12.5px] text-maya-textDim block mb-1">Chronology</span>
+                        <span className="text-maya-cream font-medium">{config.content.timePeriod}</span>
+                      </div>
+                    </div>
+
+                  </>
+                )}
               </div>
             </>
           ) : null}
@@ -281,10 +232,9 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
 
       {/* Bottom instrument — the Atmosphere Timeline, full width, and
           nothing else: the slider is the single environment control
-          (ADR-001). Rendered for the sky setups (Serpent Descent, Zenith);
-          hidden in the Calendar setup and while the Architecture panel is
-          open, and on mobile while any caption panel is open (the sheet
-          covers the frame). */}
+          (ADR-001). Rendered for the sky setup (Serpent Descent); hidden
+          in the Calendar & Architecture reference view, and on mobile
+          while any caption panel is open (the sheet covers the frame). */}
       <div
         className={`pointer-events-auto mt-auto ${
           sliderHidden ? 'hidden' : activePanel ? 'hidden md:block' : ''

@@ -41,11 +41,9 @@ export const LessonPage: React.FC = () => {
    * sun rotation, IBL intensity — is DERIVED from it via sampleAtmosphere.
    * There is deliberately no env/light React state to get out of sync.
    *
-   * URL state seed — ?topic=<id>&step=<n> drive the opening overlay state:
-   * lesson states become linkable/shareable, and the vision review pass can
-   * screenshot every topic/step deterministically with plain headless Chrome
-   * (see docs/V02_VISION_REVIEW.md). Unset params fall back to the focused
-   * serpent-descent opening (position 1).
+   * URL state seed — ?topic=<id>&step=<n> drive the opening overlay state,
+   * so lesson states are linkable/shareable. Unset params fall back to the
+   * focused serpent-descent opening (position 1).
    */
   const [searchParams] = useSearchParams();
   const urlTopicId = searchParams.get('topic');
@@ -61,7 +59,8 @@ export const LessonPage: React.FC = () => {
 
   const [sliderPosition, setSliderPosition] = useState<number>(() => {
     if (!lessonEntry || !initialTopic) return 1;
-    const n = (initialTopic.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline).length;
+    const n = (initialTopic.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline)
+      .length;
     const step = Number(searchParams.get('step'));
     if (Number.isFinite(step) && step >= 1) return Math.min(Math.round(step), n);
     return initialTopic.skyTimeline ? 1 : 3;
@@ -91,15 +90,6 @@ export const LessonPage: React.FC = () => {
       lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId) ??
       lessonEntry.config.content.topics[0];
     return topic?.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline;
-  }, [lessonEntry, selectedTopicId]);
-
-  // Whether to render the focused UI (slider, callout, sun blueprint):
-  // true only for topics that own their own skyTimeline (Serpent Descent,
-  // Zenith).
-  const showFocusedUI = useMemo(() => {
-    if (!lessonEntry) return false;
-    const topic = lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId);
-    return !!topic?.skyTimeline;
   }, [lessonEntry, selectedTopicId]);
 
   // Reset the slider position when the selected topic changes. Topics that
@@ -141,7 +131,7 @@ export const LessonPage: React.FC = () => {
       const from = positionRef.current;
       if (Math.abs(step - from) < 0.0001) return;
       // Respect prefers-reduced-motion: jump straight to the step instead of
-      // the ~0.6s eased sweep (V02 Phase E).
+      // the ~0.6s eased sweep.
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         positionRef.current = step;
         setSliderPosition(step);
@@ -256,7 +246,6 @@ export const LessonPage: React.FC = () => {
               selectedTopicId={selectedTopicId}
               onSelectTopic={handleSelectTopic}
               skyTimeline={activeSkyTimeline}
-              showFocusedUI={showFocusedUI}
             />
           </Suspense>
         )}

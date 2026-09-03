@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  ArrowLeft,
-  BookOpen,
+  Home,
   Sun,
   Calendar,
   Compass,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react';
 import { LessonConfig, SkyKeyframe } from '../../core/types/lesson.types';
 import { AtmosphereTimeline } from '../../core/components/AtmosphereTimeline';
+import { SerpentSlider } from './SerpentSlider';
 
 interface Lesson01OverlayProps {
   config: LessonConfig;
@@ -30,10 +30,6 @@ interface Lesson01OverlayProps {
   onSelectTopic: (id: string) => void;
   /** Active skyTimeline: the selected topic's own, or the lesson default. */
   skyTimeline: SkyKeyframe[];
-  /** True for topics that own a skyTimeline (Serpent Descent, Zenith).
-   *  Used to phrase the right-hand observation log when a step carries no
-   *  astro data — the instrument itself renders for every topic. */
-  showFocusedUI: boolean;
 }
 
 const topicIcons: Record<string, React.ReactNode> = {
@@ -49,44 +45,53 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   onStepSelect,
   selectedTopicId,
   onSelectTopic,
-  skyTimeline,
-  showFocusedUI
+  skyTimeline
 }) => {
-  // URL state seed — ?guide=<1|topics|monument> drives the opening panel
-  // state (peer of LessonPage's ?topic=?step= seed). Lesson states become
-  // linkable/shareable, and the vision review pass can screenshot them
-  // deterministically with plain headless Chrome
-  // (docs/V02_VISION_REVIEW.md). Unset params keep the closed defaults.
+  // URL state seed — ?guide=<topics|monument> drives the opening panel state
+  // (peer of LessonPage's ?topic=?step= seed), so lesson states are
+  // linkable/shareable. With no seed the current setup's panel is open on
+  // landing (Serpent Descent on a fresh visit).
   const [searchParams] = useSearchParams();
   const guideSeed = searchParams.get('guide');
 
-  // Field Guide panel — collapsible, defaults CLOSED so the scene is the
-  // subject on entry (V02 design plan §4). The bottom instrument carries
-  // the immediate pedagogy; the guide is the on-demand reference.
-  const [isFieldGuideOpen, setIsFieldGuideOpen] = useState<boolean>(() => !!guideSeed);
-  const [activeTab, setActiveTab] = useState<'topics' | 'monument'>(
-    guideSeed === 'monument' ? 'monument' : 'topics'
+  // Topic / Architecture buttons — one caption panel open at a time. Clicking
+  // a topic button selects that topic (parent resets the timeline) and opens
+  // its caption; clicking the open button again collapses; clicking another
+  // switches. 'monument' is the Architecture panel (no topic selection).
+  const [activePanel, setActivePanel] = useState<string | null>(() =>
+    guideSeed === 'monument' ? 'monument' : selectedTopicId
   );
-  const selectedTopic =
-    config.content.topics.find((t) => t.id === selectedTopicId) || config.content.topics[0];
 
-  // Nearest timeline keyframe — drives the contextual callout and the
-  // right-side observation log. Uses the active skyTimeline (topic-owned
-  // or lesson default) passed in by LessonPage.
-  const activeIndex = Math.min(Math.max(Math.round(sliderPosition) - 1, 0), skyTimeline.length - 1);
-  const activeKeyframe = skyTimeline[activeIndex];
-  const activeCallout = activeKeyframe?.callout;
-  const calloutLines = activeCallout?.lines ?? [];
+  const handleButtonClick = (id: string) => {
+    if (activePanel === id) {
+      setActivePanel(null);
+      return;
+    }
+    setActivePanel(id);
+    if (id !== 'monument') {
+      onSelectTopic(id);
+    }
+  };
+
+  const activeTopic =
+    activePanel && activePanel !== 'monument'
+      ? config.content.topics.find((t) => t.id === activePanel)
+      : undefined;
+
+  // The slider is the environment control for the sky setups (Serpent
+  // Descent, Zenith). Calendar and the Architecture panel are reference
+  // views — no slider there.
+  const sliderHidden = selectedTopicId === 'solar-calendar' || activePanel === 'monument';
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col p-4 md:p-6 z-20">
       {/* Bottom vignette — grounds the instrument against the sky so the
-          panel reads as an instrument, not a floating card (V02 design plan
-          §4). Earlier sibling of the instrument, so it paints beneath it. */}
+          panel reads as an instrument, not a floating card. Earlier sibling
+          of the instrument, so it paints beneath it. */}
       <div className="absolute inset-x-0 bottom-0 h-32 md:h-40 bg-gradient-to-t from-maya-bg/70 via-maya-bg/30 to-transparent pointer-events-none" />
 
       {/* Skip link — keyboard users jump straight to the observation
-          instrument, past the 3D canvas (V02 Phase E). */}
+          instrument, past the 3D canvas. */}
       <a
         href="#lesson-instrument"
         className="sr-only focus:not-sr-only focus:pointer-events-auto focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-maya-gold focus:text-maya-bg focus:text-sm focus:font-medium"
@@ -94,153 +99,166 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
         Skip to the observation instrument
       </a>
 
-      {/* Top Navigation Bar */}
-      <header className="flex items-center justify-between gap-4 pointer-events-auto">
-        <div className="flex items-center gap-3">
+      {/* Minimal header — home, lesson title, and section buttons in one
+          flat bar: solid surface background, full-bleed across the top,
+          no floating buttons. */}
+      <header className="pointer-events-auto -mx-4 md:-mx-6 -mt-4 md:-mt-6 bg-maya-surface border-b border-maya-gold/20">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 md:px-6 py-2">
           <Link
             to="/"
-            className="group flex items-center gap-2 px-3.5 py-2 rounded-xl bg-maya-surface/85 backdrop-blur-md border border-maya-gold/25 hover:border-maya-gold/70 text-maya-text hover:text-maya-gold text-xs md:text-sm font-medium transition-all shadow-lg hover:shadow-maya-gold/10 cursor-pointer"
+            aria-label="Back to all lessons"
+            title="Back to all lessons"
+            className="flex items-center justify-center w-7 h-7 rounded-md text-maya-textDim hover:text-maya-gold transition-colors cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            <span className="hidden sm:inline">All Lessons</span>
+            <Home className="w-4 h-4" />
           </Link>
 
-          <div className="bg-maya-surface/85 backdrop-blur-md border border-maya-gold/20 rounded-xl px-4 py-2 shadow-lg">
-            <div className="flex items-center gap-2">
-              <span className="px-1.5 py-0.5 rounded text-[11px] font-mono font-bold uppercase bg-maya-gold/20 text-maya-gold border border-maya-gold/30">
-                Lesson {config.id}
-              </span>
-              <h1 className="font-serif text-xs md:text-sm font-bold text-maya-cream tracking-wide truncate max-w-[200px] sm:max-w-xs md:max-w-md">
-                {config.content.monumentName}
-              </h1>
-            </div>
-            <p className="text-[11px] text-maya-textDim hidden md:block">
-              {config.content.location}
-            </p>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono font-bold uppercase text-maya-gold">
+              Lesson {config.id}
+            </span>
+            <h1 className="font-serif text-xs font-bold text-maya-cream tracking-wide truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+              {config.content.monumentName}
+            </h1>
           </div>
+
+          {/* Section buttons — flat text buttons in the bar, pushed to
+              the right edge. */}
+          <nav className="ml-auto flex flex-wrap gap-1">
+            {config.content.topics.map((topic) => {
+              const isOpen = activePanel === topic.id;
+              const isSelected = selectedTopicId === topic.id;
+              return (
+                <button
+                  key={topic.id}
+                  onClick={() => handleButtonClick(topic.id)}
+                  aria-expanded={isOpen}
+                  aria-controls="field-guide"
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                    isOpen
+                      ? 'bg-maya-gold/20 text-maya-cream'
+                      : isSelected
+                        ? 'text-maya-cream'
+                        : 'text-maya-textDim hover:text-maya-text'
+                  }`}
+                >
+                  <span className={isOpen || isSelected ? 'text-maya-gold' : 'text-maya-textDim'}>
+                    {topicIcons[topic.id] || <Sparkles className="w-4 h-4" />}
+                  </span>
+                  <span>{topic.title}</span>
+                </button>
+              );
+            })}
+            <button
+              onClick={() => handleButtonClick('monument')}
+              aria-expanded={activePanel === 'monument'}
+              aria-controls="field-guide"
+              className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                activePanel === 'monument'
+                  ? 'bg-maya-gold/20 text-maya-cream'
+                  : 'text-maya-textDim hover:text-maya-text'
+              }`}
+            >
+              <span className={activePanel === 'monument' ? 'text-maya-gold' : 'text-maya-textDim'}>
+                <Layers className="w-4 h-4" />
+              </span>
+              <span>Architecture</span>
+            </button>
+          </nav>
         </div>
       </header>
 
-      {/* Field Guide toggle — sits beneath the header row, below All Lessons. */}
-      <div className="pointer-events-auto mt-3 self-start">
-        <button
-          onClick={() => setIsFieldGuideOpen(!isFieldGuideOpen)}
-          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium backdrop-blur-md border transition-all shadow-lg cursor-pointer ${
-            isFieldGuideOpen
-              ? 'bg-maya-gold/20 border-maya-gold text-maya-cream'
-              : 'bg-maya-surface/85 border-maya-gold/20 text-maya-text hover:border-maya-gold/50'
+      {/* Field guide — content for the open button. Always mounted so the
+          section buttons collapse/uncollapse it: it hangs from the header
+          into a vertical rectangle docked to the frame's left edge (md+;
+          full-bleed section under the header on mobile), growing/collapsing
+          via a max-height + opacity transition instead of popping in.
+          Text-only — deliberately no image captions. */}
+      <aside
+        id="field-guide"
+        aria-hidden={activePanel ? undefined : true}
+        className={`pointer-events-auto flex flex-col p-5 overflow-hidden text-maya-text text-[14.4px] z-10
+          origin-top motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out
+          -mx-4 md:-mx-0 md:-ml-6 md:w-64
+          bg-maya-surface/95 backdrop-blur-xl border border-t-0 border-maya-gold/30 rounded-b-lg shadow-xl
+          ${
+            activePanel
+              ? 'opacity-100 visible max-h-[calc(100vh-64px)] md:max-h-[calc(100vh-184px)]'
+              : 'opacity-0 invisible max-h-0 pointer-events-none'
           }`}
-          aria-expanded={isFieldGuideOpen}
-          aria-controls="field-guide"
-        >
-          <BookOpen className="w-4 h-4 text-maya-gold" />
-          <span>Field Guide</span>
-          <ChevronRight
-            className={`w-3.5 h-3.5 text-maya-gold transition-transform ${
-              isFieldGuideOpen ? 'rotate-90' : ''
-            }`}
-          />
-        </button>
-      </div>
-
-      {/* Field Guide panel — the lesson's reference material, on demand.
-          Desktop (lg+): inline in the overlay column, max-h sized to the
-          viewport (the 16:9 frame leaves plenty of vertical room).
-          Tablet (md): slide-over anchored top-left, leaving room for the
-          bottom instrument and not crowding the 16:9 frame's narrow height
-          (V02 design plan §5 — "field guide becomes a slide-over").
-          Mobile (no md): full-screen sheet covering everything except the
-          top header — the 16:9 frame on portrait is too small to host the
-          panel inline with the bottom instrument. */}
-      {isFieldGuideOpen && (
-        <aside
-          id="field-guide"
-          className="pointer-events-auto bg-maya-surface/95 backdrop-blur-xl border border-maya-gold/30 rounded-2xl p-5 shadow-2xl max-h-[calc(100vh-140px)] flex flex-col overflow-hidden text-maya-text animate-fadeIn z-10
-            fixed inset-x-3 top-32 bottom-3
-            md:absolute md:inset-x-auto md:left-6 md:right-auto md:bottom-32 md:w-[26rem] md:max-w-none
-            lg:static lg:w-full lg:max-w-lg lg:max-h-[calc(100vh-200px)] lg:mt-4 lg:z-auto"
-        >
-          {/* Panel header */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-            <h2 className="font-serif text-sm font-bold text-maya-cream tracking-wide">
-              Field Guide
-            </h2>
-            <button
-              onClick={() => setIsFieldGuideOpen(false)}
-              className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
-              aria-label="Close field guide"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Tab Navigation */}
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => setActiveTab('topics')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTab === 'topics'
-                  ? 'bg-maya-gold/20 text-maya-cream border border-maya-gold/40'
-                  : 'text-maya-textDim hover:text-maya-text'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-maya-gold" />
-              Astronomical Alignments
-            </button>
-            <button
-              onClick={() => setActiveTab('monument')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                activeTab === 'monument'
-                  ? 'bg-maya-gold/20 text-maya-cream border border-maya-gold/40'
-                  : 'text-maya-textDim hover:text-maya-text'
-              }`}
-            >
-              <Layers className="w-3.5 h-3.5 text-maya-gold" />
-              Architecture
-            </button>
-          </div>
-
-          {/* Tab 1: Astronomical Topics */}
-          {activeTab === 'topics' && (
-            <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
-              {/* Topic Selector Pills */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                {config.content.topics.map((topic) => {
-                  const isSelected = topic.id === selectedTopicId;
-                  return (
-                    <button
-                      key={topic.id}
-                      onClick={() => onSelectTopic(topic.id)}
-                      className={`flex items-center gap-2 p-2 rounded-xl text-left text-xs transition-all border cursor-pointer ${
-                        isSelected
-                          ? 'bg-maya-gold/20 border-maya-gold text-maya-cream font-semibold shadow-md'
-                          : 'bg-maya-surfaceHover/60 border-white/5 text-maya-textDim hover:bg-maya-surfaceHover/80 hover:text-maya-text'
-                      }`}
-                    >
-                      <span className={`${isSelected ? 'text-maya-gold' : 'text-maya-textDim'}`}>
-                        {topicIcons[topic.id] || <Sparkles className="w-4 h-4" />}
-                      </span>
-                      <span className="truncate text-[11px]">{topic.title}</span>
-                    </button>
-                  );
-                })}
+      >
+          {activePanel === 'monument' ? (
+            <>
+              {/* Panel header */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+                <h2 className="font-serif text-[15.75px] font-bold text-maya-cream tracking-wide">
+                  Architecture
+                </h2>
+                <button
+                  onClick={() => setActivePanel(null)}
+                  className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
+                  aria-label="Close panel"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
 
-              {/* Selected Topic Content */}
-              <div className="bg-maya-surfaceHover/70 border border-maya-gold/20 rounded-xl p-4 space-y-3">
-                <div className="flex items-start justify-between gap-2">
-                  <h2 className="font-serif text-sm font-bold text-maya-cream flex items-center gap-2">
-                    <span className="text-maya-gold">{topicIcons[selectedTopic.id]}</span>
-                    {selectedTopic.title}
-                  </h2>
+              <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
+                <div className="bg-maya-surfaceHover/70 border border-white/10 rounded-xl p-4 space-y-2">
+                  <span className="text-[12.5px] font-mono uppercase tracking-wider text-maya-gold">
+                    Archaeological Overview
+                  </span>
+                  <p className="text-[13.5px] text-maya-textDim leading-relaxed">
+                    {config.content.overview}
+                  </p>
                 </div>
 
-                <p className="text-xs text-maya-textDim leading-relaxed italic border-l-2 border-maya-gold/50 pl-3">
-                  "{selectedTopic.summary}"
+                <div className="grid grid-cols-2 gap-2 text-[13.5px]">
+                  <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
+                    <span className="text-[12.5px] text-maya-textDim block mb-1">Culture</span>
+                    <span className="text-maya-cream font-medium">{config.content.culture}</span>
+                  </div>
+                  <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
+                    <span className="text-[12.5px] text-maya-textDim block mb-1">Chronology</span>
+                    <span className="text-maya-cream font-medium">{config.content.timePeriod}</span>
+                  </div>
+                </div>
+
+                <div className="bg-maya-surfaceHover/70 border border-amber-500/20 rounded-xl p-3.5 flex items-start gap-2.5">
+                  <Info className="w-4 h-4 text-maya-gold shrink-0 mt-0.5" />
+                  <p className="text-[12.5px] text-maya-textDim leading-relaxed">
+                    <strong className="text-maya-cream block mb-0.5">Scholarly Caution:</strong>
+                    {config.content.archaeologicalNotes}
+                  </p>
+                </div>
+              </div>
+            </>
+          ) : activeTopic ? (
+            <>
+              {/* Panel header */}
+              <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+                <h2 className="font-serif text-[15.75px] font-bold text-maya-cream flex items-center gap-2">
+                  <span className="text-maya-gold">
+                    {topicIcons[activeTopic.id] || <Sparkles className="w-4 h-4" />}
+                  </span>
+                  {activeTopic.title}
+                </h2>
+                <button
+                  onClick={() => setActivePanel(null)}
+                  className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
+                  aria-label="Close panel"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto pr-1 space-y-3 custom-scrollbar">
+                <p className="text-[13.5px] text-maya-textDim leading-relaxed italic border-l-2 border-maya-gold/50 pl-3">
+                  "{activeTopic.summary}"
                 </p>
 
-                <ul className="space-y-2 text-xs text-maya-textDim">
-                  {selectedTopic.details.map((detail, idx) => (
+                <ul className="space-y-2 text-[13.5px] text-maya-textDim">
+                  {activeTopic.details.map((detail, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <ChevronRight className="w-3.5 h-3.5 text-maya-gold shrink-0 mt-0.5" />
                       <span>{detail}</span>
@@ -248,157 +266,46 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
                   ))}
                 </ul>
 
-                {selectedTopic.keyFact && (
+                {activeTopic.keyFact && (
                   <div className="bg-maya-gold/10 border border-maya-gold/30 rounded-lg p-2.5 flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-maya-gold shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-maya-cream font-medium font-mono">
-                      {selectedTopic.keyFact}
+                    <p className="text-[12.5px] text-maya-cream font-medium font-mono">
+                      {activeTopic.keyFact}
                     </p>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            </>
+          ) : null}
+      </aside>
 
-          {/* Tab 2: Monument & Architectural Context */}
-          {activeTab === 'monument' && (
-            <div className="flex-1 overflow-y-auto pr-1 space-y-4 custom-scrollbar">
-              <div className="bg-maya-surfaceHover/70 border border-white/10 rounded-xl p-4 space-y-2">
-                <span className="text-[11px] font-mono uppercase tracking-wider text-maya-gold">
-                  Archaeological Overview
-                </span>
-                <p className="text-xs text-maya-textDim leading-relaxed">
-                  {config.content.overview}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
-                  <span className="text-[11px] text-maya-textDim block mb-1">Culture</span>
-                  <span className="text-maya-cream font-medium">{config.content.culture}</span>
-                </div>
-                <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
-                  <span className="text-[11px] text-maya-textDim block mb-1">Chronology</span>
-                  <span className="text-maya-cream font-medium">{config.content.timePeriod}</span>
-                </div>
-              </div>
-
-              <div className="bg-maya-surfaceHover/70 border border-amber-500/20 rounded-xl p-3.5 flex items-start gap-2.5">
-                <Info className="w-4 h-4 text-maya-gold shrink-0 mt-0.5" />
-                <p className="text-[11px] text-maya-textDim leading-relaxed">
-                  <strong className="text-maya-cream block mb-0.5">Scholarly Caution:</strong>
-                  {config.content.archaeologicalNotes}
-                </p>
-              </div>
-            </div>
-          )}
-        </aside>
-      )}
-
-      {/* Bottom instrument — single row: left callout · center Atmosphere
-          Timeline · right observation log. Rendered for EVERY topic: focused
-          topics (Serpent Descent, Zenith) use their own timeline and astro
-          data; the Calendar topic falls back to the lesson default timeline,
-          so no topic ever lands on a dead panel (V02 design plan §4). */}
-      <div className={`pointer-events-auto mt-auto ${isFieldGuideOpen ? 'hidden md:block' : ''}`}>
-        <div
-          id="lesson-instrument"
-          className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)_minmax(0,1fr)] gap-x-6 gap-y-3 items-center bg-maya-surface border border-maya-gold/40 rounded-2xl px-3 py-2.5 md:px-4 md:py-3 shadow-2xl animate-fadeIn"
-        >
-          {/* Left — contextual callout (1st contact / The descent). On mobile
-              the timeline is the primary control, so it stacks first (V02
-              Phase E bottom-sheet behavior). */}
-          <div
-            className="min-w-0 text-left order-2 md:order-1"
-            title={activeCallout?.tooltip}
-            aria-live="polite"
-          >
-            {activeCallout && (
-              <>
-                <h2 className="font-serif text-base md:text-lg font-bold text-maya-cream leading-tight mb-0.5">
-                  {activeCallout.label ?? activeKeyframe?.name}
-                </h2>
-                {activeCallout.sublabel && (
-                  <p className="text-[11px] font-mono text-maya-textDim mb-1.5">
-                    {activeCallout.sublabel}
-                  </p>
-                )}
-                {calloutLines.length > 0 && (
-                  <div className="space-y-1 border-l-2 border-maya-gold/50 pl-2.5 mb-1.5">
-                    {calloutLines.map((line, i) => (
-                      <p
-                        key={i}
-                        className={`text-[12px] leading-snug ${
-                          i === calloutLines.length - 1
-                            ? 'text-maya-cream font-medium'
-                            : 'text-maya-textDim'
-                        }`}
-                      >
-                        {line}
-                      </p>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Center — Atmosphere Timeline (single environment control, ADR-001).
-              All focused-mode topics (Serpent Descent, Zenith) share the same
-              linear slider. The Zenith timeline's three keyframes (May 23,
-              Jun 21, Jul 19) sit on a horizontal track; Step 1 / Step 3 are
-              both zenith passes (`03.webp`), Step 2 is the solstice
-              (`03before.webp`). IBL stays at 0.66 across the three so the
-              only thing that changes is the directional sun rotation. */}
-          <div className="w-full min-w-0 order-1 md:order-2">
+      {/* Bottom instrument — the Atmosphere Timeline, full width, and
+          nothing else: the slider is the single environment control
+          (ADR-001). Rendered for the sky setups (Serpent Descent, Zenith);
+          hidden in the Calendar setup and while the Architecture panel is
+          open, and on mobile while any caption panel is open (the sheet
+          covers the frame). */}
+      <div
+        className={`pointer-events-auto mt-auto ${
+          sliderHidden ? 'hidden' : activePanel ? 'hidden md:block' : ''
+        }`}
+      >
+        <div id="lesson-instrument">
+          {selectedTopicId === 'serpent-descent' ? (
+            <SerpentSlider
+              keyframes={skyTimeline}
+              value={sliderPosition}
+              onLiveChange={onSliderPositionChange}
+              onStepSelect={onStepSelect}
+            />
+          ) : (
             <AtmosphereTimeline
               keyframes={skyTimeline}
               value={sliderPosition}
               onLiveChange={onSliderPositionChange}
               onStepSelect={onStepSelect}
             />
-            {activeCallout?.prompt && (
-              <p className="mt-2 text-center text-[11px] text-maya-gold font-medium">
-                {activeCallout.prompt}
-              </p>
-            )}
-          </div>
-
-          {/* Right — observation log for the active step */}
-          <div className="min-w-0 flex flex-col items-end gap-1.5 text-right order-3">
-            <div className="flex items-center gap-2">
-              <h3 className="font-serif text-sm font-bold text-maya-cream">
-                Sun · Astronomical Data
-              </h3>
-              <Sun className="w-4 h-4 text-maya-gold" />
-            </div>
-            {activeCallout?.astro ? (
-              <dl className="space-y-1 text-[11px] font-mono text-maya-textDim">
-                <div className="flex justify-between gap-4">
-                  <dt className="text-maya-textDim">Azimuth</dt>
-                  <dd className="text-maya-gold">{activeCallout.astro.azimuth}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-maya-textDim">Altitude</dt>
-                  <dd className="text-maya-gold">{activeCallout.astro.altitude}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-maya-textDim">Declination</dt>
-                  <dd className="text-maya-gold">{activeCallout.astro.declination}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-maya-textDim">Local time</dt>
-                  <dd className="text-maya-gold">{activeCallout.astro.time}</dd>
-                </div>
-              </dl>
-            ) : (
-              <p className="text-[11px] text-maya-textDim">
-                {showFocusedUI
-                  ? 'No astronomical data for this step'
-                  : 'Select Serpent Descent or Zenith for focused astronomical data'}
-              </p>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>

@@ -37,7 +37,12 @@ interface SceneEnvironmentProps {
  *
  * All timeline textures are loaded up front via useTexture([...urls]) —
  * Suspense covers the wait — so dragging the Atmosphere Timeline never
- * hits the network mid-scrub.
+ * hits the network mid-scrub. The urls come from sample.keyframes (the
+ * ACTIVE timeline — a topic's own, or the lesson default), NOT from
+ * config.skyTimeline: the sample and the texture array must index the
+ * same keyframes or a topic-owned timeline would show the lesson
+ * default's sky (e.g. Zenith step 2 rendering 02.webp instead of
+ * 03.webp).
  *
  * The visible sky is a skydome mesh rather than scene.background because
  * the timeline needs shared UV framing (scale/panY), which three's
@@ -53,20 +58,31 @@ interface SceneEnvironmentProps {
  */
 export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, sample }) => {
   const { scene, gl } = useThree();
-  const urls = useMemo(() => config.skyTimeline.map((k) => k.url), [config.skyTimeline]);
+  // Textures index the SAMPLE's keyframes (the active timeline), not the
+  // lesson default's — sample.indexA/B are indexes into the active timeline,
+  // so the texture array must be built from the same keyframes or a
+  // topic-owned timeline would render the wrong sky.
+  const urls = useMemo(() => sample.keyframes.map((k) => k.url), [sample.keyframes]);
   const textures = useTexture(urls);
 
   // Reusable PMREM generator for both the per-keyframe caches and the on-the-fly
   // blended environment (the runtime IBL crossfade).
   const pmrem = useMemo(() => new THREE.PMREMGenerator(gl), [gl]);
 
-  // Per-keyframe PMREM render targets — created once on first visit so sitting
-  // on a step never regenerates anything (no per-frame work at a keyframe).
-  const keyframeRTsRef = useRef<Map<number, THREE.WebGLRenderTarget>>(new Map());
-  // The transient blended-env render target + its canvas source, disposed on swap.
+  // Per-keyframe PMREM render targets — created once per sky on first visit so
+  // sitting on a step never regenerates anything (no per-frame work at a
+  // keyframe). Keyed by texture uuid, NOT by index: the active timeline can
+  // change (topic switch) and reuse an index for a different sky (e.g. Zenith
+  // step 2 puts 03before.webp at index 1 where Serpent Descent had 02.webp).
+  // An index-keyed cache would serve the previous timeline's PMREM — the
+  // "IBL doesn't match the sky at the end of the slider" regression.
+  const keyframeRTsRef = useRef<Map<string, THREE.WebGLRenderTarget>>(new Map());
+  // The transient blended-env render target + its canvas source, disposed on
+  // swap. Carries the source texture uuids so a cached blend from a previous
+  // timeline is never reused for a different pair of skies.
   const blendEnvRef = useRef<{
-    indexA: number;
-    indexB: number;
+    keyA: string;
+    keyB: string;
     mix: number;
     canvasTexture: THREE.CanvasTexture;
     rt: THREE.WebGLRenderTarget;
@@ -138,12 +154,17 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
   useEffect(() => {
     const { indexA, indexB, mix, iblIntensity } = sample;
 
-    // Per-keyframe PMREM, created once on first visit.
+    // Per-keyframe PMREM, created once per sky on first visit. Keyed by the
+    // texture's uuid (stable across timelines — drei caches textures by URL)
+    // so a topic switch that reuses an index for a different sky can never
+    // serve the previous timeline's environment.
     const getKeyframeEnv = (index: number): THREE.Texture => {
-      let rt = keyframeRTsRef.current.get(index);
+      const texture = textures[index];
+      const key = texture.uuid;
+      let rt = keyframeRTsRef.current.get(key);
       if (!rt) {
-        rt = pmrem.fromEquirectangular(textures[index]);
-        keyframeRTsRef.current.set(index, rt);
+        rt = pmrem.fromEquirectangular(texture);
+        keyframeRTsRef.current.set(key, rt);
       }
       return rt.texture;
     };
@@ -151,8 +172,10 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
     // Composite A*(1-mix)+B*mix → PMREM. Throttled: reuse the last blend when
     // the mix moved <2% so a fast drag/sweep doesn't re-PMREM on every tick.
     const getBlendEnv = (aIdx: number, bIdx: number, m: number): THREE.Texture => {
+      const keyA = textures[aIdx].uuid;
+      const keyB = textures[bIdx].uuid;
       const prev = blendEnvRef.current;
-      if (prev && prev.indexA === aIdx && prev.indexB === bIdx && Math.abs(prev.mix - m) < 0.02) {
+      if (prev && prev.keyA === keyA && prev.keyB === keyB && Math.abs(prev.mix - m) < 0.02) {
         return prev.rt.texture;
       }
       // Dispose the previous transient blend (canvas source + render target).
@@ -181,7 +204,7 @@ export const SceneEnvironment: React.FC<SceneEnvironmentProps> = ({ config, samp
       canvasTex.mapping = THREE.EquirectangularReflectionMapping;
       canvasTex.colorSpace = THREE.SRGBColorSpace;
       const rt = pmrem.fromEquirectangular(canvasTex);
-      blendEnvRef.current = { indexA: aIdx, indexB: bIdx, mix: m, canvasTexture: canvasTex, rt };
+      blendEnvRef.current = { keyA, keyB, mix: m, canvasTexture: canvasTex, rt };
       return rt.texture;
     };
 

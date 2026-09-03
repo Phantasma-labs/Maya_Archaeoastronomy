@@ -36,8 +36,6 @@ export interface LessonEntry {
     onSelectTopic: (id: string) => void;
     /** Active skyTimeline: the selected topic's own, or the lesson default. */
     skyTimeline: SkyKeyframe[];
-    /** Show the focused UI (slider, callout, sun blueprint). */
-    showFocusedUI: boolean;
   }>;
 }
 

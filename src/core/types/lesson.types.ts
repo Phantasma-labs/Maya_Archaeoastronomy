@@ -18,12 +18,12 @@ export interface LightingConfig {
  * Pedagogical content attached to an Atmosphere Timeline keyframe.
  * All fields are optional so legacy sky-only keyframes still type-check;
  * a keyframe without a callout falls back to its `SkyKeyframe.name` for
- * the slider label and shows no extra panel content.
+ * the slider label.
  *
- * `lines` is the on-screen text callout body (rendered as a stacked
- * multi-line block). `prompt` is the "drag to next step" line shown
- * below the callout. `completion` is the optional end-of-lesson reveal
- * panel.
+ * `label` is the only field the UI reads today — it feeds the slider's
+ * accessible value text (aria-valuetext). `sublabel`/`tooltip`/`lines`
+ * are authored pedagogical copy carried on the keyframe for future
+ * callout UI; nothing renders them yet.
  */
 export interface StepCallout {
   /** Big headline (e.g. "First contact"). Falls back to keyframe.name. */
@@ -34,25 +34,6 @@ export interface StepCallout {
   tooltip?: string;
   /** Multi-line on-screen text block, one entry per rendered line. */
   lines?: string[];
-  /** Interaction prompt shown beneath the callout (e.g. "→ Drag to Step 2…"). */
-  prompt?: string;
-  /** Per-keyframe astronomical data (sun azimuth/altitude/declination/time). */
-  astro?: {
-    /** Solar azimuth, e.g. "≈ 240°". */
-    azimuth: string;
-    /** Solar altitude above the horizon, e.g. "≈ 29–30°". */
-    altitude: string;
-    /** Solar declination, e.g. "≈ −13.5°". */
-    declination: string;
-    /** Local clock time of the event, e.g. "~15:32". */
-    time: string;
-  };
-  /** Optional completion reveal (Step 3's "Decoded" panel). */
-  completion?: {
-    heading: string;
-    /** Rendered as preformatted lines to preserve alignment. */
-    body: string[];
-  };
 }
 
 /**
@@ -81,15 +62,14 @@ export interface SkyKeyframe {
   /**
    * Optional keyframe metadata for topic-specific pedagogical data. The
    * Zenith topic uses this to carry the calendar date (`dateLabel`, e.g.
-   * "May 23") and a "days passed" counter (`days`) that the Atmosphere
-   * Timeline reads back into its step labels and right-side astro readout.
-   * Other topics ignore it.
+   * "Jun 21") that the Atmosphere Timeline reads into the slider's
+   * accessible value text. Other topics ignore it.
    */
   meta?: {
-    /** Calendar date label, e.g. "May 23". */
+    /** Display label for the slider's accessible value text (aria-valuetext)
+     *  — a calendar date ("May 23") or clock time. Overrides the keyframe
+     *  name / callout label. */
     dateLabel?: string;
-    /** Days elapsed since the timeline's first keyframe (0 at the start). */
-    days?: number;
   };
   /** Optional pedagogical content shown when this keyframe is active. */
   callout?: StepCallout;
@@ -163,18 +143,17 @@ export interface LearningTopic {
   details: string[];
   keyFact?: string;
   /**
-   * Optional focused-view skyTimeline. When present, this topic owns its
+   * Optional topic-owned skyTimeline. When present, this topic owns its
    * own Atmosphere Timeline (overrides the lesson's default) and the
-   * overlay renders the focused UI (slider, callout, sun blueprint).
-   * Used by focused topics (Serpent Descent, Zenith) to scope the
-   * timeline to that topic's own keyframes and enable the focused UI.
+   * slider is shown for it. Used by the sky setups (Serpent Descent,
+   * Zenith) to scope the timeline to that topic's own keyframes; topics
+   * without one (Calendar) fall back to the lesson default.
    */
   skyTimeline?: SkyKeyframe[];
 }
 
 export interface LessonContent {
   monumentName: string;
-  location: string;
   timePeriod: string;
   culture: string;
   overview: string;
@@ -195,12 +174,12 @@ export interface LessonConfig {
   status: 'available' | 'coming-soon';
   difficulty: 'Introductory' | 'Intermediate' | 'Advanced';
   duration: string;
-  
+
   assets: {
     models: ModelAsset[];
     environment: EnvironmentConfig;
   };
-  
+
   camera: CameraConfig;
   lighting: LightingConfig;
   content: LessonContent;
@@ -212,6 +191,11 @@ export interface LessonConfig {
  * sampleAtmosphere(). Pure derivation — never React state (ADR-001).
  */
 export interface AtmosphereSample {
+  /** The source keyframes this sample was derived from (the active
+   *  skyTimeline). Carried on the sample so consumers — SceneEnvironment's
+   *  texture array in particular — always index the same timeline the
+   *  sample was sampled from, never the lesson default. */
+  keyframes: SkyKeyframe[];
   /** Lower keyframe index (0-based). */
   indexA: number;
   /** Upper keyframe index (equals indexA on an exact step). */

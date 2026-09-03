@@ -5,7 +5,8 @@ export const lesson02Config: LessonConfig = {
   slug: '02',
   title: 'The Caracol Observatory: Venus Extremes and Horizon Sightlines',
   subtitle: 'The Cylindrical Tower of Chichén Itzá',
-  tagline: 'Investigate the asymmetric observation slits and horizon sightlines used by Maya astronomers to track extreme northern and southern Venus risings.',
+  tagline:
+    'Investigate the asymmetric observation slits and horizon sightlines used by Maya astronomers to track extreme northern and southern Venus risings.',
   thumbnail: '/assets/landing/lesson-02-thumb.webp',
   status: 'coming-soon',
   difficulty: 'Intermediate',
@@ -54,7 +55,6 @@ export const lesson02Config: LessonConfig = {
 
   content: {
     monumentName: 'El Caracol (The Snail Observatory)',
-    location: 'Chichén Itzá, Yucatán, Mexico',
     timePeriod: 'Late Classic (~900–1050 CE)',
     culture: 'Maya civilization',
     overview:
@@ -63,12 +63,14 @@ export const lesson02Config: LessonConfig = {
       {
         id: 'venus-extremes',
         title: 'Venus Horizon Extremes',
-        summary: 'Observation slits align with extreme azimuths of Venus risings and settings on the horizon.',
+        summary:
+          'Observation slits align with extreme azimuths of Venus risings and settings on the horizon.',
         details: [
           'The upper observation chamber contains narrow horizontal windows aligned with precise celestial angles.',
           'Alignments correspond to the maximum northern and southern declinations of Venus, which occur over an 8-year cycle.'
         ],
-        keyFact: 'Sightlines point to Venus extreme rise/set positions occurring once every 8 solar years.'
+        keyFact:
+          'Sightlines point to Venus extreme rise/set positions occurring once every 8 solar years.'
       }
     ],
     archaeologicalNotes:

@@ -4,7 +4,7 @@ import { Layers, Lock } from 'lucide-react';
 import { getAllLessons } from '../lessons/registry';
 
 /**
- * LandingPage — the observatory entrance (V02 design plan §3).
+ * LandingPage — the observatory entrance.
  *
  * Single-viewport layout: compressed hero with the brand kicker, headline,
  * copy and CTA, followed by a compact expedition catalog (short card
@@ -21,8 +21,7 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="h-screen bg-maya-bg text-maya-text flex flex-col selection:bg-maya-gold/30 selection:text-maya-cream overflow-hidden">
-      {/* Skip link — keyboard users jump straight to the expedition catalog
-          (V02 Phase E). */}
+      {/* Skip link — keyboard users jump straight to the expedition catalog. */}
       <a
         href="#expeditions"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-md focus:bg-maya-gold focus:text-maya-bg focus:text-sm focus:font-medium"
@@ -77,9 +76,7 @@ export const LandingPage: React.FC = () => {
               Select an archaeological module to begin the interactive 3D investigation
             </p>
           </div>
-          <span className="text-[11px] font-mono text-maya-gold">
-            {lessons.length} Modules
-          </span>
+          <span className="text-[11px] font-mono text-maya-gold">{lessons.length} Modules</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 content-start">

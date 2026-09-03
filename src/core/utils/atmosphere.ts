@@ -3,6 +3,14 @@ import { AtmosphereSample, SkyKeyframe } from '../types/lesson.types';
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /**
+ * Slider value text for a keyframe — prefers the calendar date, then the
+ * callout label, then the keyframe name. Shared by the AtmosphereTimeline
+ * (aria-valuetext) and the SerpentSlider (end labels + aria-valuetext).
+ */
+export const displayLabel = (kf: Pick<SkyKeyframe, 'id' | 'name' | 'meta' | 'callout'>): string =>
+  kf.meta?.dateLabel ?? kf.callout?.label ?? kf.name;
+
+/**
  * Sample the Atmosphere Timeline at a continuous position in [1, N]
  * (ADR-001).
  *
@@ -15,7 +23,9 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 export function sampleAtmosphere(keyframes: SkyKeyframe[], position: number): AtmosphereSample {
   const n = keyframes.length;
   if (n === 0) {
-    throw new Error('sampleAtmosphere: environment.skyTimeline must contain at least one keyframe.');
+    throw new Error(
+      'sampleAtmosphere: environment.skyTimeline must contain at least one keyframe.'
+    );
   }
 
   const p = Number.isFinite(position) ? Math.min(Math.max(position, 1), n) : 1;
@@ -51,6 +61,7 @@ export function sampleAtmosphere(keyframes: SkyKeyframe[], position: number): At
   const activeIndex = Math.min(n - 1, Math.max(0, Math.round(p) - 1));
 
   return {
+    keyframes,
     indexA,
     indexB,
     mix,

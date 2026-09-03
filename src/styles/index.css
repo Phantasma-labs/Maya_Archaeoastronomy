@@ -75,9 +75,9 @@ body,
   animation: fadeIn 0.25s ease-out forwards;
 }
 
-/* Reduced Motion — respect the OS-level preference (V02 Phase E). The
-   timeline sweep is handled in JS (LessonPage jumps straight to the step);
-   this kills the CSS fadeIn/translate entrance animations. */
+/* Reduced Motion — respect the OS-level preference. The timeline sweep is
+   handled in JS (LessonPage jumps straight to the step); this kills the CSS
+   fadeIn/translate entrance animations. */
 @media (prefers-reduced-motion: reduce) {
   .animate-fadeIn {
     animation: none;

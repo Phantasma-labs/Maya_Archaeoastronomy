@@ -66,8 +66,7 @@ export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset }) => {
             | THREE.InterleavedBufferAttribute
             | undefined;
           const hasVertexColors =
-            !!colorAttr &&
-            (colorAttr.itemSize === 3 || colorAttr.itemSize === 4);
+            !!colorAttr && (colorAttr.itemSize === 3 || colorAttr.itemSize === 4);
 
           const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
           materials.forEach((mat: THREE.Material) => {
@@ -80,7 +79,11 @@ export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset }) => {
               // non-normalized vertex color buffers, which cause the
               // shader to interpret values like 0.5 as near-black
               // post-sRGB conversion.
-              if (colorAttr && 'normalized' in colorAttr && !(colorAttr as THREE.BufferAttribute).normalized) {
+              if (
+                colorAttr &&
+                'normalized' in colorAttr &&
+                !(colorAttr as THREE.BufferAttribute).normalized
+              ) {
                 (colorAttr as THREE.BufferAttribute).normalized = true;
               }
 

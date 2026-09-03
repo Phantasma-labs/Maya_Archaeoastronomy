@@ -357,7 +357,7 @@ export const SerpentSlider: React.FC<SerpentSliderProps> = ({
             left: pxLeft,
             width: HEAD_WIDTH,
             height: HEAD_HEIGHT,
-            // Anchor the head's bottom edge 5px below the rail baseline
+            // Anchor the head's bottom edge 15px below the rail baseline
             // so it reads as a slider knob slightly into the slot.
             bottom: -15,
             filter: headFilter

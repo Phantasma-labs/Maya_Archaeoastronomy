@@ -63,6 +63,12 @@ history.
 | V2-6 | `@` path alias unused | Alias stripped from `vite.config.ts` + `tsconfig.json` — zero imports used it |
 | V2-7 | AGENTS.md stale references | Refreshed — dropped `runtimeState`/`clsx`/Alt+D references (ADR-001: no dev panel, `sliderPosition` is the only writer) |
 
+### Resolved by V02 polish (2026-09-03)
+
+| ID | Item | Resolution |
+|---|---|---|
+| (slider) | `SerpentSlider` head rendered at authored 153×125 anchored to the rail baseline; gold halo around the head (a `drop-shadow` on the `<img>`) sat static at α 0.35 with no first-load affordance | Rail art (1024×97) and head (153×125) now render at 100% authored pixel size with no stretch; lit-rail mask uses `clip-path: inset()` for a hard (non-fading) edge; head halo becomes a motion-driven drop-shadow on the head `motion.div` that pulses 0.15↔0.60 on a 1.6s `easeInOut` until first interaction (pointerdown or arrow/Home/End keydown), then settles to a steady 0.35 — never re-arms |
+
 ## How to add to this file
 
 - New issues get a `V2-N` id and land in the active section, ranked.

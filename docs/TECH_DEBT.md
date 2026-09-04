@@ -69,6 +69,12 @@ history.
 |---|---|---|
 | (slider) | `SerpentSlider` head rendered at authored 153×125 anchored to the rail baseline; gold halo around the head (a `drop-shadow` on the `<img>`) sat static at α 0.35 with no first-load affordance | Rail art (1024×97) and head (153×125) now render at 100% authored pixel size with no stretch; lit-rail mask uses `clip-path: inset()` for a hard (non-fading) edge; head halo becomes a motion-driven drop-shadow on the head `motion.div` that pulses 0.15↔0.60 on a 1.6s `easeInOut` until first interaction (pointerdown or arrow/Home/End keydown), then settles to a steady 0.35 — never re-arms |
 
+### Resolved by V02 UI scaling (2026-09-04)
+
+| ID | Item | Resolution |
+|---|---|---|
+| V2-11 | Lesson UI re-layouts instead of scaling at non-1280×720 viewports: Tailwind `md:`/`sm:` breakpoints switch header padding / panel width / panel height and hide the slider, the panel max-height is viewport-relative (`calc(100vh − 184px)`), and authored px caps (`max-w-[1024px]` rail, 153×125 head) stop the UI from growing with the 16:9 frame — so at 1920×1080/2560×1440 the fixed-px UI becomes proportionally tiny and at narrow viewports elements wrap/stack | New core `ViewportScaler` wraps the DOM overlay layer in a 1280×720 design space uniformly scaled by `min(hostW/1280, hostH/720)`, floored at `MIN_SCALE = 0.75` with a top-center crop anchor (only 800×600 among the required viewports clamps; crop falls on the bottom vignette + slider, header/nav stay usable). `LessonPage` frame gains `overflow-hidden`; `Lesson01Overlay` breakpoint variants neutralized to their desktop values and the panel max-height converted to the design-space literal `max-h-[536px]` (= 720 − 184). The R3F canvas is deliberately NOT CSS-scaled (R3F sizes to its parent — a scaled canvas renders at logical resolution and upscales → blurry); only the DOM overlay scales. Pointer math is scale-invariant (`getBoundingClientRect()` follows transforms while `clientX` is screen-space), so `SerpentSlider`/`AtmosphereTimeline` needed no changes |
+
 ## How to add to this file
 
 - New issues get a `V2-N` id and land in the active section, ranked.

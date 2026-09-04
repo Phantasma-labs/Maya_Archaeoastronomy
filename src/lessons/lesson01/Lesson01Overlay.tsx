@@ -67,11 +67,11 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   const sliderHidden = selectedTopicId === 'solar-calendar';
 
   return (
-    <div className="pointer-events-none absolute inset-0 flex flex-col p-4 md:p-6 z-20">
+    <div className="pointer-events-none absolute inset-0 flex flex-col p-6 z-20">
       {/* Bottom vignette — grounds the instrument against the sky so the
           panel reads as an instrument, not a floating card. Earlier sibling
           of the instrument, so it paints beneath it. */}
-      <div className="absolute inset-x-0 bottom-0 h-32 md:h-40 bg-gradient-to-t from-maya-bg/70 via-maya-bg/30 to-transparent pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-maya-bg/70 via-maya-bg/30 to-transparent pointer-events-none" />
 
       {/* Skip link — keyboard users jump straight to the observation
           instrument, past the 3D canvas. */}
@@ -85,8 +85,8 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
       {/* Minimal header — home, lesson title, and section buttons in one
           flat bar: solid surface background, full-bleed across the top,
           no floating buttons. */}
-      <header className="pointer-events-auto -mx-4 md:-mx-6 -mt-4 md:-mt-6 bg-maya-surface border-b border-maya-gold/20">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 md:px-6 py-2">
+      <header className="pointer-events-auto -mx-6 -mt-6 bg-maya-surface border-b border-maya-gold/20">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-6 py-2">
           <Link
             to="/"
             aria-label="Back to all lessons"
@@ -100,7 +100,7 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
             <span className="text-[10px] font-mono font-bold uppercase text-maya-gold">
               Lesson {config.id}
             </span>
-            <h1 className="font-serif text-xs font-bold text-maya-cream tracking-wide truncate max-w-[200px] sm:max-w-xs md:max-w-md">
+            <h1 className="font-serif text-xs font-bold text-maya-cream tracking-wide truncate max-w-md">
               {config.content.monumentName}
             </h1>
           </div>
@@ -138,20 +138,22 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
 
       {/* Field guide — content for the open button. Always mounted so the
           section buttons collapse/uncollapse it: it hangs from the header
-          into a vertical rectangle docked to the frame's left edge (md+;
-          full-bleed section under the header on mobile), growing/collapsing
-          via a max-height + opacity transition instead of popping in.
+          into a vertical rectangle docked to the design space's left edge,
+          growing/collapsing via a max-height + opacity transition instead
+          of popping in. The max-height is a literal design-space value
+          (536px = 720 − 184, the md reference at 1280×720) — a viewport-
+          relative calc would not scale with the design.
           Text-only — deliberately no image captions. */}
       <aside
         id="field-guide"
         aria-hidden={activePanel ? undefined : true}
         className={`pointer-events-auto flex flex-col p-5 overflow-hidden text-maya-text text-[14.4px] z-10
           origin-top motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out
-          -mx-4 md:-mx-0 md:-ml-6 md:w-[21.16rem]
+          -ml-6 w-[21.16rem]
           bg-maya-surface/95 backdrop-blur-xl border border-t-0 border-maya-gold/30 rounded-b-lg shadow-xl
           ${
             activePanel
-              ? 'opacity-100 visible max-h-[calc(100vh-64px)] md:max-h-[calc(100vh-184px)]'
+              ? 'opacity-100 visible max-h-[536px]'
               : 'opacity-0 invisible max-h-0 pointer-events-none'
           }`}
       >
@@ -233,11 +235,13 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
       {/* Bottom instrument — the Atmosphere Timeline, full width, and
           nothing else: the slider is the single environment control
           (ADR-001). Rendered for the sky setup (Serpent Descent); hidden
-          in the Calendar & Architecture reference view, and on mobile
-          while any caption panel is open (the sheet covers the frame). */}
+          in the Calendar & Architecture reference view. The overlay lives
+          in the fixed 1280×720 design space (ViewportScaler), so the
+          desktop reference — slider always visible under an open caption
+          panel — applies at every viewport; there is no mobile sheet. */}
       <div
         className={`pointer-events-auto mt-auto ${
-          sliderHidden ? 'hidden' : activePanel ? 'hidden md:block' : ''
+          sliderHidden ? 'hidden' : activePanel ? 'block' : ''
         }`}
       >
         <div id="lesson-instrument">

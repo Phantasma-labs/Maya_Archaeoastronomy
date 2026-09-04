@@ -2,6 +2,7 @@ import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } fr
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getLessonEntry } from '../lessons/registry';
 import { SceneCanvas } from '../core/components/SceneCanvas';
+import { ViewportScaler } from '../core/components/ViewportScaler';
 import { sampleAtmosphere } from '../core/utils/atmosphere';
 import { useLessonAssetCleanup } from '../core/utils/useLessonAssetCleanup';
 import { ArrowLeft, AlertCircle, Clock } from 'lucide-react';
@@ -220,9 +221,10 @@ export const LessonPage: React.FC = () => {
       {/* Cinematic 16:9 frame — on horizontal/widescreen viewports the scene
           and overlay are letterboxed to a 16:9 frame (centered) instead of
           stretching across the full width. On narrow/tall viewports the
-          frame fills the width and its height follows from the ratio. */}
+          frame fills the width and its height follows from the ratio.
+          overflow-hidden clips the ViewportScaler box's min-scale overhang. */}
       <div
-        className="relative"
+        className="relative overflow-hidden"
         style={{
           width: 'min(100%, calc(100vh * 16 / 9))',
           aspectRatio: '16 / 9'
@@ -235,18 +237,25 @@ export const LessonPage: React.FC = () => {
 
         {/* Educational UI Overlay — sits above the canvas, over the frame.
             Wrapped in Suspense because the registry lazy-loads the overlay
-            module (route-level code splitting, TECH_DEBT H3). */}
+            module (route-level code splitting, TECH_DEBT H3). The overlay
+            layer is wrapped in ViewportScaler (core): a 1280×720 design
+            space uniformly scaled to the frame, so the authored composition
+            is preserved at every viewport. Only the DOM overlay scales —
+            the R3F canvas stays full-frame (CSS-scaling it would render it
+            blurry). */}
         {OverlayComponent && (
           <Suspense fallback={null}>
-            <OverlayComponent
-              config={config}
-              sliderPosition={sliderPosition}
-              onSliderPositionChange={handleLiveChange}
-              onStepSelect={handleStepSelect}
-              selectedTopicId={selectedTopicId}
-              onSelectTopic={handleSelectTopic}
-              skyTimeline={activeSkyTimeline}
-            />
+            <ViewportScaler>
+              <OverlayComponent
+                config={config}
+                sliderPosition={sliderPosition}
+                onSliderPositionChange={handleLiveChange}
+                onStepSelect={handleStepSelect}
+                selectedTopicId={selectedTopicId}
+                onSelectTopic={handleSelectTopic}
+                skyTimeline={activeSkyTimeline}
+              />
+            </ViewportScaler>
           </Suspense>
         )}
       </div>

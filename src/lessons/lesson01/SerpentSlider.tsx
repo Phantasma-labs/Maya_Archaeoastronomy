@@ -279,7 +279,7 @@ export const SerpentSlider: React.FC<SerpentSliderProps> = ({
     // 1024:97 aspect (no squashing) and is capped at a sensible max-width
     // so it never grows wider than the rail art was authored for — the
     // slider renders the assets at 100% of their original pixel size.
-    <div className="pointer-events-auto mx-auto w-full max-w-[1024px]">
+    <div className="pointer-events-auto ml-auto w-full max-w-[1024px]">
       {/* Slider track — sized by its natural aspect ratio. The role=slider
           span fills the full width so keyboard / drag input works across
           the whole track, not just over the art. */}

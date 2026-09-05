@@ -49,6 +49,10 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   // follows the selected topic (Serpent Descent on a fresh visit).
   const [activePanel, setActivePanel] = useState<string | null>(() => selectedTopicId);
 
+  const handleStepSelect = (step: number) => {
+    onStepSelect(step);
+  };
+
   const handleButtonClick = (id: string) => {
     if (activePanel === id) {
       setActivePanel(null);
@@ -250,14 +254,14 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
               keyframes={skyTimeline}
               value={sliderPosition}
               onLiveChange={onSliderPositionChange}
-              onStepSelect={onStepSelect}
+              onStepSelect={handleStepSelect}
             />
           ) : (
             <AtmosphereTimeline
               keyframes={skyTimeline}
               value={sliderPosition}
               onLiveChange={onSliderPositionChange}
-              onStepSelect={onStepSelect}
+              onStepSelect={handleStepSelect}
             />
           )}
         </div>

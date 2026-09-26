@@ -153,8 +153,22 @@ export const lesson01Config: LessonConfig = {
   blueprint: {
     stairways: [
       { id: 'stair-north', foot: [9.02, -32.32], top: [1.74, -8.1], width: 9.2, steps: 91 },
-      { id: 'stair-east', foot: [32.34, 10.98], top: [8.1, 3.72], width: 9.2, steps: 91 },
-      { id: 'stair-south', foot: [-10.95, 34.35], top: [-3.72, 10.1], width: 9.2, steps: 91 },
+      {
+        id: 'stair-east',
+        foot: [32.34, 10.98],
+        top: [8.1, 3.72],
+        width: 9.2,
+        steps: 91,
+        worn: true
+      },
+      {
+        id: 'stair-south',
+        foot: [-10.95, 34.35],
+        top: [-3.72, 10.1],
+        width: 9.2,
+        steps: 91,
+        worn: true
+      },
       { id: 'stair-west', foot: [-34.34, -8.98], top: [-10.1, -1.72], width: 9.2, steps: 91 }
     ]
   },

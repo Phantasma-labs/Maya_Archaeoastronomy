@@ -29,9 +29,13 @@ as an outline: `BlueprintEdges` builds `THREE.EdgesGeometry` line segments (hard
 (shared geometry, never mutated) so hidden lines stay hidden; a `GridHelper` replaces the floor.
 The Lesson 01 stairways are flat ramps (their 91 steps exist only in the photoreal textures), so
 `BlueprintStairs` draws them procedurally: `stairStepSlots()` (pure, `core/utils/stairs.ts`) gives
-each step line's horizontal placement from `LessonConfig.blueprint.stairways`, and a downward ray
-against the `PyramidBase` mesh snaps its height to the real surface (three's GLTFLoader strips the
-dot from the authored node name `Pyramid.Base`). `CameraTour` applies the pose derived by
+each step line's horizontal placement from `LessonConfig.blueprint.stairways`. Downward rays
+against the `PyramidBase` mesh (three's GLTFLoader strips the dot from the authored node name
+`Pyramid.Base`) sample each ramp's centre line, `fitLine()` fits its plane, and all step lines are
+laid on that plane, lifted just above the ramp's highest bump so eroded ramps cannot poke through
+and hide parts of the lines. Stairways flagged `worn` (Lesson 01: east and south, whose meshes are
+uneven) also have their noisy mesh edges hidden inside the footprint (`stairFootprintContains()`,
+in `BlueprintEdges`) and a clean outline drawn instead. `CameraTour` applies the pose derived by
 `sampleTour(stops, sliderPosition)` in a dependency-guarded layout effect and invalidates —
 `frameloop="demand"` and the no-`useFrame` rule are unchanged; the eased step sweep produces the
 orbit. Photoreal topics still use the locked `FixedGlbCamera`. Tour poses are orbits around a

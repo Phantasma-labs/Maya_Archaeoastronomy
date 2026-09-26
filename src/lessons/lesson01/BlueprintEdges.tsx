@@ -1,7 +1,47 @@
 import React, { useEffect, useMemo } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { ModelAsset } from '../../core/types/lesson.types';
+import { ModelAsset, StairwaySpec } from '../../core/types/lesson.types';
+import { stairFootprintContains } from '../../core/utils/stairs';
+
+/** The pyramid's body mesh in Lesson01_Layout (three strips the dot from "Pyramid.Base"). */
+const PYRAMID_BODY_MESH = 'PyramidBase';
+/** Extra width beside a worn ramp whose edges are hidden — covers its balustrades. */
+const HIDE_MARGIN = 1.2;
+
+/** Copy of an edge geometry without the segments that lie entirely inside a stairway footprint. */
+function withoutSegmentsInside(
+  source: THREE.BufferGeometry,
+  matrixWorld: THREE.Matrix4,
+  zones: StairwaySpec[]
+): THREE.BufferGeometry {
+  const pos = source.getAttribute('position');
+  const a = new THREE.Vector3();
+  const b = new THREE.Vector3();
+  const kept: number[] = [];
+  for (let i = 0; i + 1 < pos.count; i += 2) {
+    a.fromBufferAttribute(pos, i).applyMatrix4(matrixWorld);
+    b.fromBufferAttribute(pos, i + 1).applyMatrix4(matrixWorld);
+    const inside = zones.some(
+      (z) =>
+        stairFootprintContains(z, a.x, a.z, HIDE_MARGIN) &&
+        stairFootprintContains(z, b.x, b.z, HIDE_MARGIN)
+    );
+    if (!inside) {
+      kept.push(
+        pos.getX(i),
+        pos.getY(i),
+        pos.getZ(i),
+        pos.getX(i + 1),
+        pos.getY(i + 1),
+        pos.getZ(i + 1)
+      );
+    }
+  }
+  const filtered = new THREE.BufferGeometry();
+  filtered.setAttribute('position', new THREE.Float32BufferAttribute(kept, 3));
+  return filtered;
+}
 
 interface BlueprintEdgesProps {
   asset: ModelAsset;
@@ -11,6 +51,12 @@ interface BlueprintEdgesProps {
   thresholdDeg?: number;
   /** Higher threshold for organic meshes (the serpent heads) so they don't scribble. */
   organicThresholdDeg?: number;
+  /**
+   * Stairways whose mesh geometry is eroded: the pyramid body's edges inside
+   * their footprint are hidden (BlueprintStairs draws a clean outline instead).
+   * Must be a stable reference — a new array rebuilds every edge geometry.
+   */
+  hideEdgesInside?: StairwaySpec[];
 }
 
 /**
@@ -25,7 +71,8 @@ export const BlueprintEdges: React.FC<BlueprintEdgesProps> = ({
   color,
   opacity,
   thresholdDeg = 10,
-  organicThresholdDeg = 55
+  organicThresholdDeg = 55,
+  hideEdgesInside = []
 }) => {
   const gltf = useGLTF(asset.url);
 
@@ -47,17 +94,22 @@ export const BlueprintEdges: React.FC<BlueprintEdgesProps> = ({
       polygonOffsetUnits: 1,
       toneMapped: false
     });
-    const edgeGeometries: THREE.EdgesGeometry[] = [];
+    const edgeGeometries: THREE.BufferGeometry[] = [];
 
     gltf.scene.updateMatrixWorld(true);
     gltf.scene.traverse((child) => {
       if (!(child as THREE.Mesh).isMesh) return;
       const mesh = child as THREE.Mesh;
       const organic = mesh.name.startsWith('Snake');
-      const edgesGeometry = new THREE.EdgesGeometry(
+      let edgesGeometry: THREE.BufferGeometry = new THREE.EdgesGeometry(
         mesh.geometry,
         organic ? organicThresholdDeg : thresholdDeg
       );
+      if (mesh.name === PYRAMID_BODY_MESH && hideEdgesInside.length > 0) {
+        const filtered = withoutSegmentsInside(edgesGeometry, mesh.matrixWorld, hideEdgesInside);
+        edgesGeometry.dispose();
+        edgesGeometry = filtered;
+      }
       edgeGeometries.push(edgesGeometry);
 
       const lines = new THREE.LineSegments(edgesGeometry, lineMaterial);
@@ -68,7 +120,7 @@ export const BlueprintEdges: React.FC<BlueprintEdgesProps> = ({
     });
 
     return { group, lineMaterial, fillMaterial, edgeGeometries };
-  }, [gltf.scene, color, opacity, thresholdDeg, organicThresholdDeg]);
+  }, [gltf.scene, color, opacity, thresholdDeg, organicThresholdDeg, hideEdgesInside]);
 
   useEffect(
     () => () => {

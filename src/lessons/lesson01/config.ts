@@ -258,7 +258,7 @@ export const lesson01Config: LessonConfig = {
               figure: '365',
               lines: [
                 'Together with the upper platform, the 364 steps make 365.',
-                'This has been interpreted as a symbolic representation of the 365-day solar year (the Haab).'
+                'This has been interpreted as a symbolic representation of the 365-day solar year.'
               ],
               status: 'interpretation'
             }

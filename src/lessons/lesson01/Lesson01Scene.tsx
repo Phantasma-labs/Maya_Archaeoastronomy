@@ -4,11 +4,16 @@ import { FixedGlbCamera } from '../../core/components/FixedGlbCamera';
 import { SceneEnvironment } from '../../core/components/SceneEnvironment';
 import { SceneLighting } from '../../core/components/SceneLighting';
 import { AtmosphereSample, LessonConfig, ModelAsset } from '../../core/types/lesson.types';
+import { BlueprintScene } from './BlueprintScene';
 
 interface Lesson01SceneProps {
   config: LessonConfig;
   /** Derived sample of the Atmosphere Timeline (ADR-001). */
   atmosphere: AtmosphereSample;
+  /** Selected topic id — a topic that owns a `tour` renders the blueprint scene. */
+  topicId: string;
+  /** Continuous `sliderPosition`; for tour topics it is the tour step (1..N). */
+  position: number;
 }
 
 // Preload all 3 GLBs in parallel at module init time.
@@ -27,8 +32,14 @@ preloadLessonModels([
  *   - SceneEnvironment — equirectangular sky dome + IBL
  *   - SceneLighting   — directional sun (ambient fill removed; IBL provides fill)
  *   - ModelLoader × 3 — Floor, Layout (pyramid), Trees (independently cached)
+ * When the selected topic owns a `tour`, BlueprintScene is rendered instead.
  */
-export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({ config, atmosphere }) => {
+export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({
+  config,
+  atmosphere,
+  topicId,
+  position
+}) => {
   // Resolve the three required models by id. These lookups are hard-coded to
   // this scene's assembly, so a missing id is a config/scene desync — fail
   // loudly (the error boundary surfaces it) instead of a silent undefined.
@@ -45,6 +56,22 @@ export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({ config, atmosphere
   const floorAsset = requireModel('floor');
   const layoutAsset = requireModel('layout');
   const treesAsset = requireModel('trees');
+
+  // A topic that owns a guided tour renders the blueprint scene (wireframe on
+  // black, orbiting camera) instead of the photoreal assembly below. The
+  // dispatch keys on the topic's `tour`, never on a topic id.
+  const tour = config.content.topics.find((t) => t.id === topicId)?.tour;
+  if (tour) {
+    return (
+      <BlueprintScene
+        tour={tour}
+        position={position}
+        lens={config.camera}
+        layoutAsset={layoutAsset}
+        floorAsset={floorAsset}
+      />
+    );
+  }
 
   return (
     <>

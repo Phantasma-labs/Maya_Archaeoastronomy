@@ -21,6 +21,17 @@ Fixed cinematic viewpoint. The GLB authoring camera transform is **baked into
 first-frame race against GLB traversal. `FixedGlbCamera` applies it once in
 `useLayoutEffect` on mount and updates only `aspect` on resize. No controls by design.
 
+**Tour camera (Calendar & Architecture).** Topics that own a `tour` mount `BlueprintScene`
+instead of the photoreal assembly: black `scene.background`, no `SceneEnvironment`/sun (basic
+materials ignore light and IBL), the tree canopy unmounted, and every mesh re-skinned with one
+shared wireframe `MeshBasicMaterial` via `ModelLoader`'s `materialOverride` (the clone's material
+is rebound; the cached GLTF is never mutated). `CameraTour` applies the pose derived by
+`sampleTour(stops, sliderPosition)` in a dependency-guarded layout effect and invalidates —
+`frameloop="demand"` and the no-`useFrame` rule are unchanged; the eased step sweep produces the
+orbit. Photoreal topics still use the locked `FixedGlbCamera`. Tour poses are orbits around a
+target: azimuth 0 = camera on +Z increasing toward +X; the Lesson 01 pyramid is rotated ~17° in
+world space, so its north stairway faces azimuth ≈ 2.85 (not π).
+
 ## Asset loading
 
 - `useGLTF.setDecoderPath('/draco/')` at module scope; decoders self-hosted in
@@ -52,12 +63,12 @@ driven by a derived `AtmosphereSample` (`sampleAtmosphere()` in `core/utils`):
 - **Dome B** (renderOrder −999, `transparent`, `opacity = sample.mix`, hidden at mix ≈ 0)
   shows `skyTimeline[sample.indexB]`. Crossfade = plain alpha blending; no custom shaders.
   Dome B keeps depth testing ON: as the only transparent object it renders in three.js's
-  transparent pass *after* all opaque geometry regardless of renderOrder, so the models'
+  transparent pass _after_ all opaque geometry regardless of renderOrder, so the models'
   depth must occlude it — `depthTest=false` blended it over the whole viewport, making the
   geometry dissolve toward the incoming sky during sweeps (fixed regression).
 - Both domes share the lesson's framing (`scale`/`panY` via `texture.matrix` with
   `matrixAutoUpdate=false`; shared `rotation`) and brightness tint (`intensity`).
-- **IBL**: `scene.environment` can't blend two envmaps, so it follows the *dominant*
+- **IBL**: `scene.environment` can't blend two envmaps, so it follows the _dominant_
   keyframe (A below mix 0.5, B at/above) while `scene.environmentIntensity` lerps
   continuously. The directional sun dominates, making the midpoint envmap swap
   imperceptible. `environmentRotation` tracks the shared rotation.
@@ -80,7 +91,7 @@ cast shadows (deliberate: cleaner plaza, less canopy self-shadow noise).
 ## Performance characteristics (measured)
 
 - Scene: ~6 meshes / <10 draw calls, small footprint; DPR clamped; MSAA on. GPU load is
-  light *per frame* — and with `frameloop="demand"` (C2) a static frame is no longer redrawn
+  light _per frame_ — and with `frameloop="demand"` (C2) a static frame is no longer redrawn
   forever.
 - Bundle: route-level code splitting (H3) keeps the landing page at ~190 KB JS (62 KB gzip);
   the three/drei/R3F stack (~890 KB / 240 KB gzip) loads only on the lesson route.

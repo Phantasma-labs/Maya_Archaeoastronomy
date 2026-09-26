@@ -37,6 +37,56 @@ export interface StepCallout {
 }
 
 /**
+ * Camera pose of a tour stop, as an orbit around a target point. Azimuth is
+ * measured in radians around +Y from +Z toward +X, so the camera sits at
+ * target + r·(sin az·cos el, sin el, cos az·cos el). For Lesson 01 north is
+ * −Z, so a north-face-on view has azimuth π. Interpolation between stops
+ * takes the shortest azimuth arc (see `sampleTour`).
+ */
+export interface TourCameraPose {
+  azimuth: number;
+  /** Radians above the horizon (π/2 = straight down onto the target). */
+  elevation: number;
+  /** Metres from the target. */
+  radius: number;
+  target: [number, number, number];
+}
+
+/**
+ * How firmly a tour statement is supported. `mixed` = the arithmetic/calendar
+ * fact is established but its link to the architecture is an interpretation.
+ */
+export type TourEvidence = 'documented' | 'interpretation' | 'mixed';
+
+/** On-screen content for a tour stop. */
+export interface TourStopInfo {
+  headline: string;
+  /** Big number/figure shown above the headline ("9", "4 × 91", "365"). */
+  figure?: string;
+  lines: string[];
+  status: TourEvidence;
+}
+
+/** One viewpoint + explanation in a topic's guided tour. */
+export interface TourStop {
+  id: string;
+  /** Short name for the step navigator (dot tooltip / aria label). */
+  label: string;
+  camera: TourCameraPose;
+  info: TourStopInfo;
+}
+
+/** Camera state derived from a continuous tour position (pure, never stored). */
+export interface TourSample {
+  /** Camera position in world space. */
+  eye: [number, number, number];
+  /** Point the camera looks at. */
+  target: [number, number, number];
+  /** Nearest stop index (0-based) for the active text / navigator dot. */
+  activeIndex: number;
+}
+
+/**
  * A single authored sky/light state on the Atmosphere Timeline (ADR-001).
  * Keyframes are COMPLETE states — no partial-axis overrides, no fallback
  * chains. Every keyframe defines all of its values so any adjacent pair
@@ -150,6 +200,13 @@ export interface LearningTopic {
    * (Calendar & Architecture) fall back to the lesson default.
    */
   skyTimeline?: SkyKeyframe[];
+  /**
+   * Optional topic-owned guided tour. When present, the topic renders the
+   * lesson's blueprint scene instead of the photoreal one, `sliderPosition`
+   * means the tour step (1..N), and the overlay shows a step navigator with
+   * each stop's `info`. Used by Calendar & Architecture.
+   */
+  tour?: TourStop[];
 }
 
 export interface LessonContent {

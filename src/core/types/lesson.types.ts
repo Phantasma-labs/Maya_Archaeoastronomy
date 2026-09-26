@@ -67,6 +67,22 @@ export interface TourStopInfo {
   status: TourEvidence;
 }
 
+/**
+ * A 2D callout pointing at a 3D feature. `anchor` is a world-space point the
+ * arrow tip lands on; the screen position is derived (never stored) by
+ * projecting it through the tour camera (see `projectToScreen`).
+ */
+export interface TourCallout {
+  id: string;
+  /** Short label shown at the tail of the arrow ("Step 91", "+1 platform"). */
+  label: string;
+  /** World-space point the arrowhead points at. */
+  anchor: [number, number, number];
+  /** Label centre relative to the anchor's screen position, in design-space
+   *  pixels (x right, y down). The arrow runs from the label to the anchor. */
+  offset: [number, number];
+}
+
 /** One viewpoint + explanation in a topic's guided tour. */
 export interface TourStop {
   id: string;
@@ -74,6 +90,8 @@ export interface TourStop {
   label: string;
   camera: TourCameraPose;
   info: TourStopInfo;
+  /** Arrows pointing at the features this step is about (optional). */
+  callouts?: TourCallout[];
 }
 
 /** Camera state derived from a continuous tour position (pure, never stored). */

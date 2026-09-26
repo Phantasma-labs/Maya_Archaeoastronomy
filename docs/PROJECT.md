@@ -39,7 +39,8 @@ type-checks only, no emit), `preview`, `typecheck` (alias for `tsc --noEmit`),
   orbit/zoom — deliberate); the Calendar & Architecture blueprint tour moves the camera along
   authored viewpoints (still no user orbit).
 - **Blueprint tour** (Calendar & Architecture): wireframe El Castillo on black, a six-step guided
-  camera tour, and a step panel that marks each claim Documented or Interpretation.
+  camera tour with 2D arrows pointing at each step's feature, and a step panel that marks each
+  claim Documented or Interpretation.
 - **Atmosphere Timeline** (ADR-001): a continuous slider over hardcoded sky keyframes —
   in-between positions crossfade the two adjacent sky panoramas and interpolate sun
   rotation + IBL intensity; step-marker clicks run an eased sweep through the blend.

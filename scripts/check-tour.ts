@@ -2,8 +2,11 @@
 // (Node 24 executes .ts directly via type stripping; no test runner or new
 // dependency is added — see the repo's "no test scripts" rule.)
 import assert from 'node:assert/strict';
-import { sampleTour } from '../src/core/utils/tour.ts';
+import * as THREE from 'three';
+import { projectToScreen, sampleTour, tourSettle } from '../src/core/utils/tour.ts';
 import type { TourStop } from '../src/core/types/lesson.types.ts';
+
+type V3 = [number, number, number];
 
 const stop = (
   id: string,
@@ -98,6 +101,65 @@ assert.throws(() => sampleTour([], 1), /at least one/);
   near(mid.target[0], 5, 'mid target x');
   near(mid.target[1], 10, 'mid target y');
   near(mid.eye[2], 20, 'mid radius z'); // radius 20 along +Z from target z=0
+}
+
+// 9. projectToScreen: pinhole maths on a simple pose (eye on +Z looking at the origin).
+{
+  const sample = { eye: [0, 0, 10] as V3, target: [0, 0, 0] as V3, activeIndex: 0 };
+  const c = projectToScreen(sample, 90, 1, [0, 0, 0]);
+  near(c.x, 0.5, 'centre x');
+  near(c.y, 0.5, 'centre y');
+  assert.equal(c.visible, true);
+  const r = projectToScreen(sample, 90, 1, [1, 0, 0]); // depth 10, tan(45°) = 1
+  near(r.x, 0.55, 'right x');
+  near(r.y, 0.5, 'right y');
+  const u = projectToScreen(sample, 90, 1, [0, 1, 0]);
+  near(u.y, 0.45, 'up y (screen y grows downward)');
+  const wide = projectToScreen(sample, 90, 2, [1, 0, 0]);
+  near(wide.x, 0.525, 'aspect 2 x');
+  assert.equal(projectToScreen(sample, 90, 1, [0, 0, 20]).visible, false, 'behind camera');
+  assert.equal(projectToScreen(sample, 90, 1, [50, 0, 0]).visible, false, 'off-screen right');
+}
+
+// 10. projectToScreen agrees with a real THREE.PerspectiveCamera (same lookAt basis),
+//     including a steep near-top-down pose.
+{
+  const poses: { eye: V3; target: V3 }[] = [
+    { eye: [-44.4, 1.7, -73.2], target: [-1, 13, 1] },
+    { eye: [10, 40, 30], target: [0, 10, 0] },
+    { eye: [3, 90, 4], target: [-8.7, 25, -1.3] }
+  ];
+  const points: V3[] = [
+    [0, 0, 0],
+    [5, 12, -7],
+    [-9, 3, 14]
+  ];
+  for (const fov of [48.455, 70]) {
+    for (const aspect of [16 / 9, 1]) {
+      for (const p of poses) {
+        for (const pt of points) {
+          const cam = new THREE.PerspectiveCamera(fov, aspect, 0.1, 1000);
+          cam.position.set(...p.eye);
+          cam.lookAt(...p.target);
+          cam.updateMatrixWorld(true);
+          const ndc = new THREE.Vector3(...pt).project(cam);
+          const mine = projectToScreen({ ...p, activeIndex: 0 }, fov, aspect, pt);
+          const tag = `fov ${fov} aspect ${aspect.toFixed(2)} eye ${p.eye} pt ${pt}`;
+          near(mine.x, (ndc.x + 1) / 2, `three x [${tag}]`, 1e-6);
+          near(mine.y, (1 - ndc.y) / 2, `three y [${tag}]`, 1e-6);
+        }
+      }
+    }
+  }
+}
+
+// 11. tourSettle: 1 on a stop (and a plateau just around it), 0 mid-sweep, linear ramp between.
+{
+  near(tourSettle(2), 1, 'settle exact');
+  near(tourSettle(2.05), 1, 'settle plateau');
+  near(tourSettle(2.5), 0, 'settle mid-sweep');
+  near(tourSettle(2.18), (0.25 - 0.18) / 0.15, 'settle ramp');
+  near(tourSettle(Number.NaN), 1, 'settle NaN falls back to a stop');
 }
 
 console.log('sampleTour: all checks passed');

@@ -214,6 +214,15 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-outline',
             label: 'El Castillo',
+            callouts: [
+              {
+                id: 'c-platform',
+                label: 'Upper platform',
+                anchor: [-0.7, 27, 1.3],
+                offset: [150, -20]
+              },
+              { id: 'c-serpent', label: 'Serpent head', anchor: [4, 1.5, -33.8], offset: [60, 50] }
+            ],
             camera: { azimuth: 3.68, elevation: 0.32, radius: 118, target: [7.6, 14, -4.1] },
             info: {
               headline: 'El Castillo in outline',
@@ -227,6 +236,20 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-terraces',
             label: 'Nine terraces',
+            callouts: [
+              {
+                id: 'c-terrace-9',
+                label: 'Terrace 9',
+                anchor: [-11.5, 22.5, -12],
+                offset: [-20, -80]
+              },
+              {
+                id: 'c-terrace-1',
+                label: 'Terrace 1',
+                anchor: [-29.4, 1.3, -22],
+                offset: [-10, 70]
+              }
+            ],
             camera: { azimuth: 4.712, elevation: 0.05, radius: 95, target: [-1, 13, -11] },
             info: {
               headline: 'Nine stepped terraces',
@@ -238,6 +261,10 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-stairways',
             label: 'Four stairways',
+            callouts: [
+              { id: 'c-step-91', label: 'Step 91', anchor: [1.7, 25.1, -8.1], offset: [-110, -10] },
+              { id: 'c-step-1', label: 'Step 1', anchor: [9, 1, -32.3], offset: [110, 30] }
+            ],
             camera: { azimuth: 2.85, elevation: 0.12, radius: 95, target: [10.5, 13, 4.5] },
             info: {
               headline: 'Four stairways',
@@ -252,6 +279,18 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-365',
             label: '364 + 1',
+            callouts: [
+              { id: 'c-stair-n', label: '91', anchor: [5.3, 12, -20.1], offset: [0, 55] },
+              { id: 'c-stair-e', label: '91', anchor: [20.1, 12, 7.3], offset: [-70, 0] },
+              { id: 'c-stair-s', label: '91', anchor: [-7.3, 12, 22.1], offset: [0, -55] },
+              { id: 'c-stair-w', label: '91', anchor: [-22.1, 12, -5.3], offset: [70, 0] },
+              {
+                id: 'c-platform-plus-1',
+                label: '+1 platform',
+                anchor: [-1, 25.5, 1],
+                offset: [100, -90]
+              }
+            ],
             camera: { azimuth: 2.85, elevation: 1.35, radius: 100, target: [10.5, 25, 4.5] },
             info: {
               headline: '364 steps + the platform',
@@ -266,6 +305,14 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-panels',
             label: '52 panels',
+            callouts: [
+              {
+                id: 'c-panels',
+                label: '52 panels per side',
+                anchor: [23.5, 12, -4.2],
+                offset: [40, -150]
+              }
+            ],
             camera: { azimuth: 1.28, elevation: 0.1, radius: 88, target: [-4.4, 10, 12.5] },
             info: {
               headline: '52 panels on each side',

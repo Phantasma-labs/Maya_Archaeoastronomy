@@ -5,8 +5,8 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
  * proportions a designer authored against. Every lesson overlay is laid out
  * in that 1280×720 logical space and uniformly scaled to the live frame.
  */
-const DESIGN_WIDTH = 1280;
-const DESIGN_HEIGHT = 720;
+export const DESIGN_WIDTH = 1280;
+export const DESIGN_HEIGHT = 720;
 
 interface ViewportScalerProps {
   children: React.ReactNode;
@@ -48,9 +48,7 @@ export const ViewportScaler: React.FC<ViewportScalerProps> = ({ children }) => {
     const host = hostRef.current;
     if (!host) return;
     const measure = () => {
-      setScale(
-        Math.min(host.clientWidth / DESIGN_WIDTH, host.clientHeight / DESIGN_HEIGHT)
-      );
+      setScale(Math.min(host.clientWidth / DESIGN_WIDTH, host.clientHeight / DESIGN_HEIGHT));
     };
     measure();
     const ro = new ResizeObserver(measure);

@@ -33,7 +33,7 @@ LessonPage
 | `core/types/lesson.types.ts`   | All domain types: `LessonConfig`, `SkyKeyframe`, `EnvironmentConfig`, `CameraConfig`, `LightingConfig`, `LearningTopic`, `AtmosphereSample` | react (types only)             |
 | `core/components/`             | Lesson-agnostic scene/UI infrastructure (canvas, camera, environment, lighting, model loading, loading/error screens, AtmosphereTimeline)   | R3F, drei, three               |
 | `core/utils/atmosphere.ts`     | `sampleAtmosphere()` — pure timeline sampler (keyframe lerp + mix)                                                                          | core types only                |
-| `core/utils/tour.ts`           | `sampleTour()` — pure guided-tour sampler (shortest-arc azimuth, elevation/radius/target lerp)                                              | core types only                |
+| `core/utils/tour.ts`           | `sampleTour()` / `projectToScreen()` / `tourSettle()` — pure tour sampler, world→screen projection, "camera at rest" factor                 | core types only                |
 | `lessons/registry.ts`          | `LESSON_REGISTRY` id→{config, SceneComponent, OverlayComponent}; `getAllLessons`, `getLessonEntry`                                          | static imports of every lesson |
 | `lessons/<id>/config.ts`       | Static, typed lesson definition (assets, camera, lighting, pedagogical content)                                                             | core types only                |
 | `lessons/<id>/*Scene/*Overlay` | Lesson-specific scene assembly and learner UI                                                                                               | core components                |
@@ -66,7 +66,11 @@ lessonXX/config.ts ──► registry ──► LessonPage ── useState: slid
   the tour step (1..N). `sampleTour(stops, position)` derives the camera pose; the eased sweep
   between steps is the orbit, so there is still no `useFrame`. The overlay swaps the sky slider
   for `TourStepper` + `TourPanel`, and `Lesson01Scene` renders `BlueprintScene` (dispatch keys on
-  the topic's `tour`, never on a topic id).
+  the topic's `tour`, never on a topic id). Each stop may carry `callouts` (2D arrows + labels
+  pointing at 3D features): world-space anchors are projected to the screen by the pure
+  `projectToScreen()` — the same camera pose the canvas shows — and drawn by `TourCallouts` in the
+  overlay's 1280×720 design space (same 16:9 aspect as the canvas frame, so no access to the R3F
+  camera is needed). They fade out mid-sweep via `tourSettle()`.
 - UI-only state (tabs, drawer open) stays local in the overlay.
 
 ## Known structural weaknesses (details in TECH_DEBT.md)

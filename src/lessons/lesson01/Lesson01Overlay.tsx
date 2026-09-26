@@ -12,6 +12,8 @@ import {
 import { LessonConfig, SkyKeyframe } from '../../core/types/lesson.types';
 import { AtmosphereTimeline } from '../../core/components/AtmosphereTimeline';
 import { SerpentSlider } from './SerpentSlider';
+import { TourCallouts } from '../../core/components/TourCallouts';
+import { sampleTour, tourSettle } from '../../core/utils/tour';
 import { TourPanel } from './TourPanel';
 import { TourStepper } from './TourStepper';
 
@@ -71,6 +73,9 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
   // A topic that owns a guided tour swaps the sky slider for a step
   // navigator; both write the single `sliderPosition` (ADR-001).
   const tour = config.content.topics.find((t) => t.id === selectedTopicId)?.tour;
+  // The same pure derivation the 3D scene uses, so the 2D callouts are
+  // projected through exactly the camera pose the canvas is showing.
+  const tourSample = tour ? sampleTour(tour, sliderPosition) : undefined;
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col p-6 z-20">
@@ -78,6 +83,18 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           panel reads as an instrument, not a floating card. Earlier sibling
           of the instrument, so it paints beneath it. */}
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-maya-bg/70 via-maya-bg/30 to-transparent pointer-events-none" />
+
+      {/* Tour callouts — 2D arrows pointing at the 3D features of the current
+          tour step. Earlier sibling of the header/panel, so they paint beneath
+          the UI; they fade out while the camera sweeps between steps. */}
+      {tour && tourSample && (
+        <TourCallouts
+          callouts={tour[tourSample.activeIndex].callouts ?? []}
+          sample={tourSample}
+          fov={config.camera.fov}
+          opacity={tourSettle(sliderPosition)}
+        />
+      )}
 
       {/* Skip link — keyboard users jump straight to the observation
           instrument, past the 3D canvas. */}

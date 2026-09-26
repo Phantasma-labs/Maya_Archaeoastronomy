@@ -60,11 +60,12 @@ export const LessonPage: React.FC = () => {
 
   const [sliderPosition, setSliderPosition] = useState<number>(() => {
     if (!lessonEntry || !initialTopic) return 1;
-    const n = (initialTopic.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline)
-      .length;
+    const n =
+      initialTopic.tour?.length ??
+      (initialTopic.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline).length;
     const step = Number(searchParams.get('step'));
     if (Number.isFinite(step) && step >= 1) return Math.min(Math.round(step), n);
-    return initialTopic.skyTimeline ? 1 : 3;
+    return initialTopic.skyTimeline || initialTopic.tour ? 1 : 3;
   });
 
   // Mirror of the latest position for the sweep driver — lets the rAF
@@ -83,8 +84,8 @@ export const LessonPage: React.FC = () => {
 
   // The active skyTimeline is the selected topic's own (if it owns one)
   // or the lesson's default 3-step timeline. Serpent Descent owns a
-  // 2-step focused timeline; the Calendar & Architecture topic falls
-  // back to the lesson default.
+  // 2-step focused timeline; the Calendar & Architecture topic owns a tour
+  // (its sky is unused — sampleAtmosphere clamps out-of-range positions).
   const activeSkyTimeline = useMemo(() => {
     if (!lessonEntry) return [];
     const topic =
@@ -94,7 +95,7 @@ export const LessonPage: React.FC = () => {
   }, [lessonEntry, selectedTopicId]);
 
   // Reset the slider position when the selected topic changes. Topics that
-  // own a skyTimeline start at step 1; topics using the lesson default
+  // own a skyTimeline or a tour start at step 1; topics using the lesson default
   // default to step 3 (the zenith keyframe). The lesson default's
   // skyTimeline always has N=3, so step 3 is always a valid position. The
   // initial mount does NOT reset — the ?step= URL seed (or the topic
@@ -107,7 +108,7 @@ export const LessonPage: React.FC = () => {
     const topic =
       lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId) ??
       lessonEntry.config.content.topics[0];
-    setSliderPosition(topic?.skyTimeline ? 1 : 3);
+    setSliderPosition(topic?.skyTimeline || topic?.tour ? 1 : 3);
   }, [selectedTopicId, lessonEntry]);
 
   const atmosphere = useMemo(() => {
@@ -232,7 +233,12 @@ export const LessonPage: React.FC = () => {
       >
         {/* 3D Scene Viewport — fills the 16:9 frame */}
         <SceneCanvas cameraConfig={config.camera} gltfUrls={gltfUrls}>
-          <SceneComponent config={config} atmosphere={atmosphere} />
+          <SceneComponent
+            config={config}
+            atmosphere={atmosphere}
+            topicId={selectedTopicId}
+            position={sliderPosition}
+          />
         </SceneCanvas>
 
         {/* Educational UI Overlay — sits above the canvas, over the frame.

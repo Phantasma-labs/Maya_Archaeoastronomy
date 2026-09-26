@@ -21,6 +21,10 @@ export interface LessonEntry {
     config: LessonConfig;
     /** Derived sample of the Atmosphere Timeline at the current slider position. */
     atmosphere: AtmosphereSample;
+    /** Selected topic id (lets a scene pick a per-topic presentation). */
+    topicId: string;
+    /** Continuous slider position — the sky position or, for tour topics, the tour step. */
+    position: number;
   }>;
   OverlayComponent?: React.ComponentType<{
     config: LessonConfig;

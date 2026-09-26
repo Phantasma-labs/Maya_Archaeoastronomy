@@ -14,6 +14,8 @@ interface BlueprintSceneProps {
   layoutAsset: ModelAsset;
   /** Stairways to draw step lines on (the model's stairs are flat ramps). */
   stairways: StairwaySpec[];
+  /** Azimuth of the monument's main axis (enables stray-edge cleanup). */
+  axisAzimuth?: number;
 }
 
 /** maya-gold token (tailwind.config.js). */
@@ -39,7 +41,8 @@ export const BlueprintScene: React.FC<BlueprintSceneProps> = ({
   position,
   lens,
   layoutAsset,
-  stairways
+  stairways,
+  axisAzimuth
 }) => {
   const sample = useMemo(() => sampleTour(tour, position), [tour, position]);
   // Stable reference: BlueprintEdges rebuilds all its geometry when this changes.
@@ -73,6 +76,7 @@ export const BlueprintScene: React.FC<BlueprintSceneProps> = ({
           color={BLUEPRINT_GOLD}
           opacity={0.9}
           hideEdgesInside={wornStairways}
+          axisAzimuth={axisAzimuth}
         />
         <BlueprintStairs
           asset={layoutAsset}

@@ -264,6 +264,11 @@ export interface StairwaySpec {
 /** Extra data the blueprint view needs beyond the tour itself. */
 export interface BlueprintConfig {
   stairways: StairwaySpec[];
+  /**
+   * Azimuth (radians, tour convention) of the monument's main axis. Enables
+   * hiding long near-but-not-on-axis edges of the body mesh as mesh noise.
+   */
+  axisAzimuth?: number;
 }
 
 /**

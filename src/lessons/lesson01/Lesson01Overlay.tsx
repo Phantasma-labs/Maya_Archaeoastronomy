@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  Home,
-  Sun,
-  Calendar,
-  ChevronRight,
-  Sparkles,
-  CheckCircle2,
-  X
-} from 'lucide-react';
+import { Home, Sun, Calendar, ChevronRight, Sparkles, CheckCircle2, X } from 'lucide-react';
 import { LessonConfig, SkyKeyframe } from '../../core/types/lesson.types';
 import { AtmosphereTimeline } from '../../core/components/AtmosphereTimeline';
 import { SerpentSlider } from './SerpentSlider';
@@ -180,81 +172,94 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
               : 'opacity-0 invisible max-h-0 pointer-events-none'
           }`}
       >
-          {activeTopic ? (
-            <>
-              {/* Panel header */}
-              <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-                <h2 className="font-serif text-[15.75px] font-bold text-maya-cream flex items-center gap-2">
-                  <span className="text-maya-gold">
-                    {topicIcons[activeTopic.id] || <Sparkles className="w-4 h-4" />}
-                  </span>
-                  {activeTopic.title}
-                </h2>
-                <button
-                  onClick={() => setActivePanel(null)}
-                  className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
-                  aria-label="Close panel"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+        {activeTopic ? (
+          <>
+            {/* Panel header */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+              <h2 className="font-serif text-[15.75px] font-bold text-maya-cream flex items-center gap-2">
+                <span className="text-maya-gold">
+                  {topicIcons[activeTopic.id] || <Sparkles className="w-4 h-4" />}
+                </span>
+                {activeTopic.title}
+              </h2>
+              <button
+                onClick={() => setActivePanel(null)}
+                className="text-maya-textDim hover:text-white p-1 -m-1 rounded hover:bg-white/5 cursor-pointer"
+                aria-label="Close panel"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-              <div className="flex-1 overflow-y-auto pr-1 space-y-3 custom-scrollbar">
-                {activeTopic.tour && <TourPanel stops={activeTopic.tour} value={sliderPosition} />}
+            <div className="flex-1 overflow-y-auto pr-1 space-y-3 custom-scrollbar">
+              {activeTopic.tour && <TourPanel stops={activeTopic.tour} value={sliderPosition} />}
 
-                <p className="text-[13.5px] text-maya-textDim leading-relaxed italic border-l-2 border-maya-gold/50 pl-3">
-                  "{activeTopic.summary}"
-                </p>
+              {/* A guided tour is self-contained: its step panel replaces the
+                    topic's summary / details / overview reference cards. */}
+              {!activeTopic.tour && (
+                <>
+                  <p className="text-[13.5px] text-maya-textDim leading-relaxed italic border-l-2 border-maya-gold/50 pl-3">
+                    "{activeTopic.summary}"
+                  </p>
 
-                <ul className="space-y-2 text-[13.5px] text-maya-textDim">
-                  {activeTopic.details.map((detail, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <ChevronRight className="w-3.5 h-3.5 text-maya-gold shrink-0 mt-0.5" />
-                      <span>{detail}</span>
-                    </li>
-                  ))}
-                </ul>
+                  <ul className="space-y-2 text-[13.5px] text-maya-textDim">
+                    {activeTopic.details.map((detail, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <ChevronRight className="w-3.5 h-3.5 text-maya-gold shrink-0 mt-0.5" />
+                        <span>{detail}</span>
+                      </li>
+                    ))}
+                  </ul>
 
-                {activeTopic.keyFact && (
-                  <div className="bg-maya-gold/10 border border-maya-gold/30 rounded-lg p-2.5 flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-maya-gold shrink-0 mt-0.5" />
-                    <p className="text-[12.5px] text-maya-cream font-medium font-mono">
-                      {activeTopic.keyFact}
-                    </p>
-                  </div>
-                )}
+                  {activeTopic.keyFact && (
+                    <div className="bg-maya-gold/10 border border-maya-gold/30 rounded-lg p-2.5 flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-maya-gold shrink-0 mt-0.5" />
+                      <p className="text-[12.5px] text-maya-cream font-medium font-mono">
+                        {activeTopic.keyFact}
+                      </p>
+                    </div>
+                  )}
 
-                {/* Calendar & Architecture is the merged reference section:
+                  {/* Calendar & Architecture is the merged reference section:
                     the topic's calendar facts above, then the monument's
                     architecture reference content (previously its own
                     "Architecture" panel). */}
-                {activeTopic.id === 'solar-calendar' && (
-                  <>
-                    <div className="bg-maya-surfaceHover/70 border border-white/10 rounded-xl p-4 space-y-2">
-                      <span className="text-[12.5px] font-mono uppercase tracking-wider text-maya-gold">
-                        Archaeological Overview
-                      </span>
-                      <p className="text-[13.5px] text-maya-textDim leading-relaxed">
-                        {config.content.overview}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-[13.5px]">
-                      <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
-                        <span className="text-[12.5px] text-maya-textDim block mb-1">Culture</span>
-                        <span className="text-maya-cream font-medium">{config.content.culture}</span>
+                  {activeTopic.id === 'solar-calendar' && (
+                    <>
+                      <div className="bg-maya-surfaceHover/70 border border-white/10 rounded-xl p-4 space-y-2">
+                        <span className="text-[12.5px] font-mono uppercase tracking-wider text-maya-gold">
+                          Archaeological Overview
+                        </span>
+                        <p className="text-[13.5px] text-maya-textDim leading-relaxed">
+                          {config.content.overview}
+                        </p>
                       </div>
-                      <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
-                        <span className="text-[12.5px] text-maya-textDim block mb-1">Chronology</span>
-                        <span className="text-maya-cream font-medium">{config.content.timePeriod}</span>
-                      </div>
-                    </div>
 
-                  </>
-                )}
-              </div>
-            </>
-          ) : null}
+                      <div className="grid grid-cols-2 gap-2 text-[13.5px]">
+                        <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
+                          <span className="text-[12.5px] text-maya-textDim block mb-1">
+                            Culture
+                          </span>
+                          <span className="text-maya-cream font-medium">
+                            {config.content.culture}
+                          </span>
+                        </div>
+                        <div className="bg-maya-surfaceHover/50 border border-white/5 p-3 rounded-lg">
+                          <span className="text-[12.5px] text-maya-textDim block mb-1">
+                            Chronology
+                          </span>
+                          <span className="text-maya-cream font-medium">
+                            {config.content.timePeriod}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </>
+        ) : null}
       </aside>
 
       {/* Bottom instrument — one control at a time: the Atmosphere Timeline

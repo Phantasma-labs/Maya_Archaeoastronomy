@@ -16,12 +16,6 @@ useGLTF.setDecoderPath('/draco/');
 
 interface ModelLoaderProps {
   asset: ModelAsset;
-  /**
-   * When set, every mesh on this instance renders with this material instead
-   * of the GLB's own (blueprint mode). The caller owns the material's
-   * lifetime (create once, dispose on unmount).
-   */
-  materialOverride?: THREE.Material;
 }
 
 /**
@@ -30,10 +24,8 @@ interface ModelLoaderProps {
  * - Clones the scene graph so shared GLTF data is not mutated
  * - Applies shadow casting & receiving recursively to all meshes
  * - Filters out camera nodes so they are not rendered as geometry
- * - Optional `materialOverride` re-skins the clone (blueprint mode) without
- *   touching the cached GLTF
  */
-export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset, materialOverride }) => {
+export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset }) => {
   const gltf = useGLTF(asset.url);
 
   // Clone and configure scene — run once per loaded GLTF
@@ -51,17 +43,6 @@ export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset, materialOverrid
         const mesh = child as THREE.Mesh;
         if (asset.castShadow !== undefined) mesh.castShadow = asset.castShadow;
         if (asset.receiveShadow !== undefined) mesh.receiveShadow = asset.receiveShadow;
-
-        // Blueprint mode: rebind this CLONE's material to the shared override.
-        // gltf.scene.clone(true) shares materials with the cached GLTF, but
-        // assigning `mesh.material` only swaps this clone's reference — the
-        // cached scene (and the photoreal view) is never mutated. The
-        // vertex-color guard below is for the glTF's own materials, so it is
-        // skipped for the override.
-        if (materialOverride) {
-          mesh.material = materialOverride;
-          return;
-        }
 
         // Material adjustment for glTF COLOR_0 (vertex color) attributes.
         //
@@ -122,7 +103,7 @@ export const ModelLoader: React.FC<ModelLoaderProps> = ({ asset, materialOverrid
     });
 
     return clone;
-  }, [gltf.scene, asset.castShadow, asset.receiveShadow, materialOverride]);
+  }, [gltf.scene, asset.castShadow, asset.receiveShadow]);
 
   return (
     <primitive

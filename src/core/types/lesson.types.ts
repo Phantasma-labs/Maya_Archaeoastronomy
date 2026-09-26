@@ -237,6 +237,30 @@ export interface LessonContent {
 }
 
 /**
+ * A stairway drawn procedurally in the blueprint view. Some models (Lesson 01)
+ * carry their steps only in the photoreal textures — the stairway is a flat
+ * ramp — so the blueprint draws `steps` evenly spaced step lines across it.
+ * Only the horizontal footprint is authored; each line's height is snapped to
+ * the model surface at build time.
+ */
+export interface StairwaySpec {
+  id: string;
+  /** Horizontal [x, z] of the bottom of the stairway (centre line). */
+  foot: [number, number];
+  /** Horizontal [x, z] of the top of the stairway (centre line). */
+  top: [number, number];
+  /** Full width of the stairway between its balustrades, in metres. */
+  width: number;
+  /** Number of step lines to draw (Lesson 01: 91, "traditionally counted"). */
+  steps: number;
+}
+
+/** Extra data the blueprint view needs beyond the tour itself. */
+export interface BlueprintConfig {
+  stairways: StairwaySpec[];
+}
+
+/**
  * Complete Lesson Specification
  */
 export interface LessonConfig {
@@ -258,6 +282,8 @@ export interface LessonConfig {
   camera: CameraConfig;
   lighting: LightingConfig;
   content: LessonContent;
+  /** Optional data for the blueprint view of topics that own a `tour`. */
+  blueprint?: BlueprintConfig;
 }
 
 /**

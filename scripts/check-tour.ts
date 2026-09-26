@@ -91,10 +91,10 @@ assert.throws(() => sampleTour([], 1), /at least one/);
 
 // 8. Target offset, elevation and radius/target interpolation.
 {
-  const up = sampleTour([stop('a', 0, Math.PI / 2, 10, [1, 2, 3])], 1);
+  const up = sampleTour([stop('a', 0, 1.2, 10, [1, 2, 3])], 1);
   near(up.eye[0], 1, 'elev x');
-  near(up.eye[1], 12, 'elev y');
-  near(up.eye[2], 3, 'elev z');
+  near(up.eye[1], 2 + 10 * Math.sin(1.2), 'elev y');
+  near(up.eye[2], 3 + 10 * Math.cos(1.2), 'elev z');
   const mid = sampleTour(
     [stop('a', 0, 0, 10, [0, 0, 0]), stop('b', 0, 0, 30, [10, 20, 0])],
     1.5
@@ -102,6 +102,18 @@ assert.throws(() => sampleTour([], 1), /at least one/);
   near(mid.target[0], 5, 'mid target x');
   near(mid.target[1], 10, 'mid target y');
   near(mid.eye[2], 20, 'mid radius z'); // radius 20 along +Z from target z=0
+}
+
+// 8b. A straight-down (zenithal) pose is clamped just short of vertical so the azimuth
+//     still decides the on-screen orientation: exactly at π/2 lookAt has no horizontal
+//     forward direction and the rotation would silently not apply.
+{
+  const east = sampleTour([stop('a', Math.PI / 2, Math.PI / 2, 10)], 1);
+  assert.ok(east.eye[1] > 9.99 && east.eye[1] < 10, `zenithal y ≈ radius, got ${east.eye[1]}`);
+  assert.ok(east.eye[0] > 0.05, `zenithal pose keeps an offset toward +X, got ${east.eye[0]}`);
+  near(east.eye[2], 0, 'zenithal east z', 1e-6);
+  const west = sampleTour([stop('a', -Math.PI / 2, Math.PI / 2, 10)], 1);
+  assert.ok(west.eye[0] < -0.05, `opposite azimuth offsets the other way, got ${west.eye[0]}`);
 }
 
 // 9. projectToScreen: pinhole maths on a simple pose (eye on +Z looking at the origin).

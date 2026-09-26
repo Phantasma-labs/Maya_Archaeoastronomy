@@ -5,6 +5,14 @@ import type { TourSample, TourStop } from '../types/lesson.types';
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const TWO_PI = Math.PI * 2;
 
+/**
+ * Highest elevation a tour camera may reach: just short of straight down.
+ * At exactly π/2 `lookAt` has no horizontal forward direction, so the azimuth
+ * would stop deciding the on-screen orientation. A zenithal pose (π/2) is
+ * clamped to this — visually straight down (0.57° off) — keeping the rotation.
+ */
+const MAX_ELEVATION = Math.PI / 2 - 0.01;
+
 /** Signed angular difference from `from` to `to`, wrapped into (−π, π]. */
 const shortestArc = (from: number, to: number): number => {
   const d = (to - from) % TWO_PI;
@@ -48,7 +56,7 @@ export function sampleTour(stops: TourStop[], position: number): TourSample {
   const b = stops[indexB].camera;
 
   const azimuth = a.azimuth + shortestArc(a.azimuth, b.azimuth) * t;
-  const elevation = lerp(a.elevation, b.elevation, t);
+  const elevation = Math.min(lerp(a.elevation, b.elevation, t), MAX_ELEVATION);
   const radius = lerp(a.radius, b.radius, t);
   const target: [number, number, number] = [
     lerp(a.target[0], b.target[0], t),

@@ -202,6 +202,93 @@ export const lesson01Config: LessonConfig = {
         details: [
           'Its four stairways have 91 steps each, and counting the top platform gives 365 steps—matching the days of the solar year.',
           'Its 52 panels are also linked to the 52-year Calendar Round.'
+        ],
+        // Guided blueprint tour (wireframe on black). Copy is drawn only from
+        // LearningMaterial/lesson_01.md — `status` marks what is documented
+        // versus interpretation. Camera poses are orbits around the pyramid:
+        // azimuth 0 = camera on +Z, increasing toward +X; north (−Z) = π.
+        tour: [
+          {
+            id: 'tour-outline',
+            label: 'El Castillo',
+            camera: { azimuth: 3.68, elevation: 0.32, radius: 105, target: [-1, 13, 1] },
+            info: {
+              headline: 'El Castillo in outline',
+              lines: [
+                'A monumental stepped pyramid at Chichén Itzá, strongly associated with calendrical and astronomical symbolism.',
+                'Drawn here as a blueprint: only the geometry remains.'
+              ],
+              status: 'documented'
+            }
+          },
+          {
+            id: 'tour-terraces',
+            label: 'Nine terraces',
+            camera: { azimuth: 4.712, elevation: 0.05, radius: 95, target: [-1, 13, 1] },
+            info: {
+              headline: 'Nine stepped terraces',
+              figure: '9',
+              lines: ['The body of the pyramid is built from nine stepped terraces.'],
+              status: 'documented'
+            }
+          },
+          {
+            id: 'tour-stairways',
+            label: 'Four stairways',
+            camera: { azimuth: 3.1416, elevation: 0.12, radius: 80, target: [-1, 12, 1] },
+            info: {
+              headline: 'Four stairways',
+              figure: '4 × 91',
+              lines: [
+                'Four stairways climb the pyramid.',
+                'Each is traditionally counted as 91 steps: 4 × 91 = 364.'
+              ],
+              status: 'documented'
+            }
+          },
+          {
+            id: 'tour-365',
+            label: '364 + 1',
+            camera: { azimuth: 3.1416, elevation: 1.35, radius: 90, target: [-1, 25, 1] },
+            info: {
+              headline: '364 steps + the platform',
+              figure: '365',
+              lines: [
+                'Together with the upper platform, the 364 steps make 365.',
+                'This has been interpreted as a symbolic representation of the 365-day solar year (the Haab).'
+              ],
+              status: 'interpretation'
+            }
+          },
+          {
+            id: 'tour-panels',
+            label: '52 panels',
+            camera: { azimuth: 1.5708, elevation: 0.1, radius: 70, target: [-1, 10, 1] },
+            info: {
+              headline: '52 panels on each side',
+              figure: '52',
+              lines: [
+                'The structure contains 52 architectural panels or elements on each side.',
+                'The number can be related to the 52-year Calendar Round.'
+              ],
+              status: 'interpretation'
+            }
+          },
+          {
+            id: 'tour-calendar-round',
+            label: 'Calendar Round',
+            camera: { azimuth: 4.2, elevation: 0.45, radius: 130, target: [-1, 13, 1] },
+            info: {
+              headline: 'The Calendar Round',
+              figure: '18,980 days',
+              lines: [
+                'The Calendar Round repeats approximately every 18,980 days — 52 Haab years.',
+                'It is the point at which the 260-day Tzolk’in and the 365-day Haab once again produce the same combination of dates.',
+                'Whether El Castillo’s numbers were meant to echo it cannot always be demonstrated archaeologically.'
+              ],
+              status: 'mixed'
+            }
+          }
         ]
       }
     ],

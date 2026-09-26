@@ -206,12 +206,15 @@ export const lesson01Config: LessonConfig = {
         // Guided blueprint tour (wireframe on black). Copy is drawn only from
         // LearningMaterial/lesson_01.md — `status` marks what is documented
         // versus interpretation. Camera poses are orbits around the pyramid:
-        // azimuth 0 = camera on +Z, increasing toward +X; north (−Z) = π.
+        // azimuth 0 = camera on +Z, increasing toward +X. The pyramid is rotated ~17°
+        // in world space: its north stairway (snake heads) faces azimuth ≈ 2.85.
+        // Targets are offset 10–12 m (target = centre − screen-right × offset) so the
+        // pyramid sits in the free area right of the left panel.
         tour: [
           {
             id: 'tour-outline',
             label: 'El Castillo',
-            camera: { azimuth: 3.68, elevation: 0.32, radius: 105, target: [-1, 13, 1] },
+            camera: { azimuth: 3.68, elevation: 0.32, radius: 118, target: [7.6, 14, -4.1] },
             info: {
               headline: 'El Castillo in outline',
               lines: [
@@ -224,7 +227,7 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-terraces',
             label: 'Nine terraces',
-            camera: { azimuth: 4.712, elevation: 0.05, radius: 95, target: [-1, 13, 1] },
+            camera: { azimuth: 4.712, elevation: 0.05, radius: 95, target: [-1, 13, -11] },
             info: {
               headline: 'Nine stepped terraces',
               figure: '9',
@@ -235,7 +238,7 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-stairways',
             label: 'Four stairways',
-            camera: { azimuth: 3.1416, elevation: 0.12, radius: 80, target: [-1, 12, 1] },
+            camera: { azimuth: 2.85, elevation: 0.12, radius: 95, target: [10.5, 13, 4.5] },
             info: {
               headline: 'Four stairways',
               figure: '4 × 91',
@@ -249,7 +252,7 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-365',
             label: '364 + 1',
-            camera: { azimuth: 3.1416, elevation: 1.35, radius: 90, target: [-1, 25, 1] },
+            camera: { azimuth: 2.85, elevation: 1.35, radius: 100, target: [10.5, 25, 4.5] },
             info: {
               headline: '364 steps + the platform',
               figure: '365',
@@ -263,7 +266,7 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-panels',
             label: '52 panels',
-            camera: { azimuth: 1.5708, elevation: 0.1, radius: 70, target: [-1, 10, 1] },
+            camera: { azimuth: 1.28, elevation: 0.1, radius: 88, target: [-4.4, 10, 12.5] },
             info: {
               headline: '52 panels on each side',
               figure: '52',
@@ -277,7 +280,7 @@ export const lesson01Config: LessonConfig = {
           {
             id: 'tour-calendar-round',
             label: 'Calendar Round',
-            camera: { azimuth: 4.2, elevation: 0.45, radius: 130, target: [-1, 13, 1] },
+            camera: { azimuth: 4.2, elevation: 0.45, radius: 130, target: [3.9, 13, -7.7] },
             info: {
               headline: 'The Calendar Round',
               figure: '18,980 days',

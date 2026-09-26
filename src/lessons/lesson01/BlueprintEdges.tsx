@@ -2,18 +2,19 @@ import React, { useEffect, useMemo } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { ModelAsset, StairwaySpec } from '../../core/types/lesson.types';
+import { isStrayEdge } from '../../core/utils/edges';
 import { stairFootprintContains } from '../../core/utils/stairs';
 
 /** The pyramid's body mesh in Lesson01_Layout (three strips the dot from "Pyramid.Base"). */
 const PYRAMID_BODY_MESH = 'PyramidBase';
-/** Extra width beside a worn ramp whose edges are hidden — covers its balustrades. */
-const HIDE_MARGIN = 1.2;
+/** Extra width beside a worn ramp whose edges are hidden — covers its balustrades and the eroded scraps of their foot blocks. */
+const HIDE_MARGIN = 2.2;
 
-/** Copy of an edge geometry without the segments that lie entirely inside a stairway footprint. */
-function withoutSegmentsInside(
+/** Copy of an edge geometry without the segments for which `shouldDrop(a, b)` (world-space endpoints) is true. */
+function withoutSegments(
   source: THREE.BufferGeometry,
   matrixWorld: THREE.Matrix4,
-  zones: StairwaySpec[]
+  shouldDrop: (a: THREE.Vector3, b: THREE.Vector3) => boolean
 ): THREE.BufferGeometry {
   const pos = source.getAttribute('position');
   const a = new THREE.Vector3();
@@ -22,12 +23,7 @@ function withoutSegmentsInside(
   for (let i = 0; i + 1 < pos.count; i += 2) {
     a.fromBufferAttribute(pos, i).applyMatrix4(matrixWorld);
     b.fromBufferAttribute(pos, i + 1).applyMatrix4(matrixWorld);
-    const inside = zones.some(
-      (z) =>
-        stairFootprintContains(z, a.x, a.z, HIDE_MARGIN) &&
-        stairFootprintContains(z, b.x, b.z, HIDE_MARGIN)
-    );
-    if (!inside) {
+    if (!shouldDrop(a, b)) {
       kept.push(
         pos.getX(i),
         pos.getY(i),
@@ -57,6 +53,12 @@ interface BlueprintEdgesProps {
    * Must be a stable reference — a new array rebuilds every edge geometry.
    */
   hideEdgesInside?: StairwaySpec[];
+  /**
+   * Azimuth (radians) of the monument's main axis. When set, the pyramid body's
+   * long edges that run near-but-not-on an axis are hidden as mesh noise
+   * (see `isStrayEdge`).
+   */
+  axisAzimuth?: number;
 }
 
 /**
@@ -72,7 +74,8 @@ export const BlueprintEdges: React.FC<BlueprintEdgesProps> = ({
   opacity,
   thresholdDeg = 10,
   organicThresholdDeg = 55,
-  hideEdgesInside = []
+  hideEdgesInside = [],
+  axisAzimuth
 }) => {
   const gltf = useGLTF(asset.url);
 
@@ -105,8 +108,20 @@ export const BlueprintEdges: React.FC<BlueprintEdgesProps> = ({
         mesh.geometry,
         organic ? organicThresholdDeg : thresholdDeg
       );
-      if (mesh.name === PYRAMID_BODY_MESH && hideEdgesInside.length > 0) {
-        const filtered = withoutSegmentsInside(edgesGeometry, mesh.matrixWorld, hideEdgesInside);
+      if (
+        mesh.name === PYRAMID_BODY_MESH &&
+        (hideEdgesInside.length > 0 || axisAzimuth !== undefined)
+      ) {
+        const filtered = withoutSegments(edgesGeometry, mesh.matrixWorld, (a, b) => {
+          const insideWornStair = hideEdgesInside.some(
+            (z) =>
+              stairFootprintContains(z, a.x, a.z, HIDE_MARGIN) &&
+              stairFootprintContains(z, b.x, b.z, HIDE_MARGIN)
+          );
+          const stray =
+            axisAzimuth !== undefined && isStrayEdge(b.x - a.x, b.y - a.y, b.z - a.z, axisAzimuth);
+          return insideWornStair || stray;
+        });
         edgesGeometry.dispose();
         edgesGeometry = filtered;
       }
@@ -120,7 +135,7 @@ export const BlueprintEdges: React.FC<BlueprintEdgesProps> = ({
     });
 
     return { group, lineMaterial, fillMaterial, edgeGeometries };
-  }, [gltf.scene, color, opacity, thresholdDeg, organicThresholdDeg, hideEdgesInside]);
+  }, [gltf.scene, color, opacity, thresholdDeg, organicThresholdDeg, hideEdgesInside, axisAzimuth]);
 
   useEffect(
     () => () => {

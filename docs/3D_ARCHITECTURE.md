@@ -35,7 +35,7 @@ against the `PyramidBase` mesh (three's GLTFLoader strips the dot from the autho
 laid on that plane, lifted just above the ramp's highest bump so eroded ramps cannot poke through
 and hide parts of the lines. Stairways flagged `worn` (Lesson 01: east and south, whose meshes are
 uneven) also have their noisy mesh edges hidden inside the footprint (`stairFootprintContains()`,
-in `BlueprintEdges`) and a clean outline drawn instead. `CameraTour` applies the pose derived by
+in `BlueprintEdges`) and a clean outline drawn instead. `BlueprintEdges` also drops long stray edges of the pyramid body (`isStrayEdge()`, pure, `core/utils/edges.ts`, keyed on `blueprint.axisAzimuth`): every real edge of the monument is vertical, level along an axis, or steep along one (stairway walls ~45°), while erosion produces long edges 1.5°–20° off-axis or tilted 3°–15° from level (e.g. a terrace rim that rises 2 m over 22 m). `CameraTour` applies the pose derived by
 `sampleTour(stops, sliderPosition)` in a dependency-guarded layout effect and invalidates —
 `frameloop="demand"` and the no-`useFrame` rule are unchanged; the eased step sweep produces the
 orbit. Photoreal topics still use the locked `FixedGlbCamera`. Tour poses are orbits around a

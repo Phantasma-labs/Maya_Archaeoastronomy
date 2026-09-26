@@ -151,6 +151,8 @@ export const lesson01Config: LessonConfig = {
   // photoreal textures (the stairs are flat ramps), so the blueprint draws
   // 91 step lines per stairway — "traditionally counted" in the vetted copy.
   blueprint: {
+    // The pyramid is rotated ~17° in world space: its north stairway faces 2.85.
+    axisAzimuth: 2.85,
     stairways: [
       { id: 'stair-north', foot: [9.02, -32.32], top: [1.74, -8.1], width: 9.2, steps: 91 },
       {

@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { projectToScreen, sampleTour, tourSettle } from '../src/core/utils/tour.ts';
 import { fitLine, stairFootprintContains, stairStepSlots } from '../src/core/utils/stairs.ts';
+import { axisMisalignmentDeg, isStrayEdge } from '../src/core/utils/edges.ts';
 import type { StairwaySpec, TourStop } from '../src/core/types/lesson.types.ts';
 
 type V3 = [number, number, number];
@@ -238,6 +239,45 @@ assert.throws(() => sampleTour([], 1), /at least one/);
   assert.equal(stairFootprintContains(north, 2.9, -5), true, 'rotated inside');
   assert.equal(stairFootprintContains(north, 3.1, -5), false, 'rotated outside');
   assert.equal(stairFootprintContains({ ...north, top: [0, 0] }, 0, 0), false, 'zero length');
+}
+
+// 15. axisMisalignmentDeg: horizontal angle (0..45°) between an edge and the nearest monument axis.
+{
+  near(axisMisalignmentDeg(0, 1, 0), 0, 'along z, azimuth 0');
+  near(axisMisalignmentDeg(1, 0, 0), 0, 'along x, azimuth 0');
+  near(axisMisalignmentDeg(1, 0.1, 0), (Math.atan(0.1) * 180) / Math.PI, 'slightly off x', 1e-6);
+  near(axisMisalignmentDeg(-1, 0, 0), 0, 'sign of the direction does not matter');
+  // a monument rotated by azimuth 2.85: its axis direction is (sin a, cos a)
+  near(axisMisalignmentDeg(Math.sin(2.85), Math.cos(2.85), 2.85), 0, 'along the rotated axis', 1e-6);
+  const a = 2.85 + (5 * Math.PI) / 180; // 5° off the rotated axis
+  near(axisMisalignmentDeg(Math.sin(a), Math.cos(a), 2.85), 5, '5° off the rotated axis', 1e-6);
+  near(axisMisalignmentDeg(1, 1, 0), 45, 'diagonal is the maximum, 45°');
+}
+
+// 16. isStrayEdge: long, near-but-not-on-axis horizontal-ish edges are mesh noise.
+{
+  const off = (deg: number, len: number): [number, number, number] => {
+    const r = (deg * Math.PI) / 180;
+    return [len * Math.cos(r), 0, len * Math.sin(r)]; // horizontal edge, deg off the x axis
+  };
+  assert.equal(isStrayEdge(...off(4, 10), 0), true, 'long, 4° off axis → stray');
+  assert.equal(isStrayEdge(...off(0.5, 10), 0), false, 'on axis → real edge');
+  assert.equal(isStrayEdge(...off(30, 10), 0), false, 'well off axis (a rounded corner) → kept');
+  assert.equal(isStrayEdge(...off(4, 1), 0), false, 'short → kept');
+  assert.equal(isStrayEdge(0, 5, 0, 0), false, 'vertical → kept');
+  assert.equal(isStrayEdge(3, 3, 0, 0), false, 'sloped but aligned (a stairway edge) → kept');
+  assert.equal(isStrayEdge(3, 3, 0.3, 0), true, 'sloped and misaligned by ~6° → stray');
+  assert.equal(isStrayEdge(0.1, 10, 0.01, 0), false, 'nearly vertical, tiny horizontal part → kept');
+  // tilt: a long edge on a terrace rim should be level; 3°–15° from level is erosion noise.
+  // (the real case: 22.6 m, 1.4° off-axis, rising 2.3 m ≈ 5.8°)
+  const rad = (d: number) => (d * Math.PI) / 180;
+  assert.equal(isStrayEdge(22.4, 2.3, 0.55, 0), true, 'long, on-axis but tilted ~6° → stray');
+  assert.equal(isStrayEdge(20, 20 * Math.tan(rad(6)), 0, 0), true, 'exactly on axis, tilted 6° → stray');
+  assert.equal(isStrayEdge(20, 20 * Math.tan(rad(1)), 0, 0), false, 'level within 3° → kept');
+  assert.equal(isStrayEdge(20, 20 * Math.tan(rad(45)), 0, 0), false, 'stairway-steep (45°) → kept');
+  assert.equal(isStrayEdge(20, 20 * Math.tan(rad(25)), 0, 0), false, 'steep (25°) → kept');
+  assert.equal(isStrayEdge(3, 3 * Math.tan(rad(6)), 0, 0), false, 'short tilted edge (<4 m) → kept');
+  assert.equal(isStrayEdge(20, -20 * Math.tan(rad(6)), 0, 0), true, 'tilted downward → stray');
 }
 
 console.log('sampleTour: all checks passed');

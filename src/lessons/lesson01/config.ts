@@ -144,6 +144,21 @@ export const lesson01Config: LessonConfig = {
     }
   },
 
+  // Blueprint view data. The pyramid is rotated ~17° in world space; its four
+  // stairways run from foot (d = 34.8 m from the centre (-1, 1)) to the platform
+  // edge (d = 9.5 m) along azimuths 2.85 (north, the serpent-head stairway),
+  // 1.28 (east), -0.29 (south) and 4.42 (west). Their steps exist only in the
+  // photoreal textures (the stairs are flat ramps), so the blueprint draws
+  // 91 step lines per stairway — "traditionally counted" in the vetted copy.
+  blueprint: {
+    stairways: [
+      { id: 'stair-north', foot: [9.02, -32.32], top: [1.74, -8.1], width: 9.2, steps: 91 },
+      { id: 'stair-east', foot: [32.34, 10.98], top: [8.1, 3.72], width: 9.2, steps: 91 },
+      { id: 'stair-south', foot: [-10.95, 34.35], top: [-3.72, 10.1], width: 9.2, steps: 91 },
+      { id: 'stair-west', foot: [-34.34, -8.98], top: [-10.1, -1.72], width: 9.2, steps: 91 }
+    ]
+  },
+
   content: {
     monumentName: 'Temple of Kukulkán (El Castillo)',
     timePeriod: 'Terminal Classic to Early Postclassic (~800–1200 CE)',

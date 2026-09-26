@@ -38,7 +38,8 @@ type-checks only, no emit), `preview`, `typecheck` (alias for `tsc --noEmit`),
 - Fixed cinematic camera baked from the GLB authoring camera on the photoreal topics (no user
   orbit/zoom — deliberate); the Calendar & Architecture blueprint tour moves the camera along
   authored viewpoints (still no user orbit).
-- **Blueprint tour** (Calendar & Architecture): wireframe El Castillo on black, a six-step guided
+- **Blueprint tour** (Calendar & Architecture): outline-drawn El Castillo on black (91 step lines
+  per stairway), a six-step guided
   camera tour with 2D arrows pointing at each step's feature, and a step panel that marks each
   claim Documented or Interpretation.
 - **Atmosphere Timeline** (ADR-001): a continuous slider over hardcoded sky keyframes —

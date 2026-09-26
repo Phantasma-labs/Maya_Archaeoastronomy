@@ -23,9 +23,15 @@ first-frame race against GLB traversal. `FixedGlbCamera` applies it once in
 
 **Tour camera (Calendar & Architecture).** Topics that own a `tour` mount `BlueprintScene`
 instead of the photoreal assembly: black `scene.background`, no `SceneEnvironment`/sun (basic
-materials ignore light and IBL), the tree canopy unmounted, and every mesh re-skinned with one
-shared wireframe `MeshBasicMaterial` via `ModelLoader`'s `materialOverride` (the clone's material
-is rebound; the cached GLTF is never mutated). `CameraTour` applies the pose derived by
+materials ignore light and IBL), and the tree canopy and floor mesh unmounted. The pyramid is drawn
+as an outline: `BlueprintEdges` builds `THREE.EdgesGeometry` line segments (hard edges only —
+10° threshold, 55° for the organic serpent heads) from the cached GLTF over a black occluder
+(shared geometry, never mutated) so hidden lines stay hidden; a `GridHelper` replaces the floor.
+The Lesson 01 stairways are flat ramps (their 91 steps exist only in the photoreal textures), so
+`BlueprintStairs` draws them procedurally: `stairStepSlots()` (pure, `core/utils/stairs.ts`) gives
+each step line's horizontal placement from `LessonConfig.blueprint.stairways`, and a downward ray
+against the `PyramidBase` mesh snaps its height to the real surface (three's GLTFLoader strips the
+dot from the authored node name `Pyramid.Base`). `CameraTour` applies the pose derived by
 `sampleTour(stops, sliderPosition)` in a dependency-guarded layout effect and invalidates —
 `frameloop="demand"` and the no-`useFrame` rule are unchanged; the eased step sweep produces the
 orbit. Photoreal topics still use the locked `FixedGlbCamera`. Tour poses are orbits around a

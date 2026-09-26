@@ -68,7 +68,7 @@ export const Lesson01Scene: React.FC<Lesson01SceneProps> = ({
         position={position}
         lens={config.camera}
         layoutAsset={layoutAsset}
-        floorAsset={floorAsset}
+        stairways={config.blueprint?.stairways ?? []}
       />
     );
   }

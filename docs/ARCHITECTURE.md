@@ -34,6 +34,7 @@ LessonPage
 | `core/components/`             | Lesson-agnostic scene/UI infrastructure (canvas, camera, environment, lighting, model loading, loading/error screens, AtmosphereTimeline)   | R3F, drei, three               |
 | `core/utils/atmosphere.ts`     | `sampleAtmosphere()` — pure timeline sampler (keyframe lerp + mix)                                                                          | core types only                |
 | `core/utils/tour.ts`           | `sampleTour()` / `projectToScreen()` / `tourSettle()` — pure tour sampler, world→screen projection, "camera at rest" factor                 | core types only                |
+| `core/utils/stairs.ts`         | `stairStepSlots()` — pure horizontal placement of a stairway's step lines (blueprint view)                                                  | core types only                |
 | `lessons/registry.ts`          | `LESSON_REGISTRY` id→{config, SceneComponent, OverlayComponent}; `getAllLessons`, `getLessonEntry`                                          | static imports of every lesson |
 | `lessons/<id>/config.ts`       | Static, typed lesson definition (assets, camera, lighting, pedagogical content)                                                             | core types only                |
 | `lessons/<id>/*Scene/*Overlay` | Lesson-specific scene assembly and learner UI                                                                                               | core components                |

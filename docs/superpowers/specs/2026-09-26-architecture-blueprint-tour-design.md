@@ -79,6 +79,11 @@ the extra props (V2-10 unchanged).
 
 ### 2.4 Blueprint look
 
+> **Superseded (probe, 2026-09-26):** the shipped look is not the raw wireframe below. It is
+> `EdgesGeometry` outlines over a black occluder, a ground `GridHelper` instead of the floor mesh,
+> and procedurally drawn step lines on the stairways (the model's stairs are flat ramps).
+> `ModelLoader.materialOverride` was removed. See `docs/3D_ARCHITECTURE.md` (Camera section).
+
 - **Material:** one shared `MeshBasicMaterial({ wireframe: true, color: gold,
 transparent, opacity ≈ 0.7, toneMapped: false })`. Created once, disposed on
   unmount.

@@ -4,7 +4,8 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { projectToScreen, sampleTour, tourSettle } from '../src/core/utils/tour.ts';
-import type { TourStop } from '../src/core/types/lesson.types.ts';
+import { stairStepSlots } from '../src/core/utils/stairs.ts';
+import type { StairwaySpec, TourStop } from '../src/core/types/lesson.types.ts';
 
 type V3 = [number, number, number];
 
@@ -160,6 +161,38 @@ assert.throws(() => sampleTour([], 1), /at least one/);
   near(tourSettle(2.5), 0, 'settle mid-sweep');
   near(tourSettle(2.18), (0.25 - 0.18) / 0.15, 'settle ramp');
   near(tourSettle(Number.NaN), 1, 'settle NaN falls back to a stop');
+}
+
+// 12. stairStepSlots: evenly spaced step lines from foot to top, ⟂ to the stair direction.
+{
+  const flat: StairwaySpec = { id: 'flat', foot: [0, 0], top: [10, 0], width: 8, steps: 4 };
+  const s = stairStepSlots(flat);
+  assert.equal(s.length, 4);
+  [2.5, 5, 7.5, 10].forEach((x, i) => {
+    near(s[i].x, x, `flat slot ${i} x`);
+    near(s[i].z, 0, `flat slot ${i} z`);
+    near(s[i].ax, 0, `flat slot ${i} across x`);
+    near(Math.abs(s[i].az), 4, `flat slot ${i} half width`);
+  });
+
+  const diag: StairwaySpec = { id: 'diag', foot: [9, -32.3], top: [1.7, -8.1], width: 9.2, steps: 91 };
+  const d = stairStepSlots(diag);
+  assert.equal(d.length, 91, 'one slot per step');
+  const dir = [diag.top[0] - diag.foot[0], diag.top[1] - diag.foot[1]];
+  const len = Math.hypot(dir[0], dir[1]);
+  for (const slot of d) {
+    near(slot.ax * dir[0] + slot.az * dir[1], 0, 'across ⟂ direction');
+    near(Math.hypot(slot.ax, slot.az), 4.6, 'across length = half width');
+  }
+  near(d[90].x, diag.top[0], 'last slot at top x');
+  near(d[90].z, diag.top[1], 'last slot at top z');
+  // evenly spaced along the run
+  const gap = (i: number) => Math.hypot(d[i + 1].x - d[i].x, d[i + 1].z - d[i].z);
+  near(gap(0), len / 91, 'even spacing (first gap)');
+  near(gap(80), len / 91, 'even spacing (later gap)');
+
+  assert.deepEqual(stairStepSlots({ ...flat, steps: 0 }), [], 'no steps → no slots');
+  assert.deepEqual(stairStepSlots({ ...flat, top: [0, 0] }), [], 'zero-length stair → no slots');
 }
 
 console.log('sampleTour: all checks passed');

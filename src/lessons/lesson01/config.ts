@@ -295,10 +295,10 @@ export const lesson01Config: LessonConfig = {
             id: 'tour-365',
             label: '364 + 1',
             callouts: [
-              { id: 'c-stair-n', label: '91', anchor: [5.3, 12, -20.1], offset: [0, 55] },
-              { id: 'c-stair-e', label: '91', anchor: [20.1, 12, 7.3], offset: [-70, 0] },
-              { id: 'c-stair-s', label: '91', anchor: [-7.3, 12, 22.1], offset: [0, -55] },
-              { id: 'c-stair-w', label: '91', anchor: [-22.1, 12, -5.3], offset: [70, 0] },
+              { id: 'c-stair-n', label: '91', anchor: [5.3, 12, -20.1], offset: [0, -55] },
+              { id: 'c-stair-e', label: '91', anchor: [20.1, 12, 7.3], offset: [70, 0] },
+              { id: 'c-stair-s', label: '91', anchor: [-7.3, 12, 22.1], offset: [0, 55] },
+              { id: 'c-stair-w', label: '91', anchor: [-22.1, 12, -5.3], offset: [-70, 0] },
               {
                 id: 'c-platform-plus-1',
                 label: '+1 platform',
@@ -306,7 +306,9 @@ export const lesson01Config: LessonConfig = {
                 offset: [100, -90]
               }
             ],
-            camera: { azimuth: 2.85, elevation: 1.35, radius: 100, target: [10.5, 25, 4.5] },
+            // Zenithal (straight down), viewed from the SOUTH — the opposite side to the
+            // north/serpent stairway, which therefore sits at the top of the screen.
+            camera: { azimuth: -0.29, elevation: 1.5708, radius: 100, target: [-12.5, 25, -2.4] },
             info: {
               headline: '364 steps + the platform',
               figure: '365',

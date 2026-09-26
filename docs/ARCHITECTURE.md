@@ -16,7 +16,8 @@ registry, owns all runtime state, and stacks three layers:
 ```
 LessonPage
 ├── SceneCanvas (core)          ErrorBoundary + Suspense(LoadingScreen) + R3F <Canvas>
-│   └── SceneComponent          from registry (currently always Lesson01Scene)
+│   └── SceneComponent          from registry (currently always Lesson01Scene; renders
+│       │                       BlueprintScene when the selected topic owns a `tour`)
 │       ├── FixedGlbCamera      applies baked camera transform once, locks it
 │       ├── SceneEnvironment    dual skydome crossfade + scene.environment IBL
 │       ├── SceneLighting       single directional sun, rotation from timeline sample
@@ -27,15 +28,16 @@ LessonPage
 
 ## Modules and boundaries
 
-| Module | Responsibility | Depends on |
-|---|---|---|
-| `core/types/lesson.types.ts` | All domain types: `LessonConfig`, `SkyKeyframe`, `EnvironmentConfig`, `CameraConfig`, `LightingConfig`, `LearningTopic`, `AtmosphereSample` | react (types only) |
-| `core/components/` | Lesson-agnostic scene/UI infrastructure (canvas, camera, environment, lighting, model loading, loading/error screens, AtmosphereTimeline) | R3F, drei, three |
-| `core/utils/atmosphere.ts` | `sampleAtmosphere()` — pure timeline sampler (keyframe lerp + mix) | core types only |
-| `lessons/registry.ts` | `LESSON_REGISTRY` id→{config, SceneComponent, OverlayComponent}; `getAllLessons`, `getLessonEntry` | static imports of every lesson |
-| `lessons/<id>/config.ts` | Static, typed lesson definition (assets, camera, lighting, pedagogical content) | core types only |
-| `lessons/<id>/*Scene/*Overlay` | Lesson-specific scene assembly and learner UI | core components |
-| `pages/` | Route-level composition; `LessonPage` owns the single runtime value (`sliderPosition`) | registry, core |
+| Module                         | Responsibility                                                                                                                              | Depends on                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `core/types/lesson.types.ts`   | All domain types: `LessonConfig`, `SkyKeyframe`, `EnvironmentConfig`, `CameraConfig`, `LightingConfig`, `LearningTopic`, `AtmosphereSample` | react (types only)             |
+| `core/components/`             | Lesson-agnostic scene/UI infrastructure (canvas, camera, environment, lighting, model loading, loading/error screens, AtmosphereTimeline)   | R3F, drei, three               |
+| `core/utils/atmosphere.ts`     | `sampleAtmosphere()` — pure timeline sampler (keyframe lerp + mix)                                                                          | core types only                |
+| `core/utils/tour.ts`           | `sampleTour()` — pure guided-tour sampler (shortest-arc azimuth, elevation/radius/target lerp)                                              | core types only                |
+| `lessons/registry.ts`          | `LESSON_REGISTRY` id→{config, SceneComponent, OverlayComponent}; `getAllLessons`, `getLessonEntry`                                          | static imports of every lesson |
+| `lessons/<id>/config.ts`       | Static, typed lesson definition (assets, camera, lighting, pedagogical content)                                                             | core types only                |
+| `lessons/<id>/*Scene/*Overlay` | Lesson-specific scene assembly and learner UI                                                                                               | core components                |
+| `pages/`                       | Route-level composition; `LessonPage` owns the single runtime value (`sliderPosition`)                                                      | registry, core                 |
 
 ## State and data flow
 
@@ -48,7 +50,7 @@ lessonXX/config.ts ──► registry ──► LessonPage ── useState: slid
                                          │     = AtmosphereSample { indexA, indexB, mix,
                                          │       lightRotation[], iblIntensity, activeIndex }
                                          ▼
-                                   SceneComponent (config + atmosphere)
+                                   SceneComponent (config + atmosphere + topicId + position)
                                    OverlayComponent (config + sliderPosition + callbacks)
 ```
 
@@ -60,6 +62,11 @@ lessonXX/config.ts ──► registry ──► LessonPage ── useState: slid
   Leva↔runtimeState dual-source bug).
 - No store library and no `useFrame`; nothing per-frame lives in React state. The sweep
   tween lives in `LessonPage` and mutates only `sliderPosition`.
+- **Tour topics** (`LearningTopic.tour`, e.g. Calendar & Architecture): `sliderPosition` means
+  the tour step (1..N). `sampleTour(stops, position)` derives the camera pose; the eased sweep
+  between steps is the orbit, so there is still no `useFrame`. The overlay swaps the sky slider
+  for `TourStepper` + `TourPanel`, and `Lesson01Scene` renders `BlueprintScene` (dispatch keys on
+  the topic's `tour`, never on a topic id).
 - UI-only state (tabs, drawer open) stays local in the overlay.
 
 ## Known structural weaknesses (details in TECH_DEBT.md)

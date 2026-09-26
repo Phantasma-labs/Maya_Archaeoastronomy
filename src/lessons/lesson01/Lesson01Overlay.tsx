@@ -12,6 +12,8 @@ import {
 import { LessonConfig, SkyKeyframe } from '../../core/types/lesson.types';
 import { AtmosphereTimeline } from '../../core/components/AtmosphereTimeline';
 import { SerpentSlider } from './SerpentSlider';
+import { TourPanel } from './TourPanel';
+import { TourStepper } from './TourStepper';
 
 interface Lesson01OverlayProps {
   config: LessonConfig;
@@ -66,9 +68,9 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
     ? config.content.topics.find((t) => t.id === activePanel)
     : undefined;
 
-  // The slider is the environment control for the sky setup (Serpent
-  // Descent). Calendar & Architecture is a reference view — no slider.
-  const sliderHidden = selectedTopicId === 'solar-calendar';
+  // A topic that owns a guided tour swaps the sky slider for a step
+  // navigator; both write the single `sliderPosition` (ADR-001).
+  const tour = config.content.topics.find((t) => t.id === selectedTopicId)?.tour;
 
   return (
     <div className="pointer-events-none absolute inset-0 flex flex-col p-6 z-20">
@@ -181,6 +183,8 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
               </div>
 
               <div className="flex-1 overflow-y-auto pr-1 space-y-3 custom-scrollbar">
+                {activeTopic.tour && <TourPanel stops={activeTopic.tour} value={sliderPosition} />}
+
                 <p className="text-[13.5px] text-maya-textDim leading-relaxed italic border-l-2 border-maya-gold/50 pl-3">
                   "{activeTopic.summary}"
                 </p>
@@ -236,20 +240,18 @@ export const Lesson01Overlay: React.FC<Lesson01OverlayProps> = ({
           ) : null}
       </aside>
 
-      {/* Bottom instrument — the Atmosphere Timeline, full width, and
-          nothing else: the slider is the single environment control
-          (ADR-001). Rendered for the sky setup (Serpent Descent); hidden
-          in the Calendar & Architecture reference view. The overlay lives
+      {/* Bottom instrument — one control at a time: the Atmosphere Timeline
+          for the sky setup (Serpent Descent), or the tour stepper for the
+          Calendar & Architecture blueprint tour. Both write the single
+          `sliderPosition` (ADR-001). The overlay lives
           in the fixed 1280×720 design space (ViewportScaler), so the
           desktop reference — slider always visible under an open caption
           panel — applies at every viewport; there is no mobile sheet. */}
-      <div
-        className={`pointer-events-auto mt-auto ${
-          sliderHidden ? 'hidden' : activePanel ? 'block' : ''
-        }`}
-      >
+      <div className={`pointer-events-auto mt-auto ${activePanel ? 'block' : ''}`}>
         <div id="lesson-instrument">
-          {selectedTopicId === 'serpent-descent' ? (
+          {tour ? (
+            <TourStepper stops={tour} value={sliderPosition} onStepSelect={handleStepSelect} />
+          ) : selectedTopicId === 'serpent-descent' ? (
             <SerpentSlider
               keyframes={skyTimeline}
               value={sliderPosition}

@@ -94,23 +94,6 @@ export const LessonPage: React.FC = () => {
     return topic?.skyTimeline ?? lessonEntry.config.assets.environment.skyTimeline;
   }, [lessonEntry, selectedTopicId]);
 
-  // Reset the slider position when the selected topic changes. Topics that
-  // own a skyTimeline or a tour start at step 1; topics using the lesson default
-  // default to step 3 (the zenith keyframe). The lesson default's
-  // skyTimeline always has N=3, so step 3 is always a valid position. The
-  // initial mount does NOT reset — the ?step= URL seed (or the topic
-  // default) already set the opening position.
-  const previousTopicRef = useRef(selectedTopicId);
-  useEffect(() => {
-    if (!lessonEntry) return;
-    if (previousTopicRef.current === selectedTopicId) return;
-    previousTopicRef.current = selectedTopicId;
-    const topic =
-      lessonEntry.config.content.topics.find((t) => t.id === selectedTopicId) ??
-      lessonEntry.config.content.topics[0];
-    setSliderPosition(topic?.skyTimeline || topic?.tour ? 1 : 3);
-  }, [selectedTopicId, lessonEntry]);
-
   const atmosphere = useMemo(() => {
     if (!lessonEntry || activeSkyTimeline.length === 0) return null;
     return sampleAtmosphere(activeSkyTimeline, sliderPosition);
@@ -162,9 +145,28 @@ export const LessonPage: React.FC = () => {
     [cancelSweep]
   );
 
-  const handleSelectTopic = useCallback((id: string) => {
-    setSelectedTopicId(id);
-  }, []);
+  // Switching topics resets the slider position — synchronously, in the same
+  // batched update as the selection, so the new topic never renders with the
+  // old topic's position and the sweep driver's `positionRef` cannot go
+  // stale (a stale ref made a tour's Next button a no-op and let an
+  // in-flight sweep write the old topic's position into the new one).
+  // Topics that own a skyTimeline or a tour start at step 1; topics using
+  // the lesson default start at step 3 (the zenith keyframe; the default
+  // timeline always has N=3). The initial mount does NOT reset — the ?step=
+  // URL seed (or the topic default) already set the opening position.
+  // Re-selecting the current topic (re-opening a collapsed panel) is a no-op.
+  const handleSelectTopic = useCallback(
+    (id: string) => {
+      if (id === selectedTopicId) return;
+      const topic = lessonEntry?.config.content.topics.find((t) => t.id === id);
+      const start = topic?.skyTimeline || topic?.tour ? 1 : 3;
+      cancelSweep();
+      positionRef.current = start;
+      setSliderPosition(start);
+      setSelectedTopicId(id);
+    },
+    [selectedTopicId, lessonEntry, cancelSweep]
+  );
 
   // Cancel an in-flight sweep on unmount.
   useEffect(() => () => cancelSweep(), [cancelSweep]);

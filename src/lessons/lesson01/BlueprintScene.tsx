@@ -54,7 +54,7 @@ export const BlueprintScene: React.FC<BlueprintSceneProps> = ({
         color: BLUEPRINT_GOLD,
         wireframe: true,
         transparent: true,
-        opacity: 0.12,
+        opacity: 0.06,
         depthWrite: false,
         toneMapped: false
       }),

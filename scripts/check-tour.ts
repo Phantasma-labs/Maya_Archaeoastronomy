@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { projectToScreen, sampleTour, tourSettle } from '../src/core/utils/tour.ts';
-import { stairStepSlots } from '../src/core/utils/stairs.ts';
+import { fitLine, stairFootprintContains, stairStepSlots } from '../src/core/utils/stairs.ts';
 import type { StairwaySpec, TourStop } from '../src/core/types/lesson.types.ts';
 
 type V3 = [number, number, number];
@@ -205,6 +205,39 @@ assert.throws(() => sampleTour([], 1), /at least one/);
 
   assert.deepEqual(stairStepSlots({ ...flat, steps: 0 }), [], 'no steps → no slots');
   assert.deepEqual(stairStepSlots({ ...flat, top: [0, 0] }), [], 'zero-length stair → no slots');
+}
+
+// 13. fitLine: least-squares intercept + slope (used to fit each ramp plane).
+{
+  const f = fitLine([0, 1, 2, 3], [1, 3, 5, 7]);
+  near(f.intercept, 1, 'fit intercept');
+  near(f.slope, 2, 'fit slope');
+  const noisy = fitLine([0, 1, 2], [0, 1.2, 1.8]); // ≈ slope 0.9
+  near(noisy.slope, 0.9, 'noisy slope');
+  const one = fitLine([3], [5]);
+  near(one.slope, 0, 'single point slope');
+  near(one.intercept, 5, 'single point intercept');
+  const none = fitLine([], []);
+  near(none.slope, 0, 'empty slope');
+  near(none.intercept, 0, 'empty intercept');
+}
+
+// 14. stairFootprintContains: is a horizontal point inside the stairway rectangle?
+{
+  const spec: StairwaySpec = { id: 'f', foot: [0, 0], top: [10, 0], width: 8, steps: 4 };
+  assert.equal(stairFootprintContains(spec, 5, 0), true, 'centre line');
+  assert.equal(stairFootprintContains(spec, 5, 3.9), true, 'inside width');
+  assert.equal(stairFootprintContains(spec, 5, 4.5), false, 'outside width');
+  assert.equal(stairFootprintContains(spec, 5, 4.5, 1), true, 'margin widens the band');
+  assert.equal(stairFootprintContains(spec, -2, 0), false, 'before the foot');
+  assert.equal(stairFootprintContains(spec, 10.5, 0), false, 'beyond the top');
+  assert.equal(stairFootprintContains(spec, 9.95, 0), false, 'top edge excluded (tMax 0.99)');
+  assert.equal(stairFootprintContains(spec, 9.95, 0, 0, -0.03, 1.01), true, 'custom range');
+  // a rotated stairway: direction (0, -1), so 'across' is along x
+  const north: StairwaySpec = { id: 'n', foot: [0, 0], top: [0, -10], width: 6, steps: 4 };
+  assert.equal(stairFootprintContains(north, 2.9, -5), true, 'rotated inside');
+  assert.equal(stairFootprintContains(north, 3.1, -5), false, 'rotated outside');
+  assert.equal(stairFootprintContains({ ...north, top: [0, 0] }, 0, 0), false, 'zero length');
 }
 
 console.log('sampleTour: all checks passed');

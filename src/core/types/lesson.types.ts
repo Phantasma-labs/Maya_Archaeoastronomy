@@ -253,6 +253,12 @@ export interface StairwaySpec {
   width: number;
   /** Number of step lines to draw (Lesson 01: 91, "traditionally counted"). */
   steps: number;
+  /**
+   * The model's geometry for this stairway is eroded / uneven. Its noisy mesh
+   * edges are hidden inside the footprint and a clean outline (ramp edges +
+   * balustrade lines) is drawn in their place.
+   */
+  worn?: boolean;
 }
 
 /** Extra data the blueprint view needs beyond the tour itself. */

@@ -42,6 +42,8 @@ export const BlueprintScene: React.FC<BlueprintSceneProps> = ({
   stairways
 }) => {
   const sample = useMemo(() => sampleTour(tour, position), [tour, position]);
+  // Stable reference: BlueprintEdges rebuilds all its geometry when this changes.
+  const wornStairways = useMemo(() => stairways.filter((s) => s.worn), [stairways]);
 
   const grid = useMemo(() => {
     const g = new THREE.GridHelper(GRID_SIZE, GRID_DIVISIONS, BLUEPRINT_GOLD, BLUEPRINT_GOLD);
@@ -66,7 +68,12 @@ export const BlueprintScene: React.FC<BlueprintSceneProps> = ({
       <color attach="background" args={['#000000']} />
       <CameraTour sample={sample} lens={lens} />
       <group name="Lesson01_Blueprint">
-        <BlueprintEdges asset={layoutAsset} color={BLUEPRINT_GOLD} opacity={0.9} />
+        <BlueprintEdges
+          asset={layoutAsset}
+          color={BLUEPRINT_GOLD}
+          opacity={0.9}
+          hideEdgesInside={wornStairways}
+        />
         <BlueprintStairs
           asset={layoutAsset}
           stairways={stairways}

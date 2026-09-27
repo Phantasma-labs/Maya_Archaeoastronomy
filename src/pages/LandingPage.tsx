@@ -6,15 +6,13 @@ import { getAllLessons } from '../lessons/registry';
 /**
  * LandingPage — the observatory entrance.
  *
- * Single-viewport layout: compressed hero with the brand kicker, headline,
- * copy and CTA, followed by a compact expedition catalog (short card
- * thumbnails, condensed body) and a thin footer. No top header — the brand
- * is carried by the hero kicker and the wordmark glyph is omitted by
- * design so the full landing reads above the fold on a standard 1080p
- * desktop. The landing stays free of the 3D stack — the hero backdrop is a
- * plain <img> reusing the dedicated landing asset at
- * /assets/landing/hero-panorama.webp (separate from the in-lesson sky
- * panoramas, which the lesson scene owns).
+ * Single-viewport layout: the panorama fills the screen behind a compact hero
+ * (brand kicker, headline, copy) at the top and the expedition catalog
+ * (short card thumbnails, condensed body) centred below it. No top
+ * header or footer — the brand is carried by the hero kicker. The landing
+ * stays free of the 3D stack — the backdrop is a plain <img> reusing the
+ * dedicated landing asset at /assets/landing/hero-panorama.webp (separate
+ * from the in-lesson sky panoramas, which the lesson scene owns).
  */
 export const LandingPage: React.FC = () => {
   const lessons = getAllLessons();
@@ -29,32 +27,41 @@ export const LandingPage: React.FC = () => {
         Skip to expeditions
       </a>
 
-      {/* Hero — observatory entrance (compact) */}
-      <section className="relative px-6 pt-8 pb-6 md:pt-10 md:pb-8 overflow-hidden flex-shrink-0">
-        {/* Quiet sky backdrop — the dedicated Chichén Itzá panorama from
-            /assets/landing/, dimmed to a horizon and faded into the page
-            ground. Decorative (aria-hidden). WebP keeps it ~115 KB at
-            1280×640 — see ImageMagick recipe in the project docs. */}
-        <div className="absolute inset-0 pointer-events-none">
-          <img
-            src="/assets/landing/hero-panorama.webp"
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover opacity-25"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-maya-bg/70 via-maya-bg/40 to-maya-bg" />
-        </div>
+      {/* Backdrop — the dedicated Chichén Itzá panorama from /assets/landing/
+          fills the viewport at full strength. A light scrim at the top keeps
+          the headline legible and one at the bottom seats the catalog cards.
+          Decorative (aria-hidden). WebP keeps it ~115 KB at 1280×640 — see
+          ImageMagick recipe in the project docs. */}
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+        <img
+          src="/assets/landing/hero-panorama.webp"
+          alt=""
+          className="w-full h-full object-cover"
+          style={{ objectPosition: '55% center' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-maya-bg/75 via-transparent to-maya-bg/40" />
+        {/* Vignette — darkens the corners and edges, drawing the eye to the pyramid. */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 75% 70% at 50% 50%, transparent 45%, rgba(9, 11, 16, 0.9) 100%)'
+          }}
+        />
+      </div>
 
+      {/* Hero — observatory entrance (compact) */}
+      <section className="relative z-10 px-6 pt-20 pb-6 md:pt-28 md:pb-8 flex-shrink-0">
         <div className="max-w-3xl mx-auto text-center relative z-10 space-y-3 md:space-y-4">
           <p className="text-[10px] md:text-[11px] font-mono uppercase tracking-[0.25em] text-maya-gold">
             A Digital Archaeological Observatory
           </p>
 
-          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-maya-cream leading-tight">
+          <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-maya-cream leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]">
             Where Ancient Stone Encodes the Sky
           </h2>
 
-          <p className="text-xs sm:text-sm md:text-base text-maya-textDim max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm md:text-base text-maya-text max-w-2xl mx-auto leading-relaxed drop-shadow-[0_1px_6px_rgba(0,0,0,0.85)]">
             Step into cinematic, high-fidelity 3D reconstructions of Maya monuments. Investigate how
             the ancient Maya synchronized monumental architecture with equinox solar shadows,
             calendar rounds, and planetary cycles.
@@ -62,17 +69,19 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Expedition Catalog (compact) */}
+      {/* Expedition Catalog (compact) — vertically centred in the space below
+          the hero (my-auto; the bottom padding lifts it toward the middle of
+          the screen). */}
       <main
         id="expeditions"
-        className="flex-1 min-h-0 max-w-7xl mx-auto px-6 pb-2 w-full flex flex-col"
+        className="relative z-10 my-auto max-w-7xl mx-auto px-6 pb-[clamp(2rem,16vh,10rem)] w-full flex flex-col"
       >
-        <div className="flex items-end justify-between mb-2 border-b border-white/10 pb-2 flex-shrink-0">
+        <div className="flex items-end justify-between mb-2 border-b border-white/15 pb-2 flex-shrink-0 drop-shadow-[0_1px_5px_rgba(0,0,0,0.9)]">
           <div>
             <h3 className="font-serif text-base sm:text-lg font-bold text-maya-cream">
               Expeditions
             </h3>
-            <p className="text-[11px] text-maya-textDim mt-0.5 hidden sm:block">
+            <p className="text-[11px] text-maya-text mt-0.5 hidden sm:block">
               Select an archaeological module to begin the interactive 3D investigation
             </p>
           </div>
@@ -87,8 +96,8 @@ export const LandingPage: React.FC = () => {
               <div
                 className={`group relative rounded-xl border transition-all duration-300 flex flex-row overflow-hidden ${
                   isAvailable
-                    ? 'bg-maya-surface border-maya-gold/25 hover:border-maya-gold/60'
-                    : 'bg-maya-bg/60 border-white/10 opacity-75'
+                    ? 'bg-maya-surface/80 backdrop-blur-md border-maya-gold/25 hover:border-maya-gold/60'
+                    : 'bg-maya-bg/70 backdrop-blur-md border-white/10 opacity-75'
                 }`}
               >
                 {/* Thumbnail — compact side-by-side thumbnail */}
@@ -163,14 +172,6 @@ export const LandingPage: React.FC = () => {
           })}
         </div>
       </main>
-
-      {/* Footer — thin one-liner */}
-      <footer className="flex-shrink-0 border-t border-white/10 bg-maya-bg py-2 px-6 text-center text-[10px] sm:text-[11px] text-maya-textDim font-mono">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>Maya Archaeoastronomy Learning Platform · React Three Fiber Architecture</p>
-          <p>Content vetted for scholarly caution — evidence and interpretation kept distinct</p>
-        </div>
-      </footer>
     </div>
   );
 };

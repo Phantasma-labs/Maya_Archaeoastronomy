@@ -36,6 +36,7 @@ LessonPage
 | `core/utils/tour.ts`           | `sampleTour()` / `projectToScreen()` / `tourSettle()` — pure tour sampler, world→screen projection, "camera at rest" factor                 | core types only                |
 | `core/utils/stairs.ts`         | `stairStepSlots()` — pure horizontal placement of a stairway's step lines (blueprint view)                                                  | core types only                |
 | `core/utils/edges.ts`          | `isStrayEdge()` / `axisMisalignmentDeg()` — pure classification of mesh-noise edges vs real structure (blueprint view)                      | none                           |
+| `core/utils/ruler.ts`          | `rulerSegments()` — pure geometry of a schematic count ruler (baseline + evenly spaced ticks) drawn while a tour step is active             | core types only                |
 | `lessons/registry.ts`          | `LESSON_REGISTRY` id→{config, SceneComponent, OverlayComponent}; `getAllLessons`, `getLessonEntry`                                          | static imports of every lesson |
 | `lessons/<id>/config.ts`       | Static, typed lesson definition (assets, camera, lighting, pedagogical content)                                                             | core types only                |
 | `lessons/<id>/*Scene/*Overlay` | Lesson-specific scene assembly and learner UI                                                                                               | core components                |

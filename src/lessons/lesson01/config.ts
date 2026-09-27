@@ -341,18 +341,33 @@ export const lesson01Config: LessonConfig = {
             callouts: [
               {
                 id: 'c-panels',
-                label: '52 panels per side',
-                anchor: [23.5, 12, -4.2],
-                offset: [40, -150]
+                label: '52 per side · schematic',
+                anchor: [34.45, 0.9, 11.6],
+                offset: [0, 34]
               }
             ],
-            camera: { azimuth: 1.28, elevation: 0.1, radius: 88, target: [-4.4, 10, 12.5] },
+            camera: { azimuth: 1.28, elevation: 0.28, radius: 102, target: [-1, 11, 1] },
+            // Schematic 52-tick ruler along the east face, 37 m out from the pyramid centre (the
+            // face is 59.4 m wide at its base). The model has no panel geometry — the panels are
+            // texture detail — so this marks the NUMBER, not the panels' positions.
+            rulers: [
+              {
+                id: 'r-panels',
+                from: [42.97, -16.83],
+                to: [25.93, 40.07],
+                y: 0.7,
+                count: 52,
+                tickHeight: 1.3,
+                majorEvery: 10
+              }
+            ],
             info: {
               headline: '52 panels on each side',
               figure: '52',
               lines: [
                 'The structure contains 52 architectural panels or elements on each side.',
-                'The number can be related to the 52-year Calendar Round.'
+                'The number can be related to the 52-year Calendar Round.',
+                'The 52 ticks are a schematic count — they do not mark the panels\u2019 positions.'
               ],
               status: 'interpretation'
             }

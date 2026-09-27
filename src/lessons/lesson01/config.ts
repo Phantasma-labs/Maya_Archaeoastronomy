@@ -334,21 +334,6 @@ export const lesson01Config: LessonConfig = {
               ],
               status: 'interpretation'
             }
-          },
-          {
-            id: 'tour-calendar-round',
-            label: 'Calendar Round',
-            camera: { azimuth: 4.2, elevation: 0.45, radius: 130, target: [3.9, 13, -7.7] },
-            info: {
-              headline: 'The Calendar Round',
-              figure: '18,980 days',
-              lines: [
-                'The Calendar Round repeats approximately every 18,980 days — 52 Haab years.',
-                'It is the point at which the 260-day Tzolk’in and the 365-day Haab once again produce the same combination of dates.',
-                'Whether El Castillo’s numbers were meant to echo it cannot always be demonstrated archaeologically.'
-              ],
-              status: 'mixed'
-            }
           }
         ]
       }

@@ -6,7 +6,8 @@ import * as THREE from 'three';
 import { projectToScreen, sampleTour, tourSettle } from '../src/core/utils/tour.ts';
 import { fitLine, stairFootprintContains, stairStepSlots } from '../src/core/utils/stairs.ts';
 import { axisMisalignmentDeg, isStrayEdge } from '../src/core/utils/edges.ts';
-import type { StairwaySpec, TourStop } from '../src/core/types/lesson.types.ts';
+import { rulerSegments } from '../src/core/utils/ruler.ts';
+import type { StairwaySpec, TourRuler, TourStop } from '../src/core/types/lesson.types.ts';
 
 type V3 = [number, number, number];
 
@@ -278,6 +279,41 @@ assert.throws(() => sampleTour([], 1), /at least one/);
   assert.equal(isStrayEdge(20, 20 * Math.tan(rad(25)), 0, 0), false, 'steep (25°) → kept');
   assert.equal(isStrayEdge(3, 3 * Math.tan(rad(6)), 0, 0), false, 'short tilted edge (<4 m) → kept');
   assert.equal(isStrayEdge(20, -20 * Math.tan(rad(6)), 0, 0), true, 'tilted downward → stray');
+}
+
+// 17. rulerSegments: a baseline plus evenly spaced ticks (flat [x1,y1,z1,x2,y2,z2,…] list).
+{
+  const seg = (arr: number[], i: number) => arr.slice(i * 6, i * 6 + 6);
+  const r: TourRuler = { id: 'r', from: [0, 0], to: [8, 0], y: 1, count: 5, tickHeight: 2 };
+  const a = rulerSegments(r);
+  assert.equal(a.length, 6 * 6, 'baseline + 5 ticks = 6 segments');
+  assert.deepEqual(seg(a, 0), [0, 1, 0, 8, 1, 0], 'baseline first');
+  [0, 2, 4, 6, 8].forEach((x, i) => {
+    const t = seg(a, i + 1);
+    near(t[0], x, 'tick ' + i + ' x0');
+    near(t[3], x, 'tick ' + i + ' x1');
+    near(t[1], 1, 'tick ' + i + ' y0');
+    assert.ok(t[4] > 2.99, 'tick ' + i + ' rises at least tickHeight, got ' + t[4]);
+  });
+  // ends are major (taller) than interior ticks; interior majorEvery ticks are taller too
+  const m = rulerSegments({ ...r, count: 6, majorEvery: 3 });
+  const h = (i: number) => seg(m, i + 1)[4] - seg(m, i + 1)[1];
+  assert.ok(h(0) > h(1) + 1e-9, 'first tick is an end cap, taller than an interior one');
+  assert.ok(h(5) > h(1) + 1e-9, 'last tick is an end cap');
+  near(h(1), 2, 'interior tick = tickHeight');
+  near(h(2), h(0), 'tick number 3 is a major tick (majorEvery 3)');
+  near(h(4), 2, 'tick number 5 is interior');
+  // ticks are perpendicular in plan only by being vertical: same x/z at both ends
+  const d = rulerSegments({ id: 'd', from: [0, 0], to: [3, 4], y: 0, count: 3, tickHeight: 1 });
+  const t1 = d.slice(6, 12);
+  near(t1[0], t1[3], 'vertical tick x');
+  near(t1[2], t1[5], 'vertical tick z');
+  near(d[6 * 2], 1.5, 'middle tick x');
+  near(d[6 * 2 + 2], 2, 'middle tick z');
+  assert.equal(rulerSegments({ ...r, count: 0 }).length, 6, 'count 0 → baseline only');
+  assert.equal(rulerSegments({ ...r, count: 1 }).length, 12, 'count 1 → baseline + one tick');
+  near(rulerSegments({ ...r, count: 1 })[6], 4, 'single tick at the midpoint');
+  assert.deepEqual(rulerSegments({ ...r, to: [0, 0] }), [], 'zero-length ruler → nothing');
 }
 
 console.log('sampleTour: all checks passed');

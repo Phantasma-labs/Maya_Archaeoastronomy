@@ -1,9 +1,16 @@
 import React, { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
 import { CameraTour } from '../../core/components/CameraTour';
-import { sampleTour } from '../../core/utils/tour';
-import { CameraConfig, ModelAsset, StairwaySpec, TourStop } from '../../core/types/lesson.types';
+import { sampleTour, tourSettle } from '../../core/utils/tour';
+import {
+  CameraConfig,
+  ModelAsset,
+  StairwaySpec,
+  TourRuler,
+  TourStop
+} from '../../core/types/lesson.types';
 import { BlueprintEdges } from './BlueprintEdges';
+import { BlueprintRulers } from './BlueprintRulers';
 import { BlueprintStairs } from './BlueprintStairs';
 
 interface BlueprintSceneProps {
@@ -18,6 +25,9 @@ interface BlueprintSceneProps {
   axisAzimuth?: number;
 }
 
+/** Stable empty list (a fresh [] per render would rebuild the ruler geometry). */
+const NO_RULERS: TourRuler[] = [];
+
 /** maya-gold token (tailwind.config.js). */
 const BLUEPRINT_GOLD = '#d4af37';
 
@@ -30,8 +40,8 @@ const GRID_CENTER: [number, number, number] = [9, 0.5, 20];
  * Lesson 01 blueprint scene — the Calendar & Architecture view.
  *
  * The pyramid is drawn as a clean outline (hard edges over a black occluder),
- * with procedurally drawn step lines on its stairways and a faint ground grid
- * on a black background. Basic materials ignore lights and IBL, so —
+ * with procedurally drawn step lines on its stairways, schematic count rulers
+ * for the active step, and a faint ground grid on a black background. Basic materials ignore lights and IBL, so —
  * deliberately — there is no SceneEnvironment and no sun here; the tree
  * canopy and the plaza floor mesh are not mounted. The camera pose is derived
  * from the tour position by `sampleTour`; no useFrame, no state.
@@ -83,6 +93,11 @@ export const BlueprintScene: React.FC<BlueprintSceneProps> = ({
           stairways={stairways}
           color={BLUEPRINT_GOLD}
           opacity={0.6}
+        />
+        <BlueprintRulers
+          rulers={tour[sample.activeIndex].rulers ?? NO_RULERS}
+          color={BLUEPRINT_GOLD}
+          opacity={tourSettle(position)}
         />
         <primitive object={grid} />
       </group>

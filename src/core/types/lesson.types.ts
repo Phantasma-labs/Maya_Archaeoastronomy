@@ -83,6 +83,28 @@ export interface TourCallout {
   offset: [number, number];
 }
 
+/**
+ * A schematic count ruler drawn in the 3D scene while its tour step is active:
+ * a baseline with `count` evenly spaced ticks (both ends included). It marks a
+ * NUMBER (e.g. 52 panels per side) without claiming the ticks are the positions
+ * of real features — use it when the model carries no geometry for them.
+ */
+export interface TourRuler {
+  id: string;
+  /** Horizontal [x, z] of the first tick. */
+  from: [number, number];
+  /** Horizontal [x, z] of the last tick. */
+  to: [number, number];
+  /** Height of the baseline in world space. */
+  y: number;
+  /** Number of ticks, ends included. */
+  count: number;
+  /** Height of an ordinary tick, in metres. */
+  tickHeight: number;
+  /** Every n-th tick (numbered from 1) is taller, for easy counting. The end ticks always are. */
+  majorEvery?: number;
+}
+
 /** One viewpoint + explanation in a topic's guided tour. */
 export interface TourStop {
   id: string;
@@ -92,6 +114,8 @@ export interface TourStop {
   info: TourStopInfo;
   /** Arrows pointing at the features this step is about (optional). */
   callouts?: TourCallout[];
+  /** Schematic count rulers drawn in the scene while this step is active (optional). */
+  rulers?: TourRuler[];
 }
 
 /** Camera state derived from a continuous tour position (pure, never stored). */

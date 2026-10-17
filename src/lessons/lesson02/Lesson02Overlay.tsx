@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Home } from 'lucide-react';
 import { LessonConfig, SkyKeyframe } from '../../core/types/lesson.types';
@@ -58,6 +58,19 @@ export const Lesson02Overlay: React.FC<Lesson02OverlayProps> = ({
   const [prediction, setPrediction] = useState<number | null>(null);
 
   const predicting = phase === 'predicting';
+
+  // Hand keyboard focus to the instrument when the prompt gives way to the
+  // slider (the arc / Skip button unmount). Not on first mount, so a ?step=
+  // deep link never steals focus.
+  const instrumentRef = useRef<HTMLDivElement>(null);
+  const prevPhaseRef = useRef<Phase>(phase);
+  useEffect(() => {
+    if (prevPhaseRef.current === phase) return;
+    prevPhaseRef.current = phase;
+    if (phase !== 'exploring') return;
+    const slider = instrumentRef.current?.querySelector<HTMLElement>('[role="slider"]');
+    (slider ?? instrumentRef.current)?.focus();
+  }, [phase]);
   const activeIndex = activeKeyDate(sliderPosition);
   const activeCallout = activeIndex === null ? null : skyTimeline[activeIndex]?.callout;
   const activeBuilding = activeIndex === null ? null : KEY_DATES[activeIndex].building;
@@ -104,9 +117,13 @@ export const Lesson02Overlay: React.FC<Lesson02OverlayProps> = ({
         </p>
       </aside>
 
-      {/* Plan view mini-map (bottom-right, above the bar). Fixed size keeps the
-          portrait SVG from growing into the bar. */}
-      <div className="pointer-events-auto absolute right-6 bottom-32 w-[150px] h-[190px] p-2 bg-maya-surface/85 backdrop-blur-xl border border-maya-gold/30 rounded-lg shadow-xl">
+      {/* Plan view: one instance. Large while predicting (the arc is the tap
+          target), mini-map in the corner while exploring. */}
+      <div
+        className={`pointer-events-auto absolute right-6 bottom-28 p-2 bg-maya-surface/85 backdrop-blur-xl border border-maya-gold/30 rounded-lg shadow-xl ${
+          predicting ? 'w-[296px] h-[388px]' : 'w-[150px] h-[190px]'
+        }`}
+      >
         <PlanView
           azimuthDeg={positionToAzimuthDeg(sliderPosition)}
           activeId={activeBuilding}
@@ -116,27 +133,33 @@ export const Lesson02Overlay: React.FC<Lesson02OverlayProps> = ({
         />
       </div>
 
-      {/* Callout (above the bar, left of the mini-map) */}
-      {!predicting && activeCallout && (
-        <div
-          aria-live="polite"
-          className="pointer-events-auto absolute left-6 bottom-32 w-[30rem] p-4 space-y-1.5 bg-maya-surface/95 backdrop-blur-xl border border-maya-gold/40 rounded-lg shadow-xl"
-        >
-          <h3 className="font-serif text-[15px] font-bold text-maya-gold">{activeCallout.label}</h3>
-          {(activeCallout.lines ?? []).map((line) => (
-            <p key={line} className="text-[13.5px] text-maya-text">
-              {line}
-            </p>
-          ))}
-          {verdict && (
-            <p className="text-[14px] font-bold text-maya-cream pt-1">{COPY.verdicts[verdict]}</p>
-          )}
-        </div>
-      )}
+      {/* Callout (above the bar, left of the plan view). The live region is
+          always mounted; only its content comes and goes. */}
+      <div aria-live="polite" className="pointer-events-none absolute left-6 bottom-32 w-[30rem]">
+        {!predicting && activeCallout && (
+          <div className="pointer-events-auto p-4 space-y-1.5 bg-maya-surface/95 backdrop-blur-xl border border-maya-gold/40 rounded-lg shadow-xl">
+            <h3 className="font-serif text-[15px] font-bold text-maya-gold">
+              {activeCallout.label}
+            </h3>
+            {(activeCallout.lines ?? []).map((line) => (
+              <p key={line} className="text-[13.5px] text-maya-text">
+                {line}
+              </p>
+            ))}
+            {verdict && (
+              <p className="text-[14px] font-bold text-maya-cream pt-1">{COPY.verdicts[verdict]}</p>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Bottom bar */}
-      <div className="pointer-events-auto mt-auto relative mr-[calc(150px+1.5rem)]">
-        <div id="lesson-instrument">
+      <div
+        className={`pointer-events-auto mt-auto relative ${
+          predicting ? 'mr-[calc(296px+1.5rem)]' : 'mr-[calc(150px+1.5rem)]'
+        }`}
+      >
+        <div id="lesson-instrument" ref={instrumentRef} tabIndex={-1} className="outline-none">
           {predicting ? (
             <div className="flex items-center justify-between gap-4 px-4 py-3 bg-maya-surface/90 border border-maya-gold/30 rounded-lg">
               <p className="text-[14px] text-maya-cream font-medium">{COPY.prompt}</p>

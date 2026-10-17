@@ -64,7 +64,9 @@ export function PlanView({
     pt.y = event.clientY;
     const local = pt.matrixTransform(ctm.inverse());
     const az = (Math.atan2(local.x - OX, -(local.y - OZ)) * 180) / Math.PI;
-    onPredict(clampPredictionDeg(az));
+    const clamped = clampPredictionDeg(az);
+    setCursorDeg(clamped);
+    onPredict(clamped);
   };
 
   const handleKeyDown = (event: KeyboardEvent<SVGGElement>): void => {

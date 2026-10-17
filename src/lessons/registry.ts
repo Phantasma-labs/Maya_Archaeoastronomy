@@ -14,6 +14,9 @@ const Lesson01Scene = lazy(() =>
 const Lesson01Overlay = lazy(() =>
   import('./lesson01/Lesson01Overlay').then((m) => ({ default: m.Lesson01Overlay }))
 );
+const Lesson02Scene = lazy(() =>
+  import('./lesson02/Lesson02Scene').then((m) => ({ default: m.Lesson02Scene }))
+);
 
 export interface LessonEntry {
   config: LessonConfig;
@@ -55,7 +58,7 @@ export const LESSON_REGISTRY: Record<string, LessonEntry> = {
   },
   '02': {
     config: lesson02Config,
-    SceneComponent: Lesson01Scene // Placeholder scene component until custom assets are added
+    SceneComponent: Lesson02Scene
   }
 };
 

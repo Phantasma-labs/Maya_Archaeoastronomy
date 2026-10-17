@@ -78,3 +78,6 @@ export function judgePrediction(guessDeg: number): PredictionResult {
   if (Math.abs(delta) <= 15) return 'close';
   return delta > 0 ? 'too-south' : 'too-north';
 }
+
+/** Sun elevation (degrees) shown at every sunrise step; shared by the disc and the light. */
+export const SUN_ELEVATION_DEG = 4;

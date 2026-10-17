@@ -1,79 +1,135 @@
-import { LessonConfig } from '../../core/types/lesson.types';
+import { LessonConfig, SkyKeyframe } from '../../core/types/lesson.types';
+import { sunLightRotation } from '../../core/utils/sunrise';
+import { KEY_DATES, SUN_ELEVATION_DEG, positionToAzimuthDeg } from './sunPath';
+
+// Kid-level copy per key sunrise (Task 6 polishes). Index i ↔ KEY_DATES[i].
+const STEP_COPY: { headline: string; lines: string[] }[] = [
+  {
+    headline: 'December solstice: shortest day',
+    lines: [
+      'The Sun rises furthest to the south-east.',
+      'It comes up over E-III, the southern building.'
+    ]
+  },
+  {
+    headline: 'Equinox: day and night equal',
+    lines: ['The Sun rises due east.', 'It comes up over E-II, the middle building.']
+  },
+  {
+    headline: 'June solstice: longest day',
+    lines: [
+      'The Sun rises furthest to the north-east.',
+      'It comes up over E-I, the northern building.'
+    ]
+  },
+  {
+    headline: 'Equinox again',
+    lines: ['The Sun is back at due east.', 'It comes up over E-II, the middle building.']
+  },
+  {
+    headline: 'Back to the shortest day',
+    lines: [
+      'The Sun has swung back to the south-east.',
+      'It comes up over E-III again. One year is done!'
+    ]
+  }
+];
+
+// One keyframe per key date. Sun direction is derived from the slider position
+// in the scene (not from lightRotation interpolation), but each keyframe still
+// carries its true light rotation so the data stays self-consistent.
+// Temporary sky texture (branch only) until the dawn skies land in Task 8.
+const SUNRISE_KEYFRAMES: SkyKeyframe[] = KEY_DATES.map((key, i) => {
+  const copy = STEP_COPY[i];
+  return {
+    id: `sunrise-${i + 1}`,
+    name: `Step ${i + 1} · ${copy.headline}`,
+    url: '/assets/lesson_01/01.webp',
+    lightRotation: sunLightRotation(positionToAzimuthDeg(i + 1), SUN_ELEVATION_DEG),
+    iblIntensity: 0.5,
+    meta: { dateLabel: key.label },
+    callout: {
+      label: copy.headline,
+      sublabel: `${key.label}  ·  Sunrise over ${key.building}`,
+      tooltip: copy.lines.join(' '),
+      lines: copy.lines
+    }
+  };
+});
 
 export const lesson02Config: LessonConfig = {
   id: '02',
   slug: '02',
-  title: 'The Caracol Observatory: Venus Extremes and Horizon Sightlines',
-  subtitle: 'The Cylindrical Tower of Chichén Itzá',
+  title: 'Group E at Uaxactún: Watching the Sunrise',
+  subtitle: 'Parque Arqueológico Uaxactún, Petén, Guatemala',
   tagline:
-    'Investigate the asymmetric observation slits and horizon sightlines used by Maya astronomers to track extreme northern and southern Venus risings.',
+    'Stand on the western pyramid and watch the Sun rise over three buildings as the year turns from solstice to equinox to solstice.',
   thumbnail: '/assets/landing/lesson-02-thumb.webp',
-  status: 'coming-soon',
-  difficulty: 'Intermediate',
-  duration: '20 min interactive study',
+  status: 'available',
+  difficulty: 'Introductory',
+  duration: '10 min interactive study',
 
   assets: {
-    models: [],
+    models: [
+      {
+        id: 'site',
+        name: 'Group E, Uaxactún',
+        url: '/assets/lesson_02/Uaxactun_v003.glb',
+        castShadow: true,
+        receiveShadow: true
+      }
+    ],
     environment: {
-      // Single-keyframe timeline (placeholder until Lesson 02 assets land) —
-      // a 1-step timeline renders a fixed sky and the slider is hidden.
-      skyTimeline: [
-        {
-          id: 'sky-02',
-          name: 'Equinoctial Horizon',
-          url: '/assets/lesson_01/02.webp',
-          description: 'Shared Chichén Itzá horizon sky pending dedicated observatory captures.',
-          lightRotation: [0.8, 1.5, 0],
-          iblIntensity: 0.33
-        }
-      ],
-      // Shared skydome framing — authored defaults (ex-DevPanel IBL_DEFAULTS).
+      skyTimeline: SUNRISE_KEYFRAMES,
       scale: 0.52,
       panY: -0.029,
       rotation: [0.09, -1.7, 0.05],
-      // Sky-dome visual brightness.
       intensity: 1.0,
       backgroundEnabled: true
     }
   },
 
+  // Looks due east (−π/2 about Y) from the observer point west of the plaza.
   camera: {
-    position: [0, 5, 20],
-    rotation: [0, 0, 0],
-    fov: 45,
+    position: [-40, 11.5, 0],
+    rotation: [0, -Math.PI / 2, 0],
+    fov: 50,
     near: 0.1,
     far: 1000
   },
 
   lighting: {
     directional: {
-      intensity: 3.0,
-      color: '#fff0dd',
+      intensity: 3.2,
+      color: '#ffe2bd',
       castShadow: true
     }
   },
 
   content: {
-    monumentName: 'El Caracol (The Snail Observatory)',
-    timePeriod: 'Late Classic (~900–1050 CE)',
+    monumentName: 'Group E (E-VII-sub and E-I, E-II, E-III)',
+    timePeriod:
+      'Late Preclassic origins (Aveni: ~0–200 CE); platform buildings reached final form in the Early Classic',
     culture: 'Maya civilization',
     overview:
-      'El Caracol is a rare cylindrical structure named for the interior spiral staircase leading to its upper observation chamber. Archaeologists and astronomers have documented deliberate sightline alignments pointing toward key Venus extremes.',
+      'Group E at Uaxactún, in the Petén lowlands of northern Guatemala (about 17.4° N, roughly 19 km north of Tikal), is one of the most famous architectural complexes in the study of Maya astronomy. On its western side stands Structure E-VII-sub, a radial pyramid with stairways on all four sides. Facing it across an open plaza, a long north–south platform carries three smaller buildings: E-I to the north, E-II in the centre and E-III to the south. Because Uaxactún was the first such complex to be described, every building group with this layout is now called an "E Group", and dozens are known across the Maya lowlands.',
     topics: [
       {
-        id: 'venus-extremes',
-        title: 'Venus Horizon Extremes',
+        id: 'watch-sunrise',
+        title: 'Watch the Sunrise',
         summary:
-          'Observation slits align with extreme azimuths of Venus risings and settings on the horizon.',
+          'The classic interpretation is that an observer on E-VII-sub would see the Sun rise over E-I at the June solstice, over E-II at the equinoxes and over E-III at the December solstice.',
         details: [
-          'The upper observation chamber contains narrow horizontal windows aligned with precise celestial angles.',
-          'Alignments correspond to the maximum northern and southern declinations of Venus, which occur over an 8-year cycle.'
+          'The astronomy is well established and can be calculated: on a flat horizon at this latitude the Sun rises at an azimuth of about 65° around the June solstice, due east (90°) around the equinoxes, and about 115° around the December solstice, so the sunrise point travels along an arc of roughly 50° of the eastern horizon and pauses briefly at each end.',
+          'Field measurements by Anthony Aveni and Horst Hartung (1989) supported the alignment as seen from a point just above the middle stairway of E-VII-sub. Aveni also notes that Group E as a whole is aligned to the cardinal directions.',
+          'How the group was used is still debated: Aveni suggests a performative role, more like a planetarium than an observatory, while Ivan Šprajc (2021) is more sceptical that E Groups were specialised observatories.'
         ],
         keyFact:
-          'Sightlines point to Venus extreme rise/set positions occurring once every 8 solar years.'
+          'Over a year the sunrise point travels back and forth along roughly 50° of the eastern horizon, and the three buildings can mark the two ends and the middle of that journey.',
+        skyTimeline: SUNRISE_KEYFRAMES
       }
     ],
     archaeologicalNotes:
-      'The alignments at El Caracol provide strong physical evidence of intentional astronomical observation architecture in the northern Maya lowlands.'
+      'E-VII-sub is an archaeological discovery: excavation of the ruined later pyramid, E-VII, revealed this earlier, well-preserved building inside it. It dates to the Late Preclassic (Aveni gives roughly 0–200 CE), was covered in white lime plaster and was decorated with sixteen large stucco masks flanking its four stairways; Michael Coe has suggested the masks may represent the jaguar god of the underworld and sky serpents, an iconographic reading rather than a certainty. Šprajc argues that the classic sightlines connect buildings from different periods, and other scholars, including James Aimers and Prudence Rice, interpret E Groups primarily as ritual and public spaces whose layout referred symbolically to the solar cycle. The summary best supported by the evidence is that Group E is an architectural complex built around the Sun’s movement along the horizon; whether it was a working observatory, a ceremonial stage or both remains a subject of scholarly discussion. This lesson separates archaeological evidence, astronomical calculation and scholarly interpretation.'
   }
 };

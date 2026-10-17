@@ -290,4 +290,6 @@ Starts when the owner delivers `Lesson02_Site_v001.glb` (with nodes `E-I`, `E-II
 - [ ] **Step 1:** In the new GLB, verify that the `E-I` / `E-II` / `E-III` node centres match `BUILDINGS` within 0.5 m. If not, return the coordinates to the owner rather than editing `site.ts`.
 - [ ] **Step 2:** Implement the `ModelLoader.onReady` prop and `BuildingGlow`; remove the stand-ins; switch the URLs.
 - [ ] **Step 3:** Repeat the Task 3 step 4 and Task 7 checks; also confirm that no GLB/sky/thumbnail is orphaned (each is referenced by config).
+  - (a) Re-tune the environment `scale` / `panY` / `rotation` in config for the dawn sky; it currently uses Lesson 01's horizon framing.
+  - (b) `SunDisc` renders with depthTest=false (Ruling 7): visually confirm the disc never paints over the real E-I/E-II/E-III geometry (roof combs). If it does, lower `SUN_ELEVATION_DEG` or switch to depth-tested rendering with renderOrder.
 - [ ] **Step 4: Commit** `feat(lesson02): final Group E site, dawn sky and thumbnail`, then use superpowers:finishing-a-development-branch to merge.

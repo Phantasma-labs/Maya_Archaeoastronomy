@@ -147,7 +147,8 @@ export const LandingPage: React.FC = () => {
                   <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-maya-textDim font-mono">
                     <span className="flex items-center gap-1.5">
                       <Layers className="w-3 h-3 text-maya-gold" />
-                      {lesson.content.topics.length} Alignments
+                      {lesson.content.topics.length}{' '}
+                      {lesson.content.topics.length === 1 ? 'Alignment' : 'Alignments'}
                     </span>
                     <span>{lesson.duration}</span>
                   </div>

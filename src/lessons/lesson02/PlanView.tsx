@@ -109,6 +109,7 @@ export function PlanView({
         strokeWidth={0.6}
       />
       <text
+        aria-hidden="true"
         x={SUB_FOOTPRINT.x + SUB_FOOTPRINT.w / 2}
         y={SUB_FOOTPRINT.z - 2.5}
         textAnchor="middle"
@@ -172,6 +173,7 @@ export function PlanView({
               strokeWidth={active ? 1.2 : 0.8}
             />
             <text
+              aria-hidden="true"
               x={b.xz[0]}
               y={b.xz[1] + BUILDING_SIZE / 2 + 6}
               textAnchor="middle"
@@ -194,7 +196,14 @@ export function PlanView({
 
       {/* Observer */}
       <circle cx={OX} cy={OZ} r={2.4} className="fill-maya-cream" />
-      <text x={OX} y={OZ + 8} textAnchor="middle" fontSize={5.5} className="fill-maya-textDim">
+      <text
+        aria-hidden="true"
+        x={OX}
+        y={OZ + 8}
+        textAnchor="middle"
+        fontSize={5.5}
+        className="fill-maya-textDim"
+      >
         You
       </text>
 
@@ -240,9 +249,9 @@ export function PlanView({
       )}
 
       {/* North arrow */}
-      <g transform="translate(-62 -92)" className="text-maya-text">
+      <g aria-hidden="true" transform="translate(-62 -92)" className="text-maya-text">
         <path d="M 0 -9 L 4 3 L 0 0.5 L -4 3 Z" fill="currentColor" />
-        <text y={13} textAnchor="middle" fontSize={6} fill="currentColor">
+        <text aria-hidden="true" y={13} textAnchor="middle" fontSize={6} fill="currentColor">
           N
         </text>
       </g>

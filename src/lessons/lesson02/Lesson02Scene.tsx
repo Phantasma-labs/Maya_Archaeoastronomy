@@ -6,6 +6,7 @@ import { SceneLighting } from '../../core/components/SceneLighting';
 import { AtmosphereSample, LessonConfig, ModelAsset } from '../../core/types/lesson.types';
 import { sunLightRotation } from '../../core/utils/sunrise';
 import { KEY_DATES, SUN_ELEVATION_DEG, activeKeyDate, positionToAzimuthDeg } from './sunPath';
+import { lesson02Config } from './config';
 import { StandInBuildings } from './StandInBuildings';
 import { SunDisc } from './SunDisc';
 
@@ -19,7 +20,7 @@ interface Lesson02SceneProps {
 }
 
 // Warm the GLB cache at module init; useGLTF caches by URL.
-preloadLessonModels(['/assets/lesson_02/Uaxactun_v003.glb']);
+preloadLessonModels(lesson02Config.assets.models.map((m) => m.url));
 
 /**
  * Lesson 02 3D scene: Group E at Uaxactun looking due east from E-VII-sub.

@@ -22,7 +22,7 @@ npm run format       # Prettier (src/, docs/, config files)
 npm run format:check
 ```
 
-No test scripts and no CI exist. Validation = `typecheck` + `lint` + `build` + manual `dev` check.
+No test scripts and no CI exist (dev-only check scripts run directly with Node 24: `node scripts/check-tour.ts`, `node scripts/check-sunrise.ts`). Validation = `typecheck` + `lint` + `build` + manual `dev` check.
 
 ## Architecture in brief
 
@@ -36,11 +36,12 @@ src/
 │   ├── types/lesson.types.ts   all domain types (LessonConfig, SkyKeyframe, AtmosphereSample, …)
 │   ├── components/  SceneCanvas, FixedGlbCamera, SceneEnvironment, SceneLighting,
 │   │                ModelLoader, AtmosphereTimeline, LoadingScreen
-│   └── utils/       atmosphere.ts (sampleAtmosphere — pure timeline sampler)
+│   └── utils/       atmosphere.ts (sampleAtmosphere — pure timeline sampler), sunrise.ts
 ├── lessons/
 │   ├── registry.ts  LESSON_REGISTRY id → {config, SceneComponent, OverlayComponent}
 │   ├── lesson01/    config.ts + Lesson01Scene.tsx + Lesson01Overlay.tsx
-│   └── lesson02/    config-only stub (status: 'coming-soon')
+│   └── lesson02/    config.ts + site.ts + sunPath.ts + Lesson02Scene.tsx + SunDisc.tsx +
+│                    StandInBuildings.tsx (temporary) + PlanView.tsx + Lesson02Overlay.tsx
 ├── pages/           LandingPage (catalog) + LessonPage (3D host, composition root)
 └── styles/
 ```

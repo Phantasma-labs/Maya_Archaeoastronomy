@@ -38,6 +38,9 @@ export function sunDirection(azimuthDeg: number, elevationDeg: number): [number,
  * @param azimuthDeg azimuth in degrees from north through east
  * @param elevationDeg elevation above the horizon in degrees
  */
-export function sunLightRotation(azimuthDeg: number, elevationDeg: number): [number, number, number] {
+export function sunLightRotation(
+  azimuthDeg: number,
+  elevationDeg: number
+): [number, number, number] {
   return [Math.PI / 2 - elevationDeg * DEG, Math.PI - azimuthDeg * DEG, 0];
 }

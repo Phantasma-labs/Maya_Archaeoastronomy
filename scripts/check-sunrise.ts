@@ -27,7 +27,9 @@ for (const [a, e] of [
   [90, 5],
   [114.64, 5]
 ]) {
-  const v = new THREE.Vector3(0, 1, 0).applyEuler(new THREE.Euler(...sunLightRotation(a, e), 'YXZ'));
+  const v = new THREE.Vector3(0, 1, 0).applyEuler(
+    new THREE.Euler(...sunLightRotation(a, e), 'YXZ')
+  );
   const s = sunDirection(a, e);
   near(v.x, s[0]);
   near(v.y, s[1]);

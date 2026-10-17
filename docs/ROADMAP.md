@@ -23,6 +23,7 @@ of what was already done to get here.
 | **§3.5** — Asset hygiene (lesson-asset cleanup, self-hosted fonts + latin subsetting) | ✅ Shipped | TECH_DEBT V2-2 |
 | **V02 Phases A–F** — Foundation, Landing, Lesson UX, 3D presentation, A11y, Performance | ✅ Shipped (2026-09-01) | V02_VISION_REVIEW_REPORT.md |
 | **V02 Vision Review pass** — visual audit + responsive fixes | ✅ Shipped | V02_VISION_REVIEW_REPORT.md |
+| **Lesson 02** — Uaxactún Group E sunrise (replaces the Caracol stub); final site GLB, dawn sky and thumbnail pending (Task 8) | 🚧 In progress (branch `feature/lesson02-uaxactun-sunrise`) | docs/superpowers/specs/2026-10-17-lesson02-uaxactun-sunrise-design.md |
 | **§4** — Future architecture (when lessons 02–05 arrive) | ⏳ Open | — |
 
 ## §4 — Future architecture (open)

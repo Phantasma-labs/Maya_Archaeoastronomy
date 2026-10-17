@@ -10,8 +10,9 @@ GLBs) under a switchable equirectangular sky, paired with a curriculum overlay e
 the 365-day Haab count, the equinox serpent-shadow phenomenon, the 52-year Calendar Round,
 the 584-day Venus synodic period, and solar zenith passages.
 
-Lesson 02 (El Caracol observatory) exists as a **config-only stub** (`status: 'coming-soon'`)
-with no assets and a placeholder scene.
+Lesson 02 (**Uaxactún Group E — Watching the Sunrise**) is **in progress** on branch
+`feature/lesson02-uaxactun-sunrise`; it replaced the earlier El Caracol stub. The final site
+GLB, dawn sky and landing thumbnail are pending (Task 8).
 
 ## Technology stack
 

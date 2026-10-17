@@ -27,9 +27,9 @@ interface Lesson02OverlayProps {
 
 type Phase = 'predicting' | 'exploring';
 
-// Draft copy (Task 6 polishes). Everything the child reads that is not in config.ts.
+// Kid-level copy (from LearningMaterial/lesson_02.md). Everything the child reads that is not in config.ts.
 const COPY = {
-  intro: 'Stand on the big pyramid and watch the Sun rise over three buildings, all year long.',
+  intro: 'Stand on the pyramid in the west and look east. Watch the Sun rise over three buildings.',
   prompt: 'On the longest day of the year, where will the Sun rise? Tap the horizon.',
   skip: 'Skip',
   evidence:

@@ -3,35 +3,37 @@ import { sunLightRotation } from '../../core/utils/sunrise';
 import { OBSERVER_XZ, OBSERVER_Y } from './site';
 import { KEY_DATES, SUN_ELEVATION_DEG, positionToAzimuthDeg } from './sunPath';
 
-// Kid-level copy per key sunrise (Task 6 polishes). Index i ↔ KEY_DATES[i].
+// Kid-level copy per key sunrise, simplified from LearningMaterial/lesson_02.md.
+// Index i <-> KEY_DATES[i]. Each line is one short idea.
 const STEP_COPY: { headline: string; lines: string[] }[] = [
   {
     headline: 'December solstice: shortest day',
     lines: [
-      'The Sun rises furthest to the south-east.',
+      'The Sun rises farthest to the south-east.',
       'It comes up over E-III, the southern building.'
     ]
   },
   {
     headline: 'Equinox: day and night equal',
-    lines: ['The Sun rises due east.', 'It comes up over E-II, the middle building.']
+    lines: ['The Sun rises straight east.', 'It comes up over E-II, the middle building.']
   },
   {
     headline: 'June solstice: longest day',
     lines: [
-      'The Sun rises furthest to the north-east.',
+      'The Sun rises farthest to the north-east.',
       'It comes up over E-I, the northern building.'
     ]
   },
   {
     headline: 'Equinox again',
-    lines: ['The Sun is back at due east.', 'It comes up over E-II, the middle building.']
+    lines: ['The Sun rises straight east again.', 'It comes up over E-II, the middle building.']
   },
   {
     headline: 'Back to the shortest day',
     lines: [
-      'The Sun has swung back to the south-east.',
-      'It comes up over E-III again. One year is done!'
+      'The Sun has moved back to the south-east.',
+      'It comes up over E-III again.',
+      'One whole year has gone by!'
     ]
   }
 ];

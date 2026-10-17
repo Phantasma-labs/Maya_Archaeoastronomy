@@ -80,4 +80,4 @@ export function judgePrediction(guessDeg: number): PredictionResult {
 }
 
 /** Sun elevation (degrees) shown at every sunrise step; shared by the disc and the light. */
-export const SUN_ELEVATION_DEG = 4;
+export const SUN_ELEVATION_DEG = 8;

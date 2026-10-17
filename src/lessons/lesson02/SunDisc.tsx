@@ -2,25 +2,23 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { sunDirection } from '../../core/utils/sunrise';
-import { OBSERVER_XZ } from './site';
+import { OBSERVER_XZ, OBSERVER_Y } from './site';
 
 interface SunDiscProps {
   azimuthDeg: number;
   elevationDeg: number;
 }
 
-/** Eye height of the fixed camera (m) — the disc is placed relative to it. */
-const OBSERVER_Y = 11.5;
 /** Distance from the observer to the disc (m); inside the 500 m skydome. */
 const DISC_DISTANCE = 300;
-/** Exaggerated angular size (~2 deg across) so the sun reads clearly. */
-const DISC_RADIUS = 5;
-const GLOW_RADIUS = 14;
+/** Exaggerated angular size (~3 deg across) so the sun reads clearly. */
+const DISC_RADIUS = 8;
+const GLOW_RADIUS = 22;
 
 /**
  * Emissive sun disc with a soft glow, placed on the line of sight toward the
  * sunrise point and turned to face the observer. Position is mutated via ref
- * in a dependency-guarded layout effect (ADR-001: no useFrame, demand loop).
+ * in a dependency-guarded layout effect (ADR-001: no useFrame, demand loop). Depth test is off so tree canopy never hides the sun.
  */
 export const SunDisc: React.FC<SunDiscProps> = ({ azimuthDeg, elevationDeg }) => {
   const groupRef = useRef<THREE.Group>(null);
@@ -42,19 +40,26 @@ export const SunDisc: React.FC<SunDiscProps> = ({ azimuthDeg, elevationDeg }) =>
 
   return (
     <group ref={groupRef} name="SunDisc">
-      <mesh renderOrder={1}>
+      <mesh renderOrder={1000}>
         <circleGeometry args={[GLOW_RADIUS, 48]} />
         <meshBasicMaterial
           color="#ffb347"
           transparent
           opacity={0.22}
+          depthTest={false}
           depthWrite={false}
           toneMapped={false}
         />
       </mesh>
-      <mesh renderOrder={2} position={[0, 0, 0.1]}>
+      <mesh renderOrder={1001} position={[0, 0, 0.1]}>
         <circleGeometry args={[DISC_RADIUS, 48]} />
-        <meshBasicMaterial color="#fff2c4" toneMapped={false} />
+        <meshBasicMaterial
+          color="#fff2c4"
+          transparent
+          depthTest={false}
+          depthWrite={false}
+          toneMapped={false}
+        />
       </mesh>
     </group>
   );

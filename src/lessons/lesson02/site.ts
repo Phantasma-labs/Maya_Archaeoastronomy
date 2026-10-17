@@ -6,6 +6,9 @@ export const LATITUDE_DEG = 17.394;
 
 export const OBSERVER_XZ: [number, number] = [-40, 0];
 
+/** Observer eye height (m); the fixed camera and the sun disc both use it. */
+export const OBSERVER_Y = 11.5;
+
 export type BuildingId = 'E-I' | 'E-II' | 'E-III';
 
 export const BUILDINGS: { id: BuildingId; xz: [number, number] }[] = [

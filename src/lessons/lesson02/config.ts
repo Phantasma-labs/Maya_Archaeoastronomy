@@ -1,5 +1,6 @@
 import { LessonConfig, SkyKeyframe } from '../../core/types/lesson.types';
 import { sunLightRotation } from '../../core/utils/sunrise';
+import { OBSERVER_XZ, OBSERVER_Y } from './site';
 import { KEY_DATES, SUN_ELEVATION_DEG, positionToAzimuthDeg } from './sunPath';
 
 // Kid-level copy per key sunrise (Task 6 polishes). Index i ↔ KEY_DATES[i].
@@ -91,7 +92,7 @@ export const lesson02Config: LessonConfig = {
 
   // Looks due east (−π/2 about Y) from the observer point west of the plaza.
   camera: {
-    position: [-40, 11.5, 0],
+    position: [OBSERVER_XZ[0], OBSERVER_Y, OBSERVER_XZ[1]],
     rotation: [0, -Math.PI / 2, 0],
     fov: 50,
     near: 0.1,

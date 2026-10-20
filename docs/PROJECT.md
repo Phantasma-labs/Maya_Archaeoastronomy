@@ -56,7 +56,7 @@ type-checks only, no emit), `preview`, `typecheck` (alias for `tsc --noEmit`),
 - **Content accuracy matters.** `LearningMaterial/lesson_01.md` is the vetted source text;
   lesson copy deliberately distinguishes archaeological evidence from interpretation.
   Preserve that tone when editing content.
-- Assets live in `public/assets/lesson_01/` (GLBs) with self-hosted Draco decoders in
+- Assets live in `public/assets/lesson_XX/` (GLBs, skies) with self-hosted Draco decoders in
   `public/draco/`. Sky panoramas are **LDR WebP (2048×1024), not HDR** despite UI labels.
 - Fonts are **self-hosted** via `@fontsource/cinzel`, `@fontsource/plus-jakarta-sans`,
   `@fontsource/jetbrains-mono` (only the weights used in the UI). No third-party

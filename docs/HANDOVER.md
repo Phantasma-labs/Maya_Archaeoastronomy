@@ -3,6 +3,10 @@
 Last updated **2026-10-20**. This is the "what is the state of play right now" document.
 Permanent rules are in `AGENTS.md`; the project overview is in `docs/PROJECT.md`.
 
+**Written for an agent with only this repository** (no access to the owner's machine, Notion or
+chat history). Everything you need to continue is in git; §7 lists the few things that are
+deliberately _not_, and how to proceed without them.
+
 ## 1. Get running (new session / new clone)
 
 ```bash
@@ -16,9 +20,9 @@ npm run dev                                       # http://localhost:3000
 Open `http://localhost:3000/lesson/02` (add `?step=3` to jump to a key date and skip the
 prediction lock). Lesson 01 is `/lesson/01`.
 
-On the owner's Windows laptop, the untracked `scripts/launch-dev.bat` starts the dev server (if
-port 3000 is free) and opens Firefox. It hardcodes a Firefox path, so it is deliberately **not**
-committed. `.claude/launch.json` (committed) defines the `vite-dev` preview config for Claude Code.
+`.claude/launch.json` (committed) defines the `vite-dev` preview config for Claude Code. (The owner
+also keeps an untracked, Firefox-path-hardcoded `scripts/launch-dev.bat` on their own laptop; you
+do not need it.)
 
 Validation (there are no tests and no CI):
 
@@ -123,6 +127,55 @@ Still open, in order:
 ## 6. Housekeeping state
 
 - `.claude/settings.local.json` is machine-local permissions, **not committed** (ignored).
-- Notion control-base page (see memory `notion-control-base`) was last synced 2026-09-01 and
-  does not yet know about Lesson 02's Uaxactún pivot. Update its Next Steps and Dev Tasks.
+  Untracked/ignored on the owner's machine and absent from a clone: `node_modules`, `dist`,
+  `*.log`, `scripts/launch-dev.bat`. None are needed.
 - Known debt is ranked in `docs/TECH_DEBT.md`; sequencing in `docs/ROADMAP.md`.
+
+## 7. Off-repo context (what git does not carry)
+
+Knowledge that used to live only in the owner's machine or tooling, written down here.
+
+**Asset pipeline.** The owner authors 3D and media in their own working tree (Blender sources,
+Magnific/ComfyUI outputs, source PDFs) and commits only _shipped, config-referenced_ files into
+`public/assets/`. You cannot create or fetch the missing site GLB. Do not fake it.
+
+**What you can and cannot do without the owner:**
+
+| Item                                                                        | Remote agent?                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Task 8 steps 1–2 (GLB swap, `onReady`, `BuildingGlow`, delete stand-ins)    | **Blocked** on `Lesson02_Site_v001.glb`. You may write `ModelLoader.onReady` and `BuildingGlow.ts` ahead of time (lesson-agnostic, typechecked against the stand-ins), but do not delete the stand-ins or `Uaxactun_v003.glb` until the real file is committed. |
+| Sky framing re-tune (`config.ts` `scale`/`panY`/`rotation`)                 | Possible with the dev server, but judge the horizon against the **final** 3D ground, so ideally after the GLB lands.                                                                                                                                            |
+| `SunDisc` visual check vs. real temples                                     | After the GLB lands.                                                                                                                                                                                                                                            |
+| Owner copy review of kid strings                                            | **Owner only.** Do not change `STEP_COPY` wording without them; flag any suspected scholarly slip instead.                                                                                                                                                      |
+| Docs, refactors that keep `typecheck`/`lint`/`build` green, a11y/perf fixes | Yes, within `AGENTS.md`.                                                                                                                                                                                                                                        |
+
+If the GLB has landed in git, the first commit that adds it tells you the owner's naming; verify
+node names `E-I`/`E-II`/`E-III` and centres within 0.5 m of `BUILDINGS` in `site.ts`. If they are
+off, report coordinates back instead of editing `site.ts`.
+
+**Source material.** Vetted lesson text is in `LearningMaterial/lesson_01.md` and `lesson_02.md`
+(tracked). The scholarly PDF (`Archaeoastronomy_in_the_Ancient_Americas.pdf`) is tracked too.
+Keep the evidence-vs-interpretation tone. Lesson 02 shows the Group E alignment as **perfect by
+owner decision** (the Šprajc debate is a single gentle line); do not "correct" that.
+
+**Notion control base.** Project page `https://app.notion.com/p/3547cc95844d81569725c5a3b024056a`
+(Overview, Next Steps, Dev Tasks DB, Curriculum DB). Last synced 2026-09-01; it does not yet
+know about the Lesson 02 Uaxactún pivot. If you do have Notion access, update Next Steps and
+Dev Tasks; if not, leave it for the owner. API gotchas: `page_id`/`data_source_id` must be bare
+UUIDs (no URLs or `collection://`); `replace_content` takes `new_str` and fails unless child
+pages/databases are re-referenced; wrap Windows paths in backticks or the parser eats the
+backslashes.
+
+**Hosting.** Static SPA, no env vars or backend. The owner deploys to Cloudflare Pages (build
+`npm run build`, output `dist/`); no deploy config is in the repo. Do not merge to `main`
+(which may auto-deploy) until the §4 gates are met.
+
+**Line endings.** The owner's Windows git uses `core.autocrlf=true`; files in the repo are LF.
+If `prettier --check` flags CRLF files on a Windows checkout, that is the cause; do not
+mass-renormalise.
+
+**Dev server port.** `npm run dev` binds 3000. If it is busy, Vite moves to the next port;
+kill only a server you started.
+
+**Historical docs.** `docs/archive/v02/` and old `V02_*`/`V2-*` references are records of the
+earlier redesign; do not edit them to match later changes.

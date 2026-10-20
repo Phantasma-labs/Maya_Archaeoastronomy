@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Read first
 
-- **`docs/HANDOVER.md`** — current state, branch, setup, what's left, gotchas. **Start here for in-flight work.**
+- **`docs/HANDOVER.md`** — current state, branch, setup, what's left, gotchas. **Start here for in-flight work.**  §7 covers what git does not carry (assets, Notion, owner-only gates).
 - **`AGENTS.md`** — the engineering constitution. All architecture, TypeScript/React/Three.js rules, asset conventions, and the "Before Editing" / "Before Completion" checklists live there. Follow it.
 - **`docs/PROJECT.md`** — what the project is, stack, constraints, status.
 - **`docs/ARCHITECTURE.md`** — app shape, module boundaries, state/data flow (ADR-001).

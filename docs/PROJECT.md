@@ -11,8 +11,10 @@ the 365-day Haab count, the equinox serpent-shadow phenomenon, the 52-year Calen
 the 584-day Venus synodic period, and solar zenith passages.
 
 Lesson 02 (**Uaxactún Group E — Watching the Sunrise**) is **in progress** on branch
-`feature/lesson02-uaxactun-sunrise`; it replaced the earlier El Caracol stub. The final site
-GLB, dawn sky and landing thumbnail are pending (Task 8).
+`feature/lesson02-uaxactun-sunrise`; it replaced the earlier El Caracol stub. Tasks 0–7 and the
+dawn sky + landing thumbnail are done; only the final site GLB (with `E-I`/`E-II`/`E-III` nodes),
+sky-framing re-tune and the owner's copy review remain. **Current state and next steps:
+`docs/HANDOVER.md`.**
 
 ## Technology stack
 

@@ -5,74 +5,91 @@ decisions** live in `docs/DESIGN_DECISIONS.md`. This ledger is the project's
 governance record — when a fix lands, update this file, do not delete the
 history.
 
-## Active issues (2026-09-01)
+## Active issues (2026-10-20)
+
+### P2 — Medium (blocks merging Lesson 02 to `main`)
+
+- **V2-12 — Lesson 02 uses stand-in buildings and `Uaxactun_v003.glb`.** `StandInBuildings.tsx`
+  draws boxes for E-I/E-II/E-III from `site.ts`. Replace with the owner's
+  `Lesson02_Site_v001.glb` (Task 8 in the Lesson 02 plan), add `ModelLoader.onReady` +
+  `BuildingGlow.ts`, delete the stand-ins and the v003 GLB.
+- **V2-13 — Lesson 02 sky framing not tuned for `dawn_v001.webp`.** `scale`/`panY`/`rotation` in
+  `lesson02/config.ts` are still Lesson 01's values. Re-tune so the horizon meets the ground.
+- **V2-14 — Owner review of Lesson 02 kid copy is pending.** Gate before shipping.
 
 ### P3 — Low
 
-- **V2-10 — Lesson02 reuses `Lesson01Scene` as placeholder.** Harmless today
-  (the coming-soon guard prevents render) but a latent trap if the guard is ever
-  removed. Resolve by authoring a real `Lesson02Scene` when the lesson's assets
-  land.
+- **V2-15 — `SunDisc` renders with `depthTest=false`.** Verify it never paints over the real
+  temple roof combs once the final GLB is in; if it does, lower `SUN_ELEVATION_DEG` or depth-test
+  with `renderOrder`.
+- **3 pre-existing lint warnings** (`ModelLoader.tsx`, `SceneEnvironment.tsx` x2): documented
+  StrictMode-safe patterns; leave unless the file is being changed anyway.
 
 ## Resolved (historical)
 
 ### Resolved by ADR-001 / V01 (2026-08-23)
 
-| ID | Item | Resolution |
-|---|---|---|
-| H1 | Dev panel ↔ runtimeState dual source of truth | ADR-001 — single-writer slider, derived sample |
-| H4 | Dev tooling load-bearing for production boot | ADR-001 — hardcoded keyframes, no dev tooling ships |
-| M5 | `FixedGlbCamera` non-null assertion / exhaustive-deps disable | Config captured into a mount-time ref |
-| M9 | `find(...)!` assertions on hard-coded model ids | `requireModel(id)` throws on config/scene desync |
-| L2 | Failed `useGLTF` promise stays cached as rejected | Error boundary evicts lesson GLTFs on retry |
-| L4 | Per-render `Color` allocation in `SceneEnvironment` | Reusable `Color` instance mutated by memoized tint |
-| L6 | GPU memory grows unbounded across lesson visits | `useLessonAssetCleanup` evicts GLB + equirect caches on route change |
-| C2 | Static scene redrawn every frame | `frameloop="demand"` |
+| ID  | Item                                                          | Resolution                                                           |
+| --- | ------------------------------------------------------------- | -------------------------------------------------------------------- |
+| H1  | Dev panel ↔ runtimeState dual source of truth                | ADR-001 — single-writer slider, derived sample                       |
+| H4  | Dev tooling load-bearing for production boot                  | ADR-001 — hardcoded keyframes, no dev tooling ships                  |
+| M5  | `FixedGlbCamera` non-null assertion / exhaustive-deps disable | Config captured into a mount-time ref                                |
+| M9  | `find(...)!` assertions on hard-coded model ids               | `requireModel(id)` throws on config/scene desync                     |
+| L2  | Failed `useGLTF` promise stays cached as rejected             | Error boundary evicts lesson GLTFs on retry                          |
+| L4  | Per-render `Color` allocation in `SceneEnvironment`           | Reusable `Color` instance mutated by memoized tint                   |
+| L6  | GPU memory grows unbounded across lesson visits               | `useLessonAssetCleanup` evicts GLB + equirect caches on route change |
+| C2  | Static scene redrawn every frame                              | `frameloop="demand"`                                                 |
 
 ### Resolved by ROADMAP §1–§3 (post-Batch 0)
 
-| ID | Item | Resolution |
-|---|---|---|
-| (git) | Version control baseline + `.gitignore` | Done |
-| M2 | Orphan asset `01 - Copy.webp` (955 KB shipped) | Deleted |
+| ID          | Item                                                                                                                                                | Resolution                     |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| (git)       | Version control baseline + `.gitignore`                                                                                                             | Done                           |
+| M2          | Orphan asset `01 - Copy.webp` (955 KB shipped)                                                                                                      | Deleted                        |
 | M3/M4/M6/M8 | Dead code (vite middleware alias, `clsx`, `onLoaded`, `customSceneRenderer`, `CameraConfig.source`, `LearningTopic.icon`, stray `scene.background`) | Removed, each verified by grep |
-| H3 | Static registry imports pulled 3D stack into landing | Route-level code splitting |
-| (bundle) | Route-level code splitting, design-token consolidation, typed registry | Done |
+| H3          | Static registry imports pulled 3D stack into landing                                                                                                | Route-level code splitting     |
+| (bundle)    | Route-level code splitting, design-token consolidation, typed registry                                                                              | Done                           |
 
 ### Resolved by V02 Phase A (2026-09-01)
 
-| ID | Item | Resolution |
-|---|---|---|
-| V2-1 | `docs/TECH_DEBT.md` missing | This ledger recreated |
+| ID   | Item                          | Resolution                                               |
+| ---- | ----------------------------- | -------------------------------------------------------- |
+| V2-1 | `docs/TECH_DEBT.md` missing   | This ledger recreated                                    |
 | V2-2 | Font subsetting to latin-only | `@fontsource/*/latin-*.css` only — ~57% fewer font files |
-| V2-8 | ErrorFallback hardcoded hex | `LoadingScreen.tsx` error UI moved onto the palette |
+| V2-8 | ErrorFallback hardcoded hex   | `LoadingScreen.tsx` error UI moved onto the palette      |
 
 ### Resolved by V02 Phases B–F (2026-09-01)
 
-| ID | Item | Resolution |
-|---|---|---|
-| V2-4 | Zenith feature loose ends | `AtmosphereTimeline` consumes `SkyKeyframe.meta.dateLabel`; orphan skies + scratch files deleted |
+| ID   | Item                         | Resolution                                                                                                                                                                                                                                                                                                   |
+| ---- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| V2-4 | Zenith feature loose ends    | `AtmosphereTimeline` consumes `SkyKeyframe.meta.dateLabel`; orphan skies + scratch files deleted                                                                                                                                                                                                             |
 | V2-5 | `hotspot.anchor` dead config | **Superseded:** the serpent-head hotspot feature (in-scene marker, "Tap serpent head" link, popup dialog) was removed from lesson 01 as a design decision. The `hotspot` field and `hotspotAnchor` were dropped from the core types and `sampleAtmosphere`; `HOTSPOT_ANCHORS` and the dialog UI are deleted. |
-| V2-9 | Accessibility gaps | `prefers-reduced-motion` honored; touch targets ≥ 24 px; skip links on landing + lesson; `select-none` removed from lesson/overlay roots; global `:focus-visible` ring; contrast audit passes WCAG AA. (The hotspot dialog's focus management was removed with the hotspot feature — see V2-5.) |
+| V2-9 | Accessibility gaps           | `prefers-reduced-motion` honored; touch targets ≥ 24 px; skip links on landing + lesson; `select-none` removed from lesson/overlay roots; global `:focus-visible` ring; contrast audit passes WCAG AA. (The hotspot dialog's focus management was removed with the hotspot feature — see V2-5.)              |
 
 ### Resolved by V02 cleanup pass (2026-09-01)
 
-| ID | Item | Resolution |
-|---|---|---|
+| ID   | Item                                    | Resolution                                                                                                                                                                                                                                                                                      |
+| ---- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | V2-3 | `LearningMaterial/lesson_01.md` missing | Restored byte-exact from git blob `f507112b` (the file was deleted as collateral in `8505f18`); one copy drift fixed in `config.ts` — the 584-day line now reads "Venus synodic cycle" per the vetted doc's caution (584 is the synodic period as observed from Earth, not the orbital period). |
-| V2-6 | `@` path alias unused | Alias stripped from `vite.config.ts` + `tsconfig.json` — zero imports used it |
-| V2-7 | AGENTS.md stale references | Refreshed — dropped `runtimeState`/`clsx`/Alt+D references (ADR-001: no dev panel, `sliderPosition` is the only writer) |
+| V2-6 | `@` path alias unused                   | Alias stripped from `vite.config.ts` + `tsconfig.json` — zero imports used it                                                                                                                                                                                                                   |
+| V2-7 | AGENTS.md stale references              | Refreshed — dropped `runtimeState`/`clsx`/Alt+D references (ADR-001: no dev panel, `sliderPosition` is the only writer)                                                                                                                                                                         |
 
 ### Resolved by V02 polish (2026-09-03)
 
-| ID | Item | Resolution |
-|---|---|---|
+| ID       | Item                                                                                                                                                                                           | Resolution                                                                                                                                                                                                                                                                                                                                                                                             |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | (slider) | `SerpentSlider` head rendered at authored 153×125 anchored to the rail baseline; gold halo around the head (a `drop-shadow` on the `<img>`) sat static at α 0.35 with no first-load affordance | Rail art (1024×97) and head (153×125) now render at 100% authored pixel size with no stretch; lit-rail mask uses `clip-path: inset()` for a hard (non-fading) edge; head halo becomes a motion-driven drop-shadow on the head `motion.div` that pulses 0.15↔0.60 on a 1.6s `easeInOut` until first interaction (pointerdown or arrow/Home/End keydown), then settles to a steady 0.35 — never re-arms |
+
+### Resolved by Lesson 02 (2026-10-17)
+
+| ID    | Item                                           | Resolution                                                                                      |
+| ----- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| V2-10 | Lesson02 reused `Lesson01Scene` as placeholder | Real `Lesson02Scene` + `Lesson02Overlay` authored and lazy-registered; the Caracol stub is gone |
 
 ### Resolved by V02 UI scaling (2026-09-04)
 
-| ID | Item | Resolution |
-|---|---|---|
+| ID    | Item                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Resolution                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | V2-11 | Lesson UI re-layouts instead of scaling at non-1280×720 viewports: Tailwind `md:`/`sm:` breakpoints switch header padding / panel width / panel height and hide the slider, the panel max-height is viewport-relative (`calc(100vh − 184px)`), and authored px caps (`max-w-[1024px]` rail, 153×125 head) stop the UI from growing with the 16:9 frame — so at 1920×1080/2560×1440 the fixed-px UI becomes proportionally tiny and at narrow viewports elements wrap/stack | New core `ViewportScaler` wraps the DOM overlay layer in a 1280×720 design space uniformly scaled by `min(hostW/1280, hostH/720)`, floored at `MIN_SCALE = 0.75` with a top-center crop anchor (only 800×600 among the required viewports clamps; crop falls on the bottom vignette + slider, header/nav stay usable). `LessonPage` frame gains `overflow-hidden`; `Lesson01Overlay` breakpoint variants neutralized to their desktop values and the panel max-height converted to the design-space literal `max-h-[536px]` (= 720 − 184). The R3F canvas is deliberately NOT CSS-scaled (R3F sizes to its parent — a scaled canvas renders at logical resolution and upscales → blurry); only the DOM overlay scales. Pointer math is scale-invariant (`getBoundingClientRect()` follows transforms while `clientX` is screen-space), so `SerpentSlider`/`AtmosphereTimeline` needed no changes |
 
 ## How to add to this file

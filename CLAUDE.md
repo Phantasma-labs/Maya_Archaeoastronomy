@@ -4,6 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Read first
 
+- **`docs/HANDOVER.md`** — current state, branch, setup, what's left, gotchas. **Start here for in-flight work.**
 - **`AGENTS.md`** — the engineering constitution. All architecture, TypeScript/React/Three.js rules, asset conventions, and the "Before Editing" / "Before Completion" checklists live there. Follow it.
 - **`docs/PROJECT.md`** — what the project is, stack, constraints, status.
 - **`docs/ARCHITECTURE.md`** — app shape, module boundaries, state/data flow (ADR-001).
@@ -41,7 +42,7 @@ src/
 │   ├── registry.ts  LESSON_REGISTRY id → {config, SceneComponent, OverlayComponent}
 │   ├── lesson01/    config.ts + Lesson01Scene.tsx + Lesson01Overlay.tsx
 │   └── lesson02/    config.ts + site.ts + sunPath.ts + Lesson02Scene.tsx + SunDisc.tsx +
-│                    StandInBuildings.tsx (temporary) + PlanView.tsx + Lesson02Overlay.tsx
+│                    StandInBuildings.tsx (temporary, removed in Task 8) + PlanView.tsx + Lesson02Overlay.tsx
 ├── pages/           LandingPage (catalog) + LessonPage (3D host, composition root)
 └── styles/
 ```

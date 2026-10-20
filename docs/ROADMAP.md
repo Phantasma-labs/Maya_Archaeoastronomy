@@ -10,21 +10,23 @@ of what was already done to get here.
 
 > The V02 audit, design plan, vision review instructions, and final vision
 > review report are archived under `docs/archive/v02/` — read them when you
-> need to know *why* a design decision was made, not what to do next.
+> need to know _why_ a design decision was made, not what to do next.
 
-## Status as of 2026-09-01
+## Status as of 2026-10-20
 
-| Phase | Status | Reference |
-|---|---|---|
-| **Batch 0** — ADR-001: remove dev panel, hardcoded keyframes, Atmosphere Timeline | ✅ Shipped (2026-08-23) | DESIGN_DECISIONS.md |
-| **§1** — Must-fix (git baseline, debug residue, coming-soon guard, frameloop="demand") | ✅ Shipped | commit history |
-| **§2** — Should-fix (tooling, dead code) | ✅ Shipped | commit history |
-| **§3** — Nice-to-have (code splitting, token consolidation, typed registry) | ✅ Shipped | commit history |
-| **§3.5** — Asset hygiene (lesson-asset cleanup, self-hosted fonts + latin subsetting) | ✅ Shipped | TECH_DEBT V2-2 |
-| **V02 Phases A–F** — Foundation, Landing, Lesson UX, 3D presentation, A11y, Performance | ✅ Shipped (2026-09-01) | V02_VISION_REVIEW_REPORT.md |
-| **V02 Vision Review pass** — visual audit + responsive fixes | ✅ Shipped | V02_VISION_REVIEW_REPORT.md |
-| **Lesson 02** — Uaxactún Group E sunrise (replaces the Caracol stub); final site GLB, dawn sky and thumbnail pending (Task 8) | 🚧 In progress (branch `feature/lesson02-uaxactun-sunrise`) | docs/superpowers/specs/2026-10-17-lesson02-uaxactun-sunrise-design.md |
-| **§4** — Future architecture (when lessons 02–05 arrive) | ⏳ Open | — |
+> **Handing over? Read `docs/HANDOVER.md` first** — branch, setup, what is left, gotchas.
+
+| Phase                                                                                                                                                                   | Status                                                      | Reference                                                             |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------- |
+| **Batch 0** — ADR-001: remove dev panel, hardcoded keyframes, Atmosphere Timeline                                                                                       | ✅ Shipped (2026-08-23)                                     | DESIGN_DECISIONS.md                                                   |
+| **§1** — Must-fix (git baseline, debug residue, coming-soon guard, frameloop="demand")                                                                                  | ✅ Shipped                                                  | commit history                                                        |
+| **§2** — Should-fix (tooling, dead code)                                                                                                                                | ✅ Shipped                                                  | commit history                                                        |
+| **§3** — Nice-to-have (code splitting, token consolidation, typed registry)                                                                                             | ✅ Shipped                                                  | commit history                                                        |
+| **§3.5** — Asset hygiene (lesson-asset cleanup, self-hosted fonts + latin subsetting)                                                                                   | ✅ Shipped                                                  | TECH_DEBT V2-2                                                        |
+| **V02 Phases A–F** — Foundation, Landing, Lesson UX, 3D presentation, A11y, Performance                                                                                 | ✅ Shipped (2026-09-01)                                     | V02_VISION_REVIEW_REPORT.md                                           |
+| **V02 Vision Review pass** — visual audit + responsive fixes                                                                                                            | ✅ Shipped                                                  | V02_VISION_REVIEW_REPORT.md                                           |
+| **Lesson 02** — Uaxactún Group E sunrise (replaces the Caracol stub); dawn sky and thumbnail landed 2026-10-17; final site GLB pending (Task 8, see `docs/HANDOVER.md`) | 🚧 In progress (branch `feature/lesson02-uaxactun-sunrise`) | docs/superpowers/specs/2026-10-17-lesson02-uaxactun-sunrise-design.md |
+| **§4** — Future architecture (when lessons 02–05 arrive)                                                                                                                | ⏳ Open                                                     | —                                                                     |
 
 ## §4 — Future architecture (open)
 

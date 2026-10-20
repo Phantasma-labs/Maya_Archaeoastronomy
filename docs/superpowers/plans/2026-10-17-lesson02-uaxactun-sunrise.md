@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Status 2026-10-20:** Tasks 0–7 done (checkboxes below were not ticked). Task 8 is partial: `dawn_v001.webp` and the new thumbnail are in; the final site GLB, `BuildingGlow`/`onReady`, sky re-tune and owner copy review remain. Live state: `docs/HANDOVER.md`.
+
 **Goal:** Replace the Caracol/Venus stub with a playful kids' lesson in which one day-of-year slider moves the sunrise along the horizon at Group E, Uaxactún, lighting up E-III / E-II / E-I at the solstices and equinoxes, with a prediction step and a 2D plan view.
 
 **Architecture:** All astronomy is pure derivation from `sliderPosition` (ADR-001). A core util gives the sunrise azimuth, and a lesson util maps slider position → date → declination → azimuth, plus key-date and prediction logic. `Lesson02Scene` places a sun disc, the directional light and stand-in buildings from those numbers. `Lesson02Overlay` holds the only extra state, the prediction (overlay-local UI state), and renders the slider, the callouts and an SVG plan view. Lesson 02 is wired through the registry's lazy imports; `pages/` and the existing core components are unchanged.

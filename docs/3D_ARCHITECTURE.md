@@ -48,6 +48,13 @@ orbit. Photoreal topics still use the locked `FixedGlbCamera`. Tour poses are or
 target: azimuth 0 = camera on +Z increasing toward +X; the Lesson 01 pyramid is rotated ~17° in
 world space, so its north stairway faces azimuth ≈ 2.85 (not π).
 
+**Lesson 02 camera.** Fixed camera at the observer point (world x −40, z 0, eye y 11.5) looking
+due east (rotation Y = −π/2) over `Uaxactun_v003.glb`; north = −Z, east = +X. Same `FixedGlbCamera`
+path, no tour. The sun is a scene object (`SunDisc`, emissive, `depthTest=false`) placed inside the
+500 m skydome at the derived azimuth and 8° elevation, and the directional light follows the same
+direction, so shadows and disc agree. Moved by refs in a dependency-guarded effect + invalidate
+(no `useFrame`). The dawn sky has no sun painted in.
+
 ## Asset loading
 
 - `useGLTF.setDecoderPath('/draco/')` at module scope; decoders self-hosted in

@@ -41,13 +41,12 @@ const STEP_COPY: { headline: string; lines: string[] }[] = [
 // One keyframe per key date. Sun direction is derived from the slider position
 // in the scene (not from lightRotation interpolation), but each keyframe still
 // carries its true light rotation so the data stays self-consistent.
-// Temporary sky texture (branch only) until the dawn skies land in Task 8.
 const SUNRISE_KEYFRAMES: SkyKeyframe[] = KEY_DATES.map((key, i) => {
   const copy = STEP_COPY[i];
   return {
     id: `sunrise-${i + 1}`,
     name: `Step ${i + 1} · ${copy.headline}`,
-    url: '/assets/lesson_01/01.webp',
+    url: '/assets/lesson_02/dawn_v001.webp',
     lightRotation: sunLightRotation(positionToAzimuthDeg(i + 1), SUN_ELEVATION_DEG),
     iblIntensity: 0.5,
     meta: { dateLabel: key.label },

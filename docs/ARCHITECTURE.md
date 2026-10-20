@@ -16,8 +16,8 @@ registry, owns all runtime state, and stacks three layers:
 ```
 LessonPage
 ├── SceneCanvas (core)          ErrorBoundary + Suspense(LoadingScreen) + R3F <Canvas>
-│   └── SceneComponent          from registry (currently always Lesson01Scene; renders
-│       │                       BlueprintScene when the selected topic owns a `tour`)
+│   └── SceneComponent          from registry (Lesson01Scene — renders BlueprintScene when the
+│       │                       selected topic owns a `tour` — or Lesson02Scene)
 │       ├── FixedGlbCamera      applies baked camera transform once, locks it
 │       ├── SceneEnvironment    dual skydome crossfade + scene.environment IBL
 │       ├── SceneLighting       single directional sun, rotation from timeline sample
@@ -28,19 +28,20 @@ LessonPage
 
 ## Modules and boundaries
 
-| Module                         | Responsibility                                                                                                                              | Depends on                     |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| `core/types/lesson.types.ts`   | All domain types: `LessonConfig`, `SkyKeyframe`, `EnvironmentConfig`, `CameraConfig`, `LightingConfig`, `LearningTopic`, `AtmosphereSample` | react (types only)             |
-| `core/components/`             | Lesson-agnostic scene/UI infrastructure (canvas, camera, environment, lighting, model loading, loading/error screens, AtmosphereTimeline)   | R3F, drei, three               |
-| `core/utils/atmosphere.ts`     | `sampleAtmosphere()` — pure timeline sampler (keyframe lerp + mix)                                                                          | core types only                |
-| `core/utils/tour.ts`           | `sampleTour()` / `projectToScreen()` / `tourSettle()` — pure tour sampler, world→screen projection, "camera at rest" factor                 | core types only                |
-| `core/utils/stairs.ts`         | `stairStepSlots()` — pure horizontal placement of a stairway's step lines (blueprint view)                                                  | core types only                |
-| `core/utils/edges.ts`          | `isStrayEdge()` / `axisMisalignmentDeg()` — pure classification of mesh-noise edges vs real structure (blueprint view)                      | none                           |
-| `core/utils/ruler.ts`          | `rulerSegments()` — pure geometry of a schematic count ruler (baseline + evenly spaced ticks) drawn while a tour step is active             | core types only                |
-| `lessons/registry.ts`          | `LESSON_REGISTRY` id→{config, SceneComponent, OverlayComponent}; `getAllLessons`, `getLessonEntry`                                          | static imports of every lesson |
-| `lessons/<id>/config.ts`       | Static, typed lesson definition (assets, camera, lighting, pedagogical content)                                                             | core types only                |
-| `lessons/<id>/*Scene/*Overlay` | Lesson-specific scene assembly and learner UI                                                                                               | core components                |
-| `pages/`                       | Route-level composition; `LessonPage` owns the single runtime value (`sliderPosition`)                                                      | registry, core                 |
+| Module                         | Responsibility                                                                                                                                    | Depends on                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `core/types/lesson.types.ts`   | All domain types: `LessonConfig`, `SkyKeyframe`, `EnvironmentConfig`, `CameraConfig`, `LightingConfig`, `LearningTopic`, `AtmosphereSample`       | react (types only)             |
+| `core/components/`             | Lesson-agnostic scene/UI infrastructure (canvas, camera, environment, lighting, model loading, loading/error screens, AtmosphereTimeline)         | R3F, drei, three               |
+| `core/utils/atmosphere.ts`     | `sampleAtmosphere()` — pure timeline sampler (keyframe lerp + mix)                                                                                | core types only                |
+| `core/utils/tour.ts`           | `sampleTour()` / `projectToScreen()` / `tourSettle()` — pure tour sampler, world→screen projection, "camera at rest" factor                       | core types only                |
+| `core/utils/stairs.ts`         | `stairStepSlots()` — pure horizontal placement of a stairway's step lines (blueprint view)                                                        | core types only                |
+| `core/utils/edges.ts`          | `isStrayEdge()` / `axisMisalignmentDeg()` — pure classification of mesh-noise edges vs real structure (blueprint view)                            | none                           |
+| `core/utils/ruler.ts`          | `rulerSegments()` — pure geometry of a schematic count ruler (baseline + evenly spaced ticks) drawn while a tour step is active                   | core types only                |
+| `core/utils/sunrise.ts`        | `sunriseAzimuthDeg()` / `sunDirection()` / `sunLightRotation()` — pure sunrise geometry (no imports; Node-runnable by `scripts/check-sunrise.ts`) | none                           |
+| `lessons/registry.ts`          | `LESSON_REGISTRY` id→{config, SceneComponent, OverlayComponent}; `getAllLessons`, `getLessonEntry`                                                | static imports of every lesson |
+| `lessons/<id>/config.ts`       | Static, typed lesson definition (assets, camera, lighting, pedagogical content)                                                                   | core types only                |
+| `lessons/<id>/*Scene/*Overlay` | Lesson-specific scene assembly and learner UI                                                                                                     | core components                |
+| `pages/`                       | Route-level composition; `LessonPage` owns the single runtime value (`sliderPosition`)                                                            | registry, core                 |
 
 ## State and data flow
 
@@ -74,6 +75,12 @@ lessonXX/config.ts ──► registry ──► LessonPage ── useState: slid
   `projectToScreen()` — the same camera pose the canvas shows — and drawn by `TourCallouts` in the
   overlay's 1280×720 design space (same 16:9 aspect as the canvas frame, so no access to the R3F
   camera is needed). They fade out mid-sweep via `tourSettle()`.
+- **Lesson 02** (`lessons/lesson02/`): `sliderPosition` (1..5) is the five key sunrises of one year.
+  `sunPath.ts` derives date → declination → azimuth purely from it; `Lesson02Scene` places the sun
+  disc and the one directional light from that azimuth (keyframe `lightRotation` is unused), and
+  the keyframes only supply sky/IBL, step markers and callouts. The prediction marker is
+  overlay-local state that never reaches the scene. `?step=` deep links skip the prediction lock.
+  Details and current status: `docs/HANDOVER.md`.
 - UI-only state (tabs, drawer open) stays local in the overlay.
 
 ## Known structural weaknesses (details in TECH_DEBT.md)

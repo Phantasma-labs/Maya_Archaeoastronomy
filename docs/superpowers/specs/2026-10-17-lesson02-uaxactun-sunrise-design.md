@@ -1,6 +1,6 @@
 # Lesson 02 — "Watch the Sunrise" at Group E, Uaxactún — Design
 
-Status: draft for review · Date: 2026-10-17 · Replaces the Caracol/Venus stub in `src/lessons/lesson02/`
+Status: implemented on branch (Tasks 0–7); Task 8 assets pending — see docs/HANDOVER.md · Date: 2026-10-17 · Replaces the Caracol/Venus stub in `src/lessons/lesson02/`
 
 ## 1. Intent
 
@@ -106,6 +106,12 @@ Inspection of `Uaxactun_v003.glb` (glTF Y-up, metres):
 **(x −40, z 0)**, above the middle (east) stairway of E-VII-sub. The camera eye sits there at
 eye height above the pyramid top (y ≈ 11.5). The builder may tune the camera's height, field
 of view and pitch for framing, but **not its x/z**: the buildings are placed relative to it.
+
+**Decision (2026-10-17): E-VII-sub is not modelled in the 3D scene.** The camera looks east from
+on top of it, so the pyramid is behind and below the viewer and never seen. The final site GLB
+leaves it out (the 2D plan view keeps its schematic footprint). If the lower edge of the view
+ever shows what is under the observer, the owner adds only a plain stone-looking platform whose
+top is at the observer's feet (y ≈ 9.9) around (x −40, z 0); no steps, masks or pyramid detail.
 
 **Asset contract for the owner (Blender), for the perfect alignment:**
 
